@@ -7,7 +7,7 @@ import {
   ArrowLeft, Save, Monitor, Tablet, Smartphone, Code2,
   Eye, Undo2, Redo2, Check, Sparkles, Plus, FileText,
   ChevronDown, Trash2, Cpu, Send, Bot, Loader2, Wand2,
-  X as XIcon,
+  X as XIcon, Rocket,
 } from 'lucide-react'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GjsEditor = any
@@ -46,6 +46,8 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [showCode, setShowCode] = useState(false)
   const [codeHtml, setCodeHtml] = useState('')
@@ -254,6 +256,28 @@ export default function EditorPage() {
     setHasChanges(false)
     setTimeout(() => setSaved(false), 2000)
   }, [activePage])
+
+  // Publish
+  async function handlePublish() {
+    // Save first
+    await handleSave()
+    setPublishing(true)
+    try {
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setPublishedUrl(data.url)
+      setTimeout(() => setPublishedUrl(null), 8000)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Publish failed')
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   // Code view
   function toggleCodeView() {
@@ -503,8 +527,29 @@ export default function EditorPage() {
              <><Save className="w-3 h-3" /> Save</>}
             {hasChanges && !saving && !saved && <span className="w-1.5 h-1.5 bg-orange-400 rounded-full" />}
           </button>
+
+          {/* Publish */}
+          <button
+            onClick={handlePublish}
+            disabled={publishing}
+            className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border border-emerald-500/20"
+          >
+            <Rocket className="w-3 h-3" />
+            {publishing ? 'Publishing...' : 'Publish'}
+          </button>
         </div>
       </div>
+
+      {/* Published URL toast */}
+      {publishedUrl && (
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3 flex items-center gap-3 backdrop-blur-xl">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm text-emerald-300 font-medium">Site published!</span>
+          <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono">
+            {publishedUrl}
+          </a>
+        </div>
+      )}
 
       {/* ─── Main Area ────────────────── */}
       <div className="flex-1 flex overflow-hidden">

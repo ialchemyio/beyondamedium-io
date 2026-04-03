@@ -93,6 +93,15 @@ export default function ProjectSettingsPage() {
           <span className="text-sm text-white/60">Published</span>
         </label>
 
+        {project.is_published && (
+          <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
+            <p className="text-xs text-emerald-400 font-medium mb-1">Live Site</p>
+            <a href={`/p/${project.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 font-mono underline">
+              beyondamedium.io/p/{project.slug}
+            </a>
+          </div>
+        )}
+
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
           <button onClick={handleDelete} className="text-xs text-red-400/60 hover:text-red-400 flex items-center gap-1.5 transition-colors">
             <Trash2 className="w-3.5 h-3.5" /> Delete Project
