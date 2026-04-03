@@ -10,16 +10,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="h-14 border-b border-white/5 bg-[#0a0a0a]/90 backdrop-blur-xl flex items-center justify-between px-6 shrink-0">
-        <Link href="/dashboard" className="text-lg font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-          BAM
-        </Link>
+      <header className="h-14 border-b border-white/[0.06] bg-[#06080d]/90 backdrop-blur-xl flex items-center justify-between px-6 shrink-0">
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+            </div>
+            <span className="text-sm font-semibold text-white/80">BAM OS</span>
+          </Link>
+          <nav className="flex items-center gap-1">
+            <Link href="/dashboard" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Projects</Link>
+            <Link href="/dashboard/templates" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Templates</Link>
+            <Link href="/dashboard/analytics" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Analytics</Link>
+          </nav>
+        </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-white/30">{user.email}</span>
+          <span className="text-[11px] text-white/25 font-mono">{user.email}</span>
           <form action="/api/auth/signout" method="POST">
-            <button type="submit" className="text-xs text-white/40 hover:text-white/60 transition-colors">
-              Sign out
-            </button>
+            <button type="submit" className="text-[11px] text-white/30 hover:text-white/60 transition-colors">Sign out</button>
           </form>
         </div>
       </header>
