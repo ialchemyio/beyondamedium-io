@@ -18,10 +18,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
             <span className="text-sm font-semibold text-white/80">BAM OS</span>
           </Link>
-          <nav className="flex items-center gap-1">
-            <Link href="/dashboard" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Projects</Link>
-            <Link href="/dashboard/templates" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Templates</Link>
-            <Link href="/dashboard/analytics" className="px-3 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors">Analytics</Link>
+          <nav className="flex items-center gap-0.5 overflow-x-auto">
+            <Link href="/dashboard" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Projects</Link>
+            <Link href="/dashboard/templates" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Templates</Link>
+            <Link href="/dashboard/funnels" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Funnels</Link>
+            <Link href="/dashboard/automations" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Automations</Link>
+            <Link href="/dashboard/domains" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Domains</Link>
+            <Link href="/dashboard/analytics" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Analytics</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/sites/sammyj",
+      "destination": "https://dj-sammy-jay-platform.vercel.app/sites/sammyj"
+    },
+    {
+      "source": "/sites/sammyj/:path*",
+      "destination": "https://dj-sammy-jay-platform.vercel.app/sites/sammyj/:path*"
+    }
+  ]
+}
