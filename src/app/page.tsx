@@ -34,8 +34,9 @@ const plans = [
     features: ['Unlimited projects', '200 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {
-    name: 'BAM', price: 99, desc: 'Build, launch, and get paid', highlighted: false, cta: 'Start Scaling', badge: 'Best for making money', color: 'border-amber-500/30',
-    features: ['Everything in Pro', 'Client-ready hosted pages', 'Funnel builder', 'Automation workflows', 'Client billing tools', 'CRM-lite system', 'Priority support', 'Higher AI limits'],
+    name: 'BAM', price: 99, desc: 'Done-for-you growth partner', highlighted: false, cta: 'Get a Quote', badge: 'Best for making money', color: 'border-amber-500/30',
+    href: 'https://beyondamedium.com/contact',
+    features: ['Everything in Pro', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
   },
 ]
 
@@ -214,7 +215,9 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/signup"
+                  href={'href' in plan && plan.href ? plan.href as string : '/signup'}
+                  target={'href' in plan && plan.href ? '_blank' : undefined}
+                  rel={'href' in plan && plan.href ? 'noopener noreferrer' : undefined}
                   className={`w-full text-center py-2.5 rounded-xl text-xs font-semibold transition-all block ${
                     plan.name === 'BAM'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:brightness-110'
