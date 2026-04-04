@@ -4,100 +4,69 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Search, Sparkles, Eye, TrendingUp, Crown, Lock, Rocket,
+  Search, Sparkles, Eye, TrendingUp, Lock, Rocket,
   DollarSign, Clock, Users, Target, CreditCard, CalendarCheck,
   Megaphone, UserCheck, ShoppingBag, Briefcase, MapPin,
-  ArrowRight, X, Check, Zap,
+  ArrowRight, X, Check, Zap, Server, Plug, BarChart3,
 } from 'lucide-react'
 import UpgradeModal from '@/components/UpgradeModal'
 
-// ─── Types ───────────────────────────────────────────────────
-interface Template {
+interface RevenueSystem {
   id: string
   name: string
+  tagline: string
   description: string
   category: string
-  uses: number
+  revenue_potential: string
+  setup_time: string
+  conversion_focus: string
+  use_case: string
   html: string
-  is_premium: boolean
-  created_at: string
-}
-
-// ─── Revenue System Metadata ─────────────────────────────────
-// Map each category to revenue-focused metadata
-const SYSTEM_META: Record<string, {
-  useCase: string
-  revenue: string
-  setupTime: string
-  conversionFocus: string
+  backend_features: string[]
+  funnel_steps: string[]
+  integrations: string[]
+  api_endpoints: string[]
   benefits: string[]
-}> = {
-  saas: { useCase: 'Lead Gen', revenue: '$2k–$20k/mo', setupTime: '10 min', conversionFocus: 'Trial signups', benefits: ['Captures leads', 'Drives trial signups', 'Builds trust with social proof', 'Converts visitors to users'] },
-  restaurant: { useCase: 'Booking', revenue: '$3k–$15k/mo', setupTime: '8 min', conversionFocus: 'Reservations & orders', benefits: ['Drives reservations', 'Showcases menu', 'Accepts online orders', 'Builds local presence'] },
-  fitness: { useCase: 'Booking', revenue: '$2k–$12k/mo', setupTime: '10 min', conversionFocus: 'Class bookings', benefits: ['Books clients 24/7', 'Sells memberships', 'Showcases programs', 'Captures leads'] },
-  ecommerce: { useCase: 'Sales', revenue: '$5k–$50k/mo', setupTime: '12 min', conversionFocus: 'Product sales', benefits: ['Drives purchases', 'Builds brand trust', 'Upsells products', 'Captures email subscribers'] },
-  realestate: { useCase: 'Lead Gen', revenue: '$5k–$30k/mo', setupTime: '10 min', conversionFocus: 'Property inquiries', benefits: ['Captures buyer leads', 'Showcases listings', 'Builds agent credibility', 'Drives consultations'] },
-  coaching: { useCase: 'Digital Products', revenue: '$3k–$25k/mo', setupTime: '10 min', conversionFocus: 'Course enrollments', benefits: ['Sells courses', 'Books coaching calls', 'Builds authority', 'Grows email list'] },
-  agency: { useCase: 'Lead Gen', revenue: '$5k–$40k/mo', setupTime: '10 min', conversionFocus: 'Client inquiries', benefits: ['Generates client leads', 'Showcases portfolio', 'Builds credibility', 'Drives consultations'] },
-  medical: { useCase: 'Booking', revenue: '$5k–$25k/mo', setupTime: '8 min', conversionFocus: 'Appointment bookings', benefits: ['Books patients online', 'Builds trust', 'Reduces no-shows', 'Grows practice'] },
-  legal: { useCase: 'Lead Gen', revenue: '$5k–$30k/mo', setupTime: '10 min', conversionFocus: 'Consultations', benefits: ['Captures case leads', 'Builds trust', 'Qualifies prospects', 'Books consultations'] },
-  construction: { useCase: 'Lead Gen', revenue: '$3k–$20k/mo', setupTime: '8 min', conversionFocus: 'Quote requests', benefits: ['Generates quote requests', 'Showcases projects', 'Builds local trust', 'Converts visitors'] },
-  events: { useCase: 'Sales', revenue: '$2k–$15k/mo', setupTime: '10 min', conversionFocus: 'Ticket sales', benefits: ['Sells tickets', 'Builds hype', 'Captures RSVPs', 'Drives attendance'] },
-  beauty: { useCase: 'Booking', revenue: '$3k–$15k/mo', setupTime: '8 min', conversionFocus: 'Appointment bookings', benefits: ['Books appointments', 'Showcases services', 'Sells packages', 'Builds loyalty'] },
-  nonprofit: { useCase: 'Lead Gen', revenue: '$1k–$10k/mo', setupTime: '8 min', conversionFocus: 'Donations', benefits: ['Drives donations', 'Tells your story', 'Builds community', 'Captures volunteers'] },
-  automotive: { useCase: 'Lead Gen', revenue: '$3k–$20k/mo', setupTime: '8 min', conversionFocus: 'Service bookings', benefits: ['Books service appointments', 'Showcases inventory', 'Builds trust', 'Drives walk-ins'] },
+  launches: number
+  avg_conversions: number
 }
 
-const USE_CASE_ICONS: Record<string, typeof DollarSign> = {
-  'Lead Gen': Target,
-  'Booking': CalendarCheck,
-  'Sales': ShoppingBag,
-  'Digital Products': Briefcase,
-}
-
-// ─── Filter Categories (outcome-driven) ──────────────────────
 const FILTERS = [
-  { id: 'all', label: 'All Systems', icon: Sparkles },
+  { id: 'all', label: 'All Systems', icon: Zap },
   { id: 'leadgen', label: 'Lead Gen', icon: Target },
-  { id: 'booking', label: 'Booking Systems', icon: CalendarCheck },
+  { id: 'booking', label: 'Booking', icon: CalendarCheck },
   { id: 'sales', label: 'Sales Funnels', icon: ShoppingBag },
   { id: 'digital', label: 'Digital Products', icon: Briefcase },
   { id: 'brand', label: 'Personal Brand', icon: UserCheck },
   { id: 'local', label: 'Local Business', icon: MapPin },
 ]
 
-function getFilterMatch(template: Template, filterId: string): boolean {
-  if (filterId === 'all') return true
-  if (filterId === 'premium') return template.is_premium
-  const meta = SYSTEM_META[template.category]
-  if (!meta) return false
-  if (filterId === 'leadgen') return meta.useCase === 'Lead Gen'
-  if (filterId === 'booking') return meta.useCase === 'Booking'
-  if (filterId === 'sales') return meta.useCase === 'Sales'
-  if (filterId === 'digital') return meta.useCase === 'Digital Products'
-  if (filterId === 'brand') return ['coaching', 'agency'].includes(template.category)
-  if (filterId === 'local') return ['restaurant', 'fitness', 'medical', 'beauty', 'construction', 'automotive'].includes(template.category)
-  return false
+const CATEGORY_COLORS: Record<string, string> = {
+  leadgen: 'from-cyan-500 to-blue-500',
+  booking: 'from-emerald-500 to-teal-500',
+  sales: 'from-violet-500 to-purple-500',
+  digital: 'from-blue-500 to-indigo-500',
+  brand: 'from-pink-500 to-rose-500',
+  local: 'from-amber-500 to-orange-500',
 }
 
-// ─── Funnel Steps ────────────────────────────────────────────
-const FUNNEL_STEPS = [
-  { label: 'Landing', color: 'from-cyan-400 to-blue-500' },
-  { label: 'Offer', color: 'from-blue-500 to-violet-500' },
-  { label: 'Booking', color: 'from-violet-500 to-purple-500' },
-  { label: 'Payment', color: 'from-purple-500 to-pink-500' },
-  { label: 'Upsell', color: 'from-pink-500 to-rose-500' },
-]
+const CATEGORY_LABELS: Record<string, string> = {
+  leadgen: 'Lead Generation',
+  booking: 'Booking System',
+  sales: 'Sales Funnel',
+  digital: 'Digital Products',
+  brand: 'Personal Brand',
+  local: 'Local Business',
+}
 
-// ─── Main Component ──────────────────────────────────────────
 export default function RevenueSystemsPage() {
   const router = useRouter()
-  const [templates, setTemplates] = useState<Template[]>([])
+  const [systems, setSystems] = useState<RevenueSystem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [previewId, setPreviewId] = useState<string | null>(null)
-  const [funnelViewId, setFunnelViewId] = useState<string | null>(null)
+  const [detailId, setDetailId] = useState<string | null>(null)
   const [cloning, setCloning] = useState<string | null>(null)
   const [userPlan, setUserPlan] = useState<string>('starter')
   const [showUpgrade, setShowUpgrade] = useState(false)
@@ -105,8 +74,8 @@ export default function RevenueSystemsPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase.from('templates').select('*').eq('is_public', true).eq('is_premium', true).order('uses', { ascending: false })
-      setTemplates(data ?? [])
+      const { data } = await supabase.from('revenue_systems').select('*').eq('is_active', true).order('launches', { ascending: false })
+      setSystems(data ?? [])
       setLoading(false)
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -117,83 +86,146 @@ export default function RevenueSystemsPage() {
     load()
   }, [])
 
-  const filtered = templates.filter(t => {
-    if (!getFilterMatch(t, filter)) return false
-    if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.description.toLowerCase().includes(search.toLowerCase())) return false
+  const filtered = systems.filter(s => {
+    if (filter !== 'all' && s.category !== filter) return false
+    if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.description.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
-  async function launchSystem(templateId: string) {
-    const template = templates.find(t => t.id === templateId)
-    if (template?.is_premium && userPlan === 'starter') { setShowUpgrade(true); return }
-
-    setCloning(templateId)
+  async function launchSystem(systemId: string) {
+    if (userPlan === 'starter') { setShowUpgrade(true); return }
+    setCloning(systemId)
+    const system = systems.find(s => s.id === systemId)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user || !system) { setCloning(null); return }
 
-    const { data: projects } = await supabase.from('projects').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1)
-    let projectId = projects?.[0]?.id
-    if (!projectId) {
-      const { data: p } = await supabase.from('projects').insert({ user_id: user.id, name: template?.name ?? 'My Website', slug: `site-${Date.now().toString(36)}`, description: template?.description ?? '' }).select().single()
-      projectId = p?.id
-    }
-    if (!projectId) { setCloning(null); return }
+    const slug = system.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '-' + Date.now().toString(36)
+    const { data: project } = await supabase.from('projects').insert({
+      user_id: user.id, name: system.name, slug, description: system.description,
+    }).select().single()
 
-    const res = await fetch('/api/templates/clone', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templateId, projectId }) })
-    const data = await res.json()
+    if (!project) { setCloning(null); return }
+
+    await supabase.from('pages').insert({
+      project_id: project.id, title: 'Home', slug: 'index', html: system.html, css: system.html.includes('<style>') ? '' : '', is_home: true, sort_order: 0,
+    })
+
+    // Increment launches
+    await supabase.from('revenue_systems').update({ launches: (system.launches || 0) + 1 }).eq('id', systemId)
+
     setCloning(null)
-    if (data.page) router.push(`/dashboard/${projectId}/editor`)
+    router.push(`/dashboard/${project.id}/editor`)
   }
 
-  const previewTemplate = templates.find(t => t.id === previewId)
-  const funnelTemplate = templates.find(t => t.id === funnelViewId)
+  const previewSystem = systems.find(s => s.id === previewId)
+  const detailSystem = systems.find(s => s.id === detailId)
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Preview Modal */}
-      {previewTemplate && (
+      {/* Full Preview Modal */}
+      {previewSystem && (
         <div className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-sm flex flex-col" onClick={() => setPreviewId(null)}>
           <div className="h-12 flex items-center justify-between px-6 shrink-0">
-            <span className="text-sm font-medium text-white/70">{previewTemplate.name}</span>
+            <span className="text-sm font-medium text-white/70">{previewSystem.name}</span>
             <div className="flex items-center gap-3">
-              <button onClick={(e) => { e.stopPropagation(); launchSystem(previewTemplate.id) }} className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 flex items-center gap-1.5">
+              <button onClick={(e) => { e.stopPropagation(); launchSystem(previewSystem.id) }} className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 flex items-center gap-1.5">
                 <Rocket className="w-3 h-3" /> Launch This System
               </button>
               <button onClick={() => setPreviewId(null)} className="text-xs text-white/40 hover:text-white/70">Close</button>
             </div>
           </div>
           <div className="flex-1 mx-6 mb-6 bg-white rounded-xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <iframe srcDoc={previewTemplate.html} className="w-full h-full border-0" title="Preview" />
+            <iframe srcDoc={previewSystem.html} className="w-full h-full border-0" title="Preview" />
           </div>
         </div>
       )}
 
-      {/* Funnel Flow Modal */}
-      {funnelTemplate && (
-        <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex items-center justify-center" onClick={() => setFunnelViewId(null)}>
-          <div className="bg-[#0d1117] border border-white/[0.08] rounded-2xl p-8 max-w-lg w-full" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white">Funnel Flow</h3>
-              <button onClick={() => setFunnelViewId(null)} className="p-1 text-white/30 hover:text-white/60"><X className="w-4 h-4" /></button>
+      {/* System Detail Modal */}
+      {detailSystem && (
+        <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setDetailId(null)}>
+          <div className="bg-[#0d1117] border border-white/[0.08] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-white/[0.06] flex items-start justify-between">
+              <div>
+                <span className={`text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r ${CATEGORY_COLORS[detailSystem.category]} bg-clip-text text-transparent`}>{CATEGORY_LABELS[detailSystem.category]}</span>
+                <h2 className="text-xl font-bold text-white mt-1">{detailSystem.name}</h2>
+                <p className="text-xs text-white/40 mt-1">{detailSystem.tagline}</p>
+              </div>
+              <button onClick={() => setDetailId(null)} className="p-1 text-white/30 hover:text-white/60"><X className="w-5 h-5" /></button>
             </div>
-            <p className="text-xs text-white/40 mb-6">How <span className="text-white/70 font-medium">{funnelTemplate.name}</span> converts visitors into revenue:</p>
-            <div className="space-y-3">
-              {FUNNEL_STEPS.map((step, i) => (
-                <div key={step.label} className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center shrink-0 opacity-80`}>
-                    <span className="text-white text-xs font-bold">{i + 1}</span>
+
+            <div className="p-6 space-y-6">
+              {/* Metrics */}
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { icon: DollarSign, label: 'Revenue', value: detailSystem.revenue_potential, color: 'text-emerald-400' },
+                  { icon: Clock, label: 'Setup', value: detailSystem.setup_time, color: 'text-cyan-400' },
+                  { icon: Users, label: 'Launched', value: `${detailSystem.launches}`, color: 'text-blue-400' },
+                  { icon: BarChart3, label: 'Avg Conv.', value: `${detailSystem.avg_conversions}/day`, color: 'text-violet-400' },
+                ].map(m => (
+                  <div key={m.label} className="bg-white/[0.03] rounded-xl p-3 text-center">
+                    <m.icon className={`w-4 h-4 ${m.color} mx-auto mb-1`} />
+                    <p className="text-xs font-bold text-white">{m.value}</p>
+                    <p className="text-[9px] text-white/25">{m.label}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-white/80">{step.label}</p>
-                  </div>
-                  {i < FUNNEL_STEPS.length - 1 && <ArrowRight className="w-3 h-3 text-white/15" />}
+                ))}
+              </div>
+
+              {/* Funnel Flow */}
+              <div>
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Megaphone className="w-3 h-3" /> Funnel Flow</h3>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {detailSystem.funnel_steps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-white/60 bg-white/[0.04] px-2.5 py-1 rounded-lg">{step}</span>
+                      {i < detailSystem.funnel_steps.length - 1 && <ArrowRight className="w-3 h-3 text-white/15 shrink-0" />}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Backend Features */}
+              <div>
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Server className="w-3 h-3" /> Backend Features</h3>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {detailSystem.backend_features.map(f => (
+                    <div key={f} className="flex items-center gap-2 text-[11px] text-white/40">
+                      <Check className="w-3 h-3 text-cyan-400/60 shrink-0" /> {f}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Integrations */}
+              <div>
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Plug className="w-3 h-3" /> Integrations</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {detailSystem.integrations.map(i => (
+                    <span key={i} className="text-[10px] text-white/30 bg-white/[0.03] px-2.5 py-1 rounded-full border border-white/[0.05]">{i}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* API Endpoints */}
+              <div>
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">API Endpoints</h3>
+                <div className="bg-[#0a0e16] rounded-xl p-3 space-y-1">
+                  {detailSystem.api_endpoints.map(ep => (
+                    <p key={ep} className="text-[11px] text-cyan-400/60 font-mono">{ep}</p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Social Proof */}
+              <div className="bg-emerald-500/[0.05] border border-emerald-500/10 rounded-xl p-4 text-center">
+                <p className="text-xs text-emerald-400/80">Used by <span className="font-bold text-emerald-400">{detailSystem.launches}</span> creators — avg <span className="font-bold text-emerald-400">{detailSystem.avg_conversions}</span> conversions/day</p>
+              </div>
+
+              {/* Launch CTA */}
+              <button onClick={() => { setDetailId(null); launchSystem(detailSystem.id) }} className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center justify-center gap-2">
+                <Rocket className="w-4 h-4" /> Launch This System
+              </button>
             </div>
-            <button onClick={() => { setFunnelViewId(null); launchSystem(funnelTemplate.id) }} className="w-full mt-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center justify-center gap-2">
-              <Rocket className="w-4 h-4" /> Launch This System
-            </button>
           </div>
         </div>
       )}
@@ -206,12 +238,12 @@ export default function RevenueSystemsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Revenue Systems</h1>
-            <p className="text-[13px] text-white/40">Pre-built systems designed to generate leads, bookings, and revenue.</p>
+            <p className="text-[13px] text-white/40">Pre-built business systems with frontend + backend. Generate leads, book clients, close sales.</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 mt-4">
-          <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full font-mono">{templates.length} systems</span>
-          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full font-mono">{templates.filter(t => t.is_premium).length} premium</span>
+        <div className="flex items-center gap-3 mt-4">
+          <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full font-mono">{systems.length} systems</span>
+          <span className="text-xs bg-white/[0.04] text-white/30 px-2.5 py-1 rounded-full">Pro / BAM plans</span>
         </div>
       </div>
 
@@ -222,12 +254,13 @@ export default function RevenueSystemsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-1.5 mb-8 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex gap-1.5 mb-8 overflow-x-auto pb-2">
         {FILTERS.map(f => {
           const Icon = f.icon
+          const count = f.id === 'all' ? systems.length : systems.filter(s => s.category === f.id).length
           return (
-            <button key={f.id} onClick={() => setFilter(f.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${filter === f.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50 hover:bg-white/[0.04]'}`}>
-              <Icon className="w-3 h-3" /> {f.label}
+            <button key={f.id} onClick={() => setFilter(f.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${filter === f.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50'}`}>
+              <Icon className="w-3 h-3" /> {f.label} <span className="text-[9px] text-white/20">{count}</span>
             </button>
           )
         })}
@@ -236,7 +269,7 @@ export default function RevenueSystemsPage() {
       {/* Grid */}
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {Array.from({ length: 9 }).map((_, i) => <div key={i} className="bg-white/[0.02] rounded-2xl h-96 animate-pulse" />)}
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="bg-white/[0.02] rounded-2xl h-[400px] animate-pulse" />)}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-white/[0.02] border border-white/[0.05] rounded-2xl">
@@ -245,97 +278,83 @@ export default function RevenueSystemsPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map(template => {
-            const meta = SYSTEM_META[template.category] ?? { useCase: 'Lead Gen', revenue: '$1k–$10k/mo', setupTime: '10 min', conversionFocus: 'Conversions', benefits: ['Captures leads', 'Drives conversions'] }
-            const UseCaseIcon = USE_CASE_ICONS[meta.useCase] ?? Target
-
+          {filtered.map(system => {
+            const color = CATEGORY_COLORS[system.category] ?? 'from-gray-500 to-zinc-500'
             return (
-              <div key={template.id} className={`bg-white/[0.02] border rounded-2xl overflow-hidden group hover:border-white/[0.12] transition-all ${template.is_premium ? 'border-amber-500/15' : 'border-white/[0.05]'}`}>
+              <div key={system.id} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-white/[0.12] transition-all">
                 {/* Live Preview */}
                 <div className="aspect-[16/10] bg-[#0f1115] relative overflow-hidden">
                   <iframe
-                    srcDoc={template.html}
+                    srcDoc={system.html}
                     className="absolute top-0 left-0 w-[1440px] h-[900px] border-0 pointer-events-none origin-top-left"
                     style={{ transform: 'scale(var(--thumb-scale,0.25))' }}
-                    title={template.name}
+                    title={system.name}
                     loading="lazy"
                     sandbox=""
                     ref={(el) => {
                       if (el) {
-                        const obs = new ResizeObserver(([entry]) => {
-                          el.style.setProperty('--thumb-scale', String(entry.contentRect.width / 1440))
-                        })
+                        const obs = new ResizeObserver(([entry]) => { el.style.setProperty('--thumb-scale', String(entry.contentRect.width / 1440)) })
                         obs.observe(el.parentElement!)
                       }
                     }}
                   />
-                  {template.is_premium && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full z-10">
-                      <Crown className="w-2.5 h-2.5 text-white" />
-                      <span className="text-[9px] font-bold text-white">PRO</span>
-                    </div>
-                  )}
-                  {template.is_premium && userPlan === 'starter' && (
-                    <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-[5]">
-                      <Lock className="w-5 h-5 text-white/40" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-end justify-center pb-3 gap-2">
-                    <button onClick={() => setPreviewId(template.id)} className="px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg text-[11px] text-white font-medium flex items-center gap-1.5 hover:bg-white/20">
+                  {/* Category badge */}
+                  <div className={`absolute top-2 left-2 px-2 py-0.5 bg-gradient-to-r ${color} rounded-full z-10`}>
+                    <span className="text-[9px] font-bold text-white tracking-wide">{CATEGORY_LABELS[system.category]?.toUpperCase()}</span>
+                  </div>
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117] via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-end justify-center pb-3 gap-2">
+                    <button onClick={() => setPreviewId(system.id)} className="px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg text-[11px] text-white font-medium flex items-center gap-1.5 hover:bg-white/20">
                       <Eye className="w-3 h-3" /> Preview
                     </button>
-                    <button onClick={() => setFunnelViewId(template.id)} className="px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg text-[11px] text-white font-medium flex items-center gap-1.5 hover:bg-white/20">
-                      <Megaphone className="w-3 h-3" /> View Funnel
+                    <button onClick={() => setDetailId(system.id)} className="px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg text-[11px] text-white font-medium flex items-center gap-1.5 hover:bg-white/20">
+                      <Server className="w-3 h-3" /> System Details
                     </button>
                   </div>
                 </div>
 
                 {/* System Info */}
                 <div className="p-4 space-y-3">
-                  {/* Title + Social Proof */}
                   <div>
                     <div className="flex items-start justify-between">
-                      <h3 className="font-semibold text-white/85 text-sm">{template.name}</h3>
-                      <span className="text-[10px] text-emerald-400/70 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0 ml-2">{meta.revenue}</span>
+                      <h3 className="font-semibold text-white/85 text-sm">{system.name}</h3>
+                      <span className="text-[10px] text-emerald-400/70 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0 ml-2">{system.revenue_potential}</span>
                     </div>
-                    <p className="text-[11px] text-white/30 mt-0.5 line-clamp-1">{template.description}</p>
+                    <p className="text-[11px] text-white/30 mt-0.5">{system.tagline}</p>
                   </div>
 
-                  {/* Metrics Row */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-[10px] text-white/30">
-                      <UseCaseIcon className="w-3 h-3 text-cyan-400/60" /> {meta.useCase}
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-white/30">
-                      <Clock className="w-3 h-3 text-white/20" /> {meta.setupTime}
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-white/30">
-                      <Users className="w-3 h-3 text-white/20" /> {template.uses} launched
-                    </div>
+                  {/* Metrics */}
+                  <div className="flex items-center gap-3 text-[10px] text-white/30">
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-white/20" /> {system.setup_time}</span>
+                    <span className="flex items-center gap-1"><Users className="w-3 h-3 text-white/20" /> {system.launches} launched</span>
+                    <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-emerald-400/40" /> {system.avg_conversions}/day</span>
                   </div>
 
-                  {/* What this system does */}
+                  {/* Backend features preview */}
                   <div className="flex flex-wrap gap-1">
-                    {meta.benefits.slice(0, 3).map(b => (
-                      <span key={b} className="text-[9px] text-white/25 bg-white/[0.03] px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Check className="w-2 h-2 text-cyan-400/50" /> {b}
+                    {system.backend_features.slice(0, 3).map(f => (
+                      <span key={f} className="text-[9px] text-white/20 bg-white/[0.03] px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Server className="w-2 h-2 text-cyan-400/40" /> {f}
                       </span>
                     ))}
+                    {system.backend_features.length > 3 && (
+                      <span className="text-[9px] text-white/15 px-1">+{system.backend_features.length - 3} more</span>
+                    )}
                   </div>
 
                   {/* CTA */}
                   <button
-                    onClick={() => launchSystem(template.id)}
-                    disabled={cloning === template.id}
+                    onClick={() => launchSystem(system.id)}
+                    disabled={cloning === system.id}
                     className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                      template.is_premium && userPlan === 'starter'
+                      userPlan === 'starter'
                         ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-500/40'
                         : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'
                     }`}
                   >
-                    {template.is_premium && userPlan === 'starter' ? (
+                    {userPlan === 'starter' ? (
                       <><Lock className="w-3 h-3" /> Upgrade to Launch</>
-                    ) : cloning === template.id ? (
+                    ) : cloning === system.id ? (
                       'Launching...'
                     ) : (
                       <><Rocket className="w-3 h-3" /> Launch This System</>
