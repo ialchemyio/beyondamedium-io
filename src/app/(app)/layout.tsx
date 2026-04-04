@@ -20,10 +20,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </Link>
           <nav className="flex items-center gap-0.5 overflow-x-auto">
             <Link href="/dashboard" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Projects</Link>
-            <Link href="/dashboard/templates" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Revenue Systems</Link>
+            <Link href="/dashboard/templates" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Templates</Link>
             <Link href="/dashboard/premium-templates" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
-              Premium Sites
+              Revenue Systems
             </Link>
             <Link href="/dashboard/funnels" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Funnels</Link>
             <Link href="/dashboard/automations" className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap">Automations</Link>
