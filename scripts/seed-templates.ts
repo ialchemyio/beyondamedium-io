@@ -192,7 +192,7 @@ async function main() {
 
           // Insert into Supabase
           const { error } = await supabase.from('templates').insert({
-            user_id: '00000000-0000-0000-0000-000000000000', // system user
+            user_id: '7aee1ca8-626b-4c14-89ff-50cc86ae54e1', // beyondamedium@gmail.com
             name: template.name,
             description: template.desc,
             category: template.category,
