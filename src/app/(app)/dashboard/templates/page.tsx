@@ -211,14 +211,23 @@ export default function TemplatesPage() {
             return (
               <div key={template.id} className={`bg-white/[0.02] border rounded-2xl overflow-hidden group hover:border-white/[0.12] transition-all hover:scale-[1.01] ${template.is_premium ? 'border-amber-500/15' : 'border-white/[0.05]'}`}>
                 {/* Live Preview Thumbnail */}
-                <div className="h-44 bg-white relative overflow-hidden">
+                <div className="aspect-[16/10] bg-[#0f1115] relative overflow-hidden">
                   <iframe
                     srcDoc={template.html}
-                    className="w-[1280px] h-[800px] border-0 pointer-events-none"
-                    style={{ transform: 'scale(0.22)', transformOrigin: 'top left' }}
+                    className="absolute top-0 left-0 w-[1440px] h-[900px] border-0 pointer-events-none origin-top-left"
+                    style={{ transform: 'scale(var(--thumb-scale,0.25))' }}
                     title={template.name}
                     loading="lazy"
                     sandbox=""
+                    ref={(el) => {
+                      if (el) {
+                        const obs = new ResizeObserver(([entry]) => {
+                          const w = entry.contentRect.width
+                          el.style.setProperty('--thumb-scale', String(w / 1440))
+                        })
+                        obs.observe(el.parentElement!)
+                      }
+                    }}
                   />
                   {/* Premium badge */}
                   {template.is_premium && (
