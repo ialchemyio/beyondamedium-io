@@ -8,9 +8,10 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import {
-  Plus, Layout, CreditCard, Gift, Heart, Trash2, ArrowLeft,
-  DollarSign, Users, TrendingUp, Settings, Eye, BarChart3,
-  Megaphone, ShoppingBag, FileText, Rocket, Check, X,
+  Plus, Layout, CreditCard, Gift, Heart, Trash2,
+  DollarSign, Users, TrendingUp, Settings,
+  Megaphone, ShoppingBag, FileText, Rocket, Check,
+  Mail, Database, Bot, Zap, ChevronDown, ChevronRight,
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────
@@ -42,12 +43,13 @@ const STEP_ICONS: Record<string, typeof Layout> = {
   thankyou: Heart, optin: FileText, webinar: Megaphone, downsell: ShoppingBag,
 }
 
-function FunnelStepNode({ data }: { data: { label: string; stepType: string; convRate?: string } }) {
+function FunnelStepNode({ data }: { data: { label: string; stepType: string; convRate?: string; actions?: string[] } }) {
   const colors = STEP_COLORS[data.stepType] || STEP_COLORS.landing
   const Icon = STEP_ICONS[data.stepType] || Layout
+  const actions = data.actions ?? []
 
   return (
-    <div className={`bg-[#0d1117] border-2 ${colors.border} rounded-xl px-5 py-4 min-w-[200px] shadow-lg`}>
+    <div className={`bg-[#0d1117] border-2 ${colors.border} rounded-xl px-5 py-4 min-w-[220px] shadow-lg`}>
       <Handle type="target" position={Position.Top} className="!bg-white/30 !w-3 !h-3 !border-2 !border-[#0d1117]" />
       <Handle type="source" position={Position.Bottom} className="!bg-white/30 !w-3 !h-3 !border-2 !border-[#0d1117]" />
       <div className="flex items-center gap-2.5 mb-2">
@@ -63,6 +65,12 @@ function FunnelStepNode({ data }: { data: { label: string; stepType: string; con
         <div className="flex items-center gap-1 mt-1">
           <TrendingUp className="w-3 h-3 text-emerald-400/50" />
           <span className="text-[10px] text-emerald-400/60 font-mono">{data.convRate} conv.</span>
+        </div>
+      )}
+      {actions.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center gap-1">
+          <Zap className="w-2.5 h-2.5 text-cyan-400/40" />
+          <span className="text-[8px] text-white/25">{actions.length} action{actions.length > 1 ? 's' : ''}</span>
         </div>
       )}
     </div>
@@ -86,22 +94,35 @@ const STEP_TYPES = [
 // ─── Funnel Templates ────────────────────────────────────────
 const FUNNEL_TEMPLATES = [
   {
-    name: 'Lead Magnet Funnel',
+    name: 'Lead Generation Funnel',
+    desc: 'Capture leads with a free resource and nurture to sale',
     nodes: [
-      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Free Guide Landing', stepType: 'landing', convRate: '35%' } },
-      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Email Opt-In', stepType: 'optin', convRate: '28%' } },
-      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Thank You + Offer', stepType: 'thankyou', convRate: '12%' } },
+      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Lead Magnet Landing', stepType: 'landing', convRate: '35%', actions: [] } },
+      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Email Opt-In', stepType: 'optin', convRate: '28%', actions: ['send_email', 'add_to_db'] } },
+      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Thank You + Offer', stepType: 'thankyou', convRate: '12%', actions: ['send_email'] } },
     ],
     edges: [{ id: 'e1', source: 's1', target: 's2' }, { id: 'e2', source: 's2', target: 's3' }],
   },
   {
-    name: 'Product Sales Funnel',
+    name: 'Booking Funnel',
+    desc: 'Drive appointment bookings with confirmation and reminders',
     nodes: [
-      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Sales Page', stepType: 'landing', convRate: '8%' } },
-      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Checkout', stepType: 'checkout', convRate: '65%' } },
-      { id: 's3', type: 'funnelStep', position: { x: 150, y: 390 }, data: { label: 'Upsell #1', stepType: 'upsell', convRate: '25%' } },
-      { id: 's4', type: 'funnelStep', position: { x: 450, y: 390 }, data: { label: 'Downsell', stepType: 'downsell', convRate: '15%' } },
-      { id: 's5', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Order Confirmation', stepType: 'thankyou' } },
+      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Services Page', stepType: 'landing', convRate: '20%', actions: [] } },
+      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Select Service', stepType: 'offer', convRate: '60%', actions: [] } },
+      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Book & Pay', stepType: 'checkout', convRate: '70%', actions: ['send_email', 'add_to_db'] } },
+      { id: 's4', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Confirmation', stepType: 'thankyou', actions: ['send_email', 'ai_agent'] } },
+    ],
+    edges: [{ id: 'e1', source: 's1', target: 's2' }, { id: 'e2', source: 's2', target: 's3' }, { id: 'e3', source: 's3', target: 's4' }],
+  },
+  {
+    name: 'Product Sales Funnel',
+    desc: 'Sell products with upsells to maximize average order value',
+    nodes: [
+      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Sales Page', stepType: 'landing', convRate: '8%', actions: [] } },
+      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Checkout', stepType: 'checkout', convRate: '65%', actions: ['add_to_db'] } },
+      { id: 's3', type: 'funnelStep', position: { x: 150, y: 390 }, data: { label: 'Upsell #1', stepType: 'upsell', convRate: '25%', actions: ['show_upsell'] } },
+      { id: 's4', type: 'funnelStep', position: { x: 450, y: 390 }, data: { label: 'Downsell', stepType: 'downsell', convRate: '15%', actions: ['show_upsell'] } },
+      { id: 's5', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Order Confirmation', stepType: 'thankyou', actions: ['send_email', 'add_to_db'] } },
     ],
     edges: [
       { id: 'e1', source: 's1', target: 's2' },
@@ -112,28 +133,117 @@ const FUNNEL_TEMPLATES = [
     ],
   },
   {
-    name: 'Webinar Funnel',
+    name: 'Service Funnel',
+    desc: 'Sell high-ticket services with application and consultation',
     nodes: [
-      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Registration Page', stepType: 'landing', convRate: '40%' } },
-      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Webinar Room', stepType: 'webinar', convRate: '55%' } },
-      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Special Offer', stepType: 'offer', convRate: '18%' } },
-      { id: 's4', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Checkout', stepType: 'checkout', convRate: '70%' } },
-    ],
-    edges: [{ id: 'e1', source: 's1', target: 's2' }, { id: 'e2', source: 's2', target: 's3' }, { id: 'e3', source: 's3', target: 's4' }],
-  },
-  {
-    name: 'High-Ticket Application',
-    nodes: [
-      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'VSL Page', stepType: 'landing', convRate: '12%' } },
-      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Application Form', stepType: 'optin', convRate: '35%' } },
-      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Calendar Booking', stepType: 'checkout', convRate: '50%' } },
-      { id: 's4', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Confirmation', stepType: 'thankyou' } },
+      { id: 's1', type: 'funnelStep', position: { x: 300, y: 50 }, data: { label: 'Service Overview', stepType: 'landing', convRate: '15%', actions: [] } },
+      { id: 's2', type: 'funnelStep', position: { x: 300, y: 220 }, data: { label: 'Application Form', stepType: 'optin', convRate: '35%', actions: ['add_to_db', 'ai_agent'] } },
+      { id: 's3', type: 'funnelStep', position: { x: 300, y: 390 }, data: { label: 'Book Consultation', stepType: 'checkout', convRate: '50%', actions: ['send_email'] } },
+      { id: 's4', type: 'funnelStep', position: { x: 300, y: 560 }, data: { label: 'Confirmation + Prep', stepType: 'thankyou', actions: ['send_email', 'trigger_automation'] } },
     ],
     edges: [{ id: 'e1', source: 's1', target: 's2' }, { id: 'e2', source: 's2', target: 's3' }, { id: 'e3', source: 's3', target: 's4' }],
   },
 ]
 
 const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+
+const STEP_ACTIONS = [
+  { id: 'send_email', label: 'Send Email', icon: Mail, color: 'text-cyan-400' },
+  { id: 'add_to_db', label: 'Add to Database', icon: Database, color: 'text-blue-400' },
+  { id: 'ai_agent', label: 'Trigger AI Agent', icon: Bot, color: 'text-violet-400' },
+  { id: 'show_upsell', label: 'Show Upsell', icon: Gift, color: 'text-amber-400' },
+  { id: 'trigger_automation', label: 'Trigger Automation', icon: Zap, color: 'text-emerald-400' },
+]
+
+// ─── Step Config Panel ───────────────────────────────────────
+function StepConfigPanel({ node, onUpdate, onDelete }: { node: Node; onUpdate: (data: Record<string, unknown>) => void; onDelete: () => void }) {
+  const data = node.data as Record<string, unknown>
+  const actions = (data.actions as string[]) ?? []
+  const [showActions, setShowActions] = useState(true)
+  const [showAddAction, setShowAddAction] = useState(false)
+
+  function toggleAction(actionId: string) {
+    const updated = actions.includes(actionId) ? actions.filter(a => a !== actionId) : [...actions, actionId]
+    onUpdate({ actions: updated })
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Step Info */}
+      <div>
+        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Step Type</label>
+        <p className="text-xs text-white/60 capitalize">{data.stepType as string}</p>
+      </div>
+      <div>
+        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Label</label>
+        <input defaultValue={data.label as string} className={inp} onChange={e => onUpdate({ label: e.target.value })} />
+      </div>
+      <div>
+        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Page URL</label>
+        <input placeholder="/funnel/step-1" className={inp + ' font-mono'} />
+      </div>
+      <div>
+        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Connected Page</label>
+        <select className={inp}><option>None (create new)</option><option>From templates...</option></select>
+      </div>
+
+      {/* Actions on this step */}
+      <div className="border-t border-white/[0.06] pt-4">
+        <button onClick={() => setShowActions(!showActions)} className="w-full flex items-center justify-between mb-3">
+          <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="w-3 h-3 text-cyan-400/50" /> Actions on this step
+          </span>
+          {showActions ? <ChevronDown className="w-3 h-3 text-white/20" /> : <ChevronRight className="w-3 h-3 text-white/20" />}
+        </button>
+
+        {showActions && (
+          <div className="space-y-1.5">
+            {actions.length === 0 ? (
+              <p className="text-[10px] text-white/20 py-2">No actions configured</p>
+            ) : (
+              actions.map(actionId => {
+                const action = STEP_ACTIONS.find(a => a.id === actionId)
+                if (!action) return null
+                return (
+                  <div key={actionId} className="flex items-center justify-between px-2.5 py-2 bg-white/[0.03] rounded-lg group">
+                    <div className="flex items-center gap-2">
+                      <action.icon className={`w-3 h-3 ${action.color}`} />
+                      <span className="text-[10px] text-white/50">{action.label}</span>
+                    </div>
+                    <button onClick={() => toggleAction(actionId)} className="opacity-0 group-hover:opacity-100 text-[9px] text-red-400/50 hover:text-red-400 transition-all">Remove</button>
+                  </div>
+                )
+              })
+            )}
+
+            {/* Add Action */}
+            {showAddAction ? (
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2 space-y-0.5">
+                {STEP_ACTIONS.filter(a => !actions.includes(a.id)).map(action => (
+                  <button key={action.id} onClick={() => { toggleAction(action.id); setShowAddAction(false) }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors">
+                    <action.icon className={`w-3 h-3 ${action.color}`} />
+                    <span className="text-[10px] text-white/40 hover:text-white/60">{action.label}</span>
+                  </button>
+                ))}
+                {STEP_ACTIONS.filter(a => !actions.includes(a.id)).length === 0 && (
+                  <p className="text-[9px] text-white/20 text-center py-2">All actions added</p>
+                )}
+              </div>
+            ) : (
+              <button onClick={() => setShowAddAction(true)} className="w-full py-1.5 border border-dashed border-white/[0.08] rounded-lg text-[10px] text-white/25 hover:text-white/40 hover:border-white/[0.15] transition-colors flex items-center justify-center gap-1">
+                <Plus className="w-3 h-3" /> Add action
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <button onClick={onDelete} className="w-full py-2 text-xs text-red-400/60 hover:text-red-400 flex items-center justify-center gap-1.5 hover:bg-red-500/5 rounded-lg">
+        <Trash2 className="w-3 h-3" /> Delete Step
+      </button>
+    </div>
+  )
+}
 
 // ─── Main Component ──────────────────────────────────────────
 export default function FunnelsPage() {
@@ -278,13 +388,25 @@ export default function FunnelsPage() {
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <Megaphone className="w-12 h-12 text-white/5 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white/30 mb-2">Funnel Builder</h3>
-              <p className="text-xs text-white/20 mb-6 max-w-xs">Build conversion funnels visually. Landing → Offer → Checkout → Upsell → Thank You.</p>
-              <button onClick={() => setShowCreate(true)} className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-xl hover:brightness-110">
-                Create Funnel
-              </button>
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center mx-auto mb-5">
+                <DollarSign className="w-8 h-8 text-cyan-400/30" />
+              </div>
+              <h3 className="text-xl font-bold text-white/50 mb-2">Build a Revenue System</h3>
+              <p className="text-sm text-white/25 mb-8">Design conversion funnels that turn visitors into customers. Each step can trigger automations — emails, database updates, AI agents, and more.</p>
+              <div className="flex flex-col items-center gap-3">
+                <button onClick={() => setShowCreate(true)} className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Create Custom Funnel
+                </button>
+                <p className="text-[10px] text-white/20">or start with a template</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {FUNNEL_TEMPLATES.map(t => (
+                    <button key={t.name} onClick={() => loadTemplate(t)} className="px-3 py-1.5 bg-white/[0.03] border border-white/[0.06] rounded-lg text-[10px] text-white/35 hover:text-white/60 hover:border-white/[0.12] transition-colors">
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -297,29 +419,11 @@ export default function FunnelsPage() {
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {selectedNode ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Step Type</label>
-                <p className="text-xs text-white/60 capitalize">{(selectedNode.data as Record<string, string>).stepType}</p>
-              </div>
-              <div>
-                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Label</label>
-                <input defaultValue={(selectedNode.data as Record<string, string>).label} className={inp} onChange={e => {
-                  setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, label: e.target.value } } : n))
-                }} />
-              </div>
-              <div>
-                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Page URL</label>
-                <input placeholder="/funnel/step-1" className={inp + ' font-mono'} />
-              </div>
-              <div>
-                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Connected Page</label>
-                <select className={inp}><option>None (create new)</option><option>From templates...</option></select>
-              </div>
-              <button onClick={() => { setNodes(nds => nds.filter(n => n.id !== selectedNode.id)); setSelectedNode(null) }} className="w-full py-2 text-xs text-red-400/60 hover:text-red-400 flex items-center justify-center gap-1.5 hover:bg-red-500/5 rounded-lg">
-                <Trash2 className="w-3 h-3" /> Delete Step
-              </button>
-            </div>
+            <StepConfigPanel
+              node={selectedNode}
+              onUpdate={(data) => setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, ...data } } : n))}
+              onDelete={() => { setNodes(nds => nds.filter(n => n.id !== selectedNode.id)); setSelectedNode(null) }}
+            />
           ) : (
             <div className="text-center py-12">
               <Settings className="w-8 h-8 text-white/10 mx-auto mb-3" />
