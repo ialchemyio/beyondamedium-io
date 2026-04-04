@@ -58,7 +58,6 @@ const USE_CASE_ICONS: Record<string, typeof DollarSign> = {
 // ─── Filter Categories (outcome-driven) ──────────────────────
 const FILTERS = [
   { id: 'all', label: 'All Systems', icon: Sparkles },
-  { id: 'premium', label: 'Premium', icon: Crown },
   { id: 'leadgen', label: 'Lead Gen', icon: Target },
   { id: 'booking', label: 'Booking Systems', icon: CalendarCheck },
   { id: 'sales', label: 'Sales Funnels', icon: ShoppingBag },
@@ -106,7 +105,7 @@ export default function RevenueSystemsPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase.from('templates').select('*').eq('is_public', true).order('uses', { ascending: false })
+      const { data } = await supabase.from('templates').select('*').eq('is_public', true).eq('is_premium', true).order('uses', { ascending: false })
       setTemplates(data ?? [])
       setLoading(false)
       const { data: { user } } = await supabase.auth.getUser()
