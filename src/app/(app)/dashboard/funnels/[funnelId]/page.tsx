@@ -16,6 +16,7 @@ import {
   BarChart3, Clock, Users, ExternalLink, Pencil,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import FunnelAnalytics from '@/components/funnels/FunnelAnalytics'
 
 // ─── Types ───────────────────────────────────────────────────
 interface FunnelData {
@@ -154,7 +155,7 @@ export default function FunnelEditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showStepLib, setShowStepLib] = useState(false)
-  const [configSection, setConfigSection] = useState<'page' | 'actions' | 'flow'>('page')
+  const [configSection, setConfigSection] = useState<'page' | 'actions' | 'flow' | 'analytics'>('page')
 
   // Load funnel if it's a real ID (not 'new')
   useEffect(() => {
@@ -352,6 +353,7 @@ export default function FunnelEditorPage() {
                   { id: 'page' as const, label: 'Page', icon: Layout },
                   { id: 'actions' as const, label: 'Actions', icon: Zap },
                   { id: 'flow' as const, label: 'Flow', icon: TrendingUp },
+                  { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
                 ]).map(tab => (
                   <button key={tab.id} onClick={() => setConfigSection(tab.id)} className={`flex-1 py-2.5 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${configSection === tab.id ? 'text-cyan-400 border-b border-cyan-400' : 'text-white/30 hover:text-white/50'}`}>
                     <tab.icon className="w-3 h-3" /> {tab.label}
@@ -505,6 +507,15 @@ export default function FunnelEditorPage() {
                   </div>
                 )}
 
+                {/* Analytics */}
+                {configSection === 'analytics' && (
+                  <FunnelAnalytics
+                    funnelId={funnelId}
+                    nodes={nodes}
+                    onUpdateNodeData={updateNodeData}
+                  />
+                )}
+
                 {/* Delete */}
                 <div className="mt-6 pt-4 border-t border-white/[0.04]">
                   <button onClick={() => deleteNode(selectedNode.id)} className="w-full py-2 text-xs text-red-400/40 hover:text-red-400 flex items-center justify-center gap-1.5 hover:bg-red-500/5 rounded-lg transition-colors">
@@ -514,10 +525,11 @@ export default function FunnelEditorPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-6">
-              <Settings className="w-10 h-10 text-white/5 mb-4" />
-              <p className="text-xs text-white/25 text-center mb-1">Select a step to configure</p>
-              <p className="text-[10px] text-white/15 text-center">Click on any node in the canvas to edit its settings, actions, and flow logic.</p>
+            <div className="flex-1 overflow-y-auto p-4">
+              <FunnelAnalytics funnelId={funnelId} nodes={nodes} onUpdateNodeData={updateNodeData} />
+              <div className="mt-6 text-center">
+                <p className="text-[10px] text-white/15">Click a step to configure it</p>
+              </div>
             </div>
           )}
         </div>
