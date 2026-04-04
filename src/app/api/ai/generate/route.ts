@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { CREDIT_COSTS } from '@/lib/stripe'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -29,6 +30,21 @@ export async function POST(request: Request) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
+    }
+
+    // Credit check
+    const creditCost = mode === 'edit' ? CREDIT_COSTS.edit_element : mode === 'section' ? CREDIT_COSTS.generate_section : CREDIT_COSTS.generate_page
+    const origin = request.headers.get('origin') || ''
+    const creditRes = await fetch(`${origin}/api/credits`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: request.headers.get('cookie') || '' },
+      body: JSON.stringify({ action: mode || 'generate_page', amount: creditCost }),
+    })
+    if (!creditRes.ok) {
+      const creditData = await creditRes.json()
+      if (creditData.upgrade) {
+        return NextResponse.json({ error: 'Insufficient credits', upgrade: true, needed: creditCost, ...creditData }, { status: 402 })
+      }
     }
 
     let userPrompt: string

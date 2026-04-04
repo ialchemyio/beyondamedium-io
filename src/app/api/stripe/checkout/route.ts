@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
-    const { priceId, planName } = await request.json()
+    const { priceId, planName, mode, credits } = await request.json()
     if (!priceId) return NextResponse.json({ error: 'priceId required' }, { status: 400 })
 
     const supabase = await createClient()
@@ -14,11 +14,26 @@ export async function POST(request: Request) {
     const stripe = getStripe()
     const origin = request.headers.get('origin') || 'https://beyondamedium.io'
 
+    if (mode === 'credits') {
+      // One-time credit purchase
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        customer_email: user.email ?? undefined,
+        metadata: { userId: user.id, type: 'credits', credits: String(credits) },
+        success_url: `${origin}/dashboard?credits=success`,
+        cancel_url: `${origin}/dashboard?credits=cancelled`,
+      })
+      return NextResponse.json({ url: session.url })
+    }
+
+    // Subscription
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: user.email,
+      customer_email: user.email ?? undefined,
       metadata: { userId: user.id, plan: planName },
       success_url: `${origin}/dashboard?plan=success`,
       cancel_url: `${origin}/dashboard?plan=cancelled`,

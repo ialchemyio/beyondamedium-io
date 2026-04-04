@@ -542,11 +542,14 @@ export default function EditorPage() {
 
       {/* Published URL toast */}
       {publishedUrl && (
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3 flex items-center gap-3 backdrop-blur-xl">
-          <Check className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm text-emerald-300 font-medium">Site published!</span>
-          <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono">
-            {publishedUrl}
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-4 flex flex-col items-center gap-2 backdrop-blur-xl">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm text-emerald-300 font-medium">Site published!</span>
+          </div>
+          <p className="text-[10px] text-white/40">Your site is live at:</p>
+          <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono bg-[#0a0e16] px-3 py-1.5 rounded-lg border border-white/[0.06]">
+            beyondamedium.io{publishedUrl}
           </a>
         </div>
       )}

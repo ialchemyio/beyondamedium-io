@@ -1,12 +1,20 @@
 {
   "rewrites": [
     {
-      "source": "/sites/sammyj",
-      "destination": "https://dj-sammy-jay-platform.vercel.app/sites/sammyj"
+      "source": "/sites/djsammyjay",
+      "destination": "https://djsammyjay-v2.vercel.app/"
     },
     {
-      "source": "/sites/sammyj/:path*",
-      "destination": "https://dj-sammy-jay-platform.vercel.app/sites/sammyj/:path*"
+      "source": "/sites/djsammyjay/:path*",
+      "destination": "https://djsammyjay-v2.vercel.app/:path*"
+    },
+    {
+      "source": "/sites/lumpiaandmore",
+      "destination": "https://lumpia-and-more.vercel.app/sites/lumpiaandmore"
+    },
+    {
+      "source": "/sites/lumpiaandmore/:path*",
+      "destination": "https://lumpia-and-more.vercel.app/sites/lumpiaandmore/:path*"
     }
   ]
 }

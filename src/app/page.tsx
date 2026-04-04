@@ -22,17 +22,27 @@ const steps = [
 
 const plans = [
   {
-    name: 'Starter', price: 0, desc: 'Start building for free', highlighted: false, cta: 'Start Building',
-    features: ['1 project', '10 AI generations/mo', 'Core components', 'BAM subdomain', 'Community support'],
+    name: 'Starter', price: 0, desc: 'Start for free', highlighted: false, cta: 'Start Building', badge: null, color: 'border-white/[0.05]',
+    features: ['1 project', '5 AI credits / month', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
   },
   {
-    name: 'Pro', price: 29, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro',
-    features: ['Unlimited projects', 'Unlimited AI', 'All components', 'Custom domains', 'Code export', 'AI agents', 'Priority support'],
+    name: 'Builder', price: 19, desc: 'For creators getting started', highlighted: false, cta: 'Upgrade to Builder', badge: null, color: 'border-blue-500/20',
+    features: ['5 projects', '50 AI credits / month', 'All components', 'Basic templates', 'Hosted BAM sites (instant publishing)', 'Code export', 'Basic analytics'],
   },
   {
-    name: 'Agency', price: 79, desc: 'For teams at scale', highlighted: false, cta: 'Scale Up',
-    features: ['Everything in Pro', 'White-label', '5 team seats', 'Client billing', 'API access', 'Custom integrations', 'Dedicated support'],
+    name: 'Pro', price: 39, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
+    features: ['Unlimited projects', '200 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
+  {
+    name: 'BAM', price: 99, desc: 'Build, launch, and get paid', highlighted: false, cta: 'Start Scaling', badge: 'Best for making money', color: 'border-amber-500/30',
+    features: ['Everything in Pro', 'Client-ready hosted pages', 'Funnel builder', 'Automation workflows', 'Client billing tools', 'CRM-lite system', 'Priority support', 'Higher AI limits'],
+  },
+]
+
+const creditPacks = [
+  { credits: 50, price: '$10' },
+  { credits: 150, price: '$25' },
+  { credits: 500, price: '$60' },
 ]
 
 export default function LandingPage() {
@@ -163,45 +173,52 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-[11px] text-cyan-400/60 font-mono tracking-widest uppercase mb-3 block">Pricing</span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Ship faster, pay less</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Build. Launch. Get Paid.</h2>
+            <p className="text-white/30 mt-3 max-w-lg mx-auto text-sm">Everything you need to turn ideas into live, revenue-generating websites.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-7 flex flex-col ${
-                  plan.highlighted
-                    ? 'bg-gradient-to-b from-cyan-500/[0.08] to-blue-500/[0.03] border border-cyan-500/20 relative'
-                    : 'bg-white/[0.02] border border-white/[0.05]'
+                className={`rounded-2xl p-6 flex flex-col relative ${
+                  plan.name === 'BAM'
+                    ? 'bg-gradient-to-b from-amber-500/[0.08] to-orange-500/[0.03] border ' + plan.color
+                    : plan.highlighted
+                    ? 'bg-gradient-to-b from-cyan-500/[0.08] to-blue-500/[0.03] border ' + plan.color
+                    : 'bg-white/[0.02] border ' + plan.color
                 }`}
               >
-                {plan.highlighted && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-bold rounded-full tracking-wide">
-                    POPULAR
+                {plan.badge && (
+                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 text-white text-[9px] font-bold rounded-full tracking-wide whitespace-nowrap ${
+                    plan.name === 'BAM' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                  }`}>
+                    {plan.badge}
                   </span>
                 )}
-                <h3 className="text-sm font-semibold text-white/70">{plan.name}</h3>
-                <div className="mt-3 mb-1">
+                <h3 className={`text-sm font-semibold ${plan.name === 'BAM' ? 'text-amber-300/80' : 'text-white/70'}`}>{plan.name}</h3>
+                <div className="mt-2 mb-1">
                   <span className="text-3xl font-bold text-white">${plan.price}</span>
                   <span className="text-white/25 text-xs">/mo</span>
                 </div>
-                <p className="text-xs text-white/25 mb-6">{plan.desc}</p>
-                <ul className="space-y-2.5 mb-8 flex-1">
+                <p className="text-[11px] text-white/25 mb-5">{plan.desc}</p>
+                <ul className="space-y-2 mb-6 flex-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs">
-                      <Check className="w-3.5 h-3.5 text-cyan-400/70 shrink-0" />
-                      <span className="text-white/45">{f}</span>
+                    <li key={f} className="flex items-start gap-2 text-[11px]">
+                      <Check className={`w-3 h-3 mt-0.5 shrink-0 ${plan.name === 'BAM' ? 'text-amber-400/70' : 'text-cyan-400/70'}`} />
+                      <span className="text-white/40">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
                   className={`w-full text-center py-2.5 rounded-xl text-xs font-semibold transition-all block ${
-                    plan.highlighted
+                    plan.name === 'BAM'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:brightness-110'
+                      : plan.highlighted
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'
                       : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/50'
                   }`}
@@ -210,6 +227,20 @@ export default function LandingPage() {
                 </Link>
               </div>
             ))}
+          </div>
+
+          {/* Credit Packs */}
+          <div className="mt-10 text-center">
+            <p className="text-xs text-white/30 mb-4">Need more AI? Buy credits anytime.</p>
+            <div className="flex items-center justify-center gap-3">
+              {creditPacks.map((pack) => (
+                <div key={pack.credits} className="bg-white/[0.02] border border-white/[0.06] rounded-xl px-5 py-3 text-center hover:border-white/[0.1] transition-colors">
+                  <p className="text-sm font-bold text-white">{pack.credits} credits</p>
+                  <p className="text-[11px] text-cyan-400 font-mono">{pack.price}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-white/15 mt-4 font-mono">AI credits power generation, editing, and automation. No hidden limits.</p>
           </div>
         </div>
       </section>
