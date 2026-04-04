@@ -34,7 +34,7 @@ const plans = [
     features: ['Unlimited projects', '200 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {
-    name: 'BAM', price: 99, desc: 'Done-for-you growth partner', highlighted: false, cta: 'Get a Quote', badge: 'Best for making money', color: 'border-amber-500/30',
+    name: 'BAM', price: 99, desc: 'Done-for-you growth engine', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Best for making money', color: 'border-amber-500/30', startingAt: true,
     href: 'https://beyondamedium.com/contact',
     features: ['Everything in Pro', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
   },
@@ -202,6 +202,7 @@ export default function LandingPage() {
                 )}
                 <h3 className={`text-sm font-semibold ${plan.name === 'BAM' ? 'text-amber-300/80' : 'text-white/70'}`}>{plan.name}</h3>
                 <div className="mt-2 mb-1">
+                  {'startingAt' in plan && plan.startingAt && <span className="text-[10px] text-amber-400/60 font-medium block mb-0.5">Starting at</span>}
                   <span className="text-3xl font-bold text-white">${plan.price}</span>
                   <span className="text-white/25 text-xs">/mo</span>
                 </div>
