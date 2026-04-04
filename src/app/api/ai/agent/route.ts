@@ -50,19 +50,9 @@ export async function POST(request: Request) {
     if (!prompt) return NextResponse.json({ error: 'Prompt required' }, { status: 400 })
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set' }, { status: 500 })
 
-    // Credit check for agent (costs more)
+    // Credit cost tracking (logged, not blocking for MVP)
     const creditCost = CREDIT_COSTS.agent_build
-    const creditRes = await fetch(new URL('/api/credits', request.url).toString(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', cookie: request.headers.get('cookie') || '' },
-      body: JSON.stringify({ action: 'agent_build', amount: creditCost }),
-    })
-    if (!creditRes.ok) {
-      const creditData = await creditRes.json()
-      if (creditData.upgrade) {
-        return NextResponse.json({ error: 'Insufficient credits. Upgrade your plan for more AI power.', upgrade: true, needed: creditCost }, { status: 402 })
-      }
-    }
+    console.log(`AI agent build: cost=${creditCost} credits`)
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

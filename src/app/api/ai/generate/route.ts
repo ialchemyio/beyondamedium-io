@@ -32,20 +32,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
     }
 
-    // Credit check
+    // Credit cost tracking (logged, not blocking for MVP)
     const creditCost = mode === 'edit' ? CREDIT_COSTS.edit_element : mode === 'section' ? CREDIT_COSTS.generate_section : CREDIT_COSTS.generate_page
-    const origin = request.headers.get('origin') || ''
-    const creditRes = await fetch(`${origin}/api/credits`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', cookie: request.headers.get('cookie') || '' },
-      body: JSON.stringify({ action: mode || 'generate_page', amount: creditCost }),
-    })
-    if (!creditRes.ok) {
-      const creditData = await creditRes.json()
-      if (creditData.upgrade) {
-        return NextResponse.json({ error: 'Insufficient credits', upgrade: true, needed: creditCost, ...creditData }, { status: 402 })
-      }
-    }
+    console.log(`AI generation: mode=${mode}, cost=${creditCost} credits`)
 
     let userPrompt: string
 
