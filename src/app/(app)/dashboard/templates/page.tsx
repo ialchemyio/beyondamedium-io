@@ -32,6 +32,8 @@ const CATEGORIES = [
   { id: 'construction', label: 'Construction', emoji: '🔨' },
   { id: 'events', label: 'Events', emoji: '🎉' },
   { id: 'beauty', label: 'Beauty', emoji: '💅' },
+  { id: 'nonprofit', label: 'Nonprofit', emoji: '💚' },
+  { id: 'automotive', label: 'Automotive', emoji: '🚗' },
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -47,6 +49,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   construction: 'from-orange-500 to-amber-500',
   events: 'from-pink-500 to-rose-500',
   beauty: 'from-fuchsia-500 to-pink-500',
+  nonprofit: 'from-emerald-500 to-green-500',
+  automotive: 'from-red-500 to-rose-500',
 }
 
 export default function TemplatesPage() {
