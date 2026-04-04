@@ -13,10 +13,11 @@ import {
   Layout, CreditCard, Gift, Heart, FileText, DollarSign,
   Megaphone, ShoppingBag, TrendingUp, Settings, ChevronDown,
   ChevronRight, Mail, Database, Bot, Zap, Rocket, Eye,
-  BarChart3, Clock, Users, ExternalLink, Pencil,
+  BarChart3, Clock, Users, ExternalLink, Pencil, FlaskConical,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import FunnelAnalytics from '@/components/funnels/FunnelAnalytics'
+import ABTestPanel from '@/components/funnels/ABTestPanel'
 
 // ─── Types ───────────────────────────────────────────────────
 interface FunnelData {
@@ -155,7 +156,7 @@ export default function FunnelEditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showStepLib, setShowStepLib] = useState(false)
-  const [configSection, setConfigSection] = useState<'page' | 'actions' | 'flow' | 'analytics'>('page')
+  const [configSection, setConfigSection] = useState<'page' | 'actions' | 'flow' | 'analytics' | 'abtest'>('page')
 
   // Load funnel if it's a real ID (not 'new')
   useEffect(() => {
@@ -353,7 +354,8 @@ export default function FunnelEditorPage() {
                   { id: 'page' as const, label: 'Page', icon: Layout },
                   { id: 'actions' as const, label: 'Actions', icon: Zap },
                   { id: 'flow' as const, label: 'Flow', icon: TrendingUp },
-                  { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
+                  { id: 'abtest' as const, label: 'A/B Test', icon: FlaskConical },
+                  { id: 'analytics' as const, label: 'Stats', icon: BarChart3 },
                 ]).map(tab => (
                   <button key={tab.id} onClick={() => setConfigSection(tab.id)} className={`flex-1 py-2.5 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${configSection === tab.id ? 'text-cyan-400 border-b border-cyan-400' : 'text-white/30 hover:text-white/50'}`}>
                     <tab.icon className="w-3 h-3" /> {tab.label}
@@ -505,6 +507,11 @@ export default function FunnelEditorPage() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* A/B Test */}
+                {configSection === 'abtest' && (
+                  <ABTestPanel funnelId={funnelId} stepId={selectedNode.id} />
                 )}
 
                 {/* Analytics */}
