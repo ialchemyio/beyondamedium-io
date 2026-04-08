@@ -15,6 +15,22 @@
     {
       "source": "/sites/lumpiaandmore/:path*",
       "destination": "https://lumpia-and-more.vercel.app/sites/lumpiaandmore/:path*"
+    },
+    {
+      "source": "/sites/VictoryLaps",
+      "destination": "https://victory-laps.vercel.app/sites/VictoryLaps"
+    },
+    {
+      "source": "/sites/VictoryLaps/:path*",
+      "destination": "https://victory-laps.vercel.app/sites/VictoryLaps/:path*"
+    },
+    {
+      "source": "/sites/jewelcitysteven",
+      "destination": "https://jewelcitysteven.vercel.app/sites/jewelcitysteven"
+    },
+    {
+      "source": "/sites/jewelcitysteven/:path*",
+      "destination": "https://jewelcitysteven.vercel.app/sites/jewelcitysteven/:path*"
     }
   ]
 }
