@@ -31,6 +31,46 @@
     {
       "source": "/sites/jewelcitysteven/:path*",
       "destination": "https://jewelcitysteven.vercel.app/sites/jewelcitysteven/:path*"
+    },
+    {
+      "source": "/sites/SmileDentalCare",
+      "destination": "https://smile-dental-revamp.vercel.app/sites/SmileDentalCare"
+    },
+    {
+      "source": "/sites/SmileDentalCare/:path*",
+      "destination": "https://smile-dental-revamp.vercel.app/sites/SmileDentalCare/:path*"
+    },
+    {
+      "source": "/sites/fl00redEnt",
+      "destination": "https://fl00red.vercel.app/sites/fl00redEnt"
+    },
+    {
+      "source": "/sites/fl00redEnt/:path*",
+      "destination": "https://fl00red.vercel.app/sites/fl00redEnt/:path*"
+    },
+    {
+      "source": "/sites/carlosnunez",
+      "destination": "https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez"
+    },
+    {
+      "source": "/sites/carlosnunez/:path*",
+      "destination": "https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez/:path*"
+    },
+    {
+      "source": "/sites/JGFamilyRoofing",
+      "destination": "https://jg-family-roofing.vercel.app/sites/JGFamilyRoofing"
+    },
+    {
+      "source": "/sites/JGFamilyRoofing/:path*",
+      "destination": "https://jg-family-roofing.vercel.app/sites/JGFamilyRoofing/:path*"
+    },
+    {
+      "source": "/sites/localheartsfoundation",
+      "destination": "https://local-hearts-alchemyproco-9733s-projects.vercel.app/sites/localheartsfoundation"
+    },
+    {
+      "source": "/sites/localheartsfoundation/:path*",
+      "destination": "https://local-hearts-alchemyproco-9733s-projects.vercel.app/sites/localheartsfoundation/:path*"
     }
   ]
 }
