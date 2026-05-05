@@ -62,4 +62,16 @@ export const CREDIT_COSTS = {
   agent_build: 15,
 } as const
 
+// BAM takes 14% of every restaurant transaction
 export const PLATFORM_FEE_PERCENT = 14
+export const PLATFORM_FEE_BPS = 1400 // basis points
+
+export function calculateBamCut(amountCents: number): { bamCut: number; clientCut: number } {
+  const bamCut = Math.round(amountCents * (PLATFORM_FEE_PERCENT / 100))
+  const clientCut = amountCents - bamCut
+  return { bamCut, clientCut }
+}
+
+export function calculateApplicationFee(amountCents: number): number {
+  return Math.round(amountCents * (PLATFORM_FEE_PERCENT / 100))
+}
