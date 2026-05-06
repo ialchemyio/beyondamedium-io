@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { CREDIT_COSTS } from '@/lib/stripe'
+import { createClient } from '@/lib/supabase/server'
+import { checkCredits, deductCredits, getCostForMode } from '@/lib/credits'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -32,9 +33,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
     }
 
-    // Credit cost tracking (logged, not blocking for MVP)
-    const creditCost = mode === 'edit' ? CREDIT_COSTS.edit_element : mode === 'section' ? CREDIT_COSTS.generate_section : CREDIT_COSTS.generate_page
-    console.log(`AI generation: mode=${mode}, cost=${creditCost} credits`)
+    // Auth check
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // Credit check + deduct (atomic via service role)
+    const creditCost = getCostForMode(mode)
+    const check = await checkCredits(user.id, creditCost)
+    if (!check.ok) {
+      return NextResponse.json({
+        error: 'Insufficient credits',
+        upgrade: true,
+        needed: creditCost,
+        remaining: check.total,
+        usagePercent: check.usagePercent,
+        warningLevel: 'critical',
+      }, { status: 402 })
+    }
+
+    const deduct = await deductCredits(user.id, creditCost, mode || 'generate_page')
+    if (!deduct.ok) {
+      return NextResponse.json({
+        error: 'Insufficient credits',
+        upgrade: true,
+        needed: creditCost,
+      }, { status: 402 })
+    }
 
     let userPrompt: string
 
@@ -84,7 +109,16 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     let html = content.text
     html = html.replace(/^```html?\n?/i, '').replace(/\n?```$/i, '').trim()
 
-    return NextResponse.json({ html })
+    return NextResponse.json({
+      html,
+      credits: {
+        deducted: deduct.deducted,
+        remaining: deduct.total,
+        monthly: deduct.monthly,
+        usagePercent: deduct.usagePercent,
+        warningLevel: deduct.warningLevel,
+      },
+    })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'AI generation failed'
     console.error('AI generation error:', message)

@@ -323,7 +323,25 @@ export default function EditorPage() {
       })
 
       const data = await res.json()
+
+      // Handle 402 (insufficient credits) — show upgrade flow
+      if (res.status === 402 || data.upgrade) {
+        setAiMessages(prev => [...prev, {
+          role: 'ai',
+          text: `🔒 You're out of credits. Upgrade to keep building — your work is saved.`,
+          type: 'error',
+        }])
+        // Trigger global upgrade event (caught by UpgradeModal listeners)
+        window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'credits', needed: data.needed } }))
+        return
+      }
+
       if (data.error) throw new Error(data.error)
+
+      // Update credits indicator in header
+      if (data.credits) {
+        window.dispatchEvent(new CustomEvent('bam:credits-updated', { detail: data.credits }))
+      }
 
       if (aiMode === 'page') {
         // Replace entire canvas

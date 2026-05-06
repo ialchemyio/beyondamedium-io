@@ -23,15 +23,15 @@ const steps = [
 const plans = [
   {
     name: 'Starter', price: 0, desc: 'Start for free', highlighted: false, cta: 'Start Building', badge: null, color: 'border-white/[0.05]',
-    features: ['1 project', '5 AI credits / month', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
+    features: ['1 project', '10 AI credits / month', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
   },
   {
     name: 'Builder', price: 19, desc: 'For creators getting started', highlighted: false, cta: 'Upgrade to Builder', badge: null, color: 'border-blue-500/20',
-    features: ['5 projects', '50 AI credits / month', 'All components', 'Basic templates', 'Hosted BAM sites (instant publishing)', 'Code export', 'Basic analytics'],
+    features: ['5 projects', '100 AI credits / month', 'All components', 'Basic templates', 'Hosted BAM sites (instant publishing)', 'Code export', 'Basic analytics'],
   },
   {
     name: 'Pro', price: 39, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
-    features: ['Unlimited projects', '200 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
+    features: ['Unlimited projects', '400 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {
     name: 'BAM', price: 99, desc: 'Done-for-you growth engine', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Best for making money', color: 'border-amber-500/30', startingAt: true,

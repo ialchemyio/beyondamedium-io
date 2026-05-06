@@ -11,9 +11,9 @@ interface UpgradeModalProps {
 }
 
 const plans = [
-  { name: 'Builder', price: 19, credits: 50, projects: 5, color: 'from-blue-500 to-cyan-500' },
-  { name: 'Pro', price: 39, credits: 200, projects: 'Unlimited', color: 'from-cyan-500 to-blue-500', popular: true },
-  { name: 'BAM', price: 99, credits: 500, projects: 'Unlimited', color: 'from-amber-500 to-orange-500' },
+  { name: 'Builder', price: 19, credits: 100, projects: 5, color: 'from-blue-500 to-cyan-500' },
+  { name: 'Pro', price: 39, credits: 400, projects: 'Unlimited', color: 'from-cyan-500 to-blue-500', popular: true },
+  { name: 'BAM', price: 99, credits: 1000, projects: 'Unlimited', color: 'from-amber-500 to-orange-500' },
 ]
 
 const creditPacks = [

@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { BAM_LITE } from '@/lib/bam-lite'
+import CreditsIndicator from '@/components/CreditsIndicator'
+import GlobalUpgradeListener from '@/components/GlobalUpgradeListener'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -54,7 +56,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <CreditsIndicator variant="compact" />
+          <div className="w-px h-4 bg-white/[0.06]" />
           <span className="text-[11px] text-white/25 font-mono">{user.email}</span>
           <form action="/api/auth/signout" method="POST">
             <button type="submit" className="text-[11px] text-white/30 hover:text-white/60 transition-colors">Sign out</button>
@@ -64,6 +68,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="flex-1 p-6">
         {children}
       </main>
+      <GlobalUpgradeListener />
     </div>
   )
 }

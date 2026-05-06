@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { CREDIT_COSTS } from '@/lib/stripe'
+import { checkCredits, deductCredits } from '@/lib/credits'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -50,13 +51,27 @@ export async function POST(request: Request) {
     if (!prompt) return NextResponse.json({ error: 'Prompt required' }, { status: 400 })
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set' }, { status: 500 })
 
-    // Credit cost tracking (logged, not blocking for MVP)
     const creditCost = CREDIT_COSTS.agent_build
-    console.log(`AI agent build: cost=${creditCost} credits`)
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // Credit check + deduct
+    const check = await checkCredits(user.id, creditCost)
+    if (!check.ok) {
+      return NextResponse.json({
+        error: 'Insufficient credits. Upgrade your plan for more AI power.',
+        upgrade: true,
+        needed: creditCost,
+        remaining: check.total,
+        warningLevel: 'critical',
+      }, { status: 402 })
+    }
+    const deduct = await deductCredits(user.id, creditCost, 'agent_build')
+    if (!deduct.ok) {
+      return NextResponse.json({ error: 'Insufficient credits', upgrade: true, needed: creditCost }, { status: 402 })
+    }
 
     // Call Claude
     const message = await anthropic.messages.create({
@@ -136,7 +151,16 @@ export async function POST(request: Request) {
       result.projectSlug = slug
     }
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      ...result,
+      credits: {
+        deducted: deduct.deducted,
+        remaining: deduct.total,
+        monthly: deduct.monthly,
+        usagePercent: deduct.usagePercent,
+        warningLevel: deduct.warningLevel,
+      },
+    })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Agent failed'
     console.error('Agent error:', message)
