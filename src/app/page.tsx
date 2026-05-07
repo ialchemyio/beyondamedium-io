@@ -30,7 +30,7 @@ const plans = [
     features: ['5 projects', '300 AI credits / month', '8+ AI Agent builds', 'All components', 'Templates marketplace', 'Code export', 'Basic analytics'],
   },
   {
-    name: 'Pro', price: 39, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
+    name: 'Pro', price: 49, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
     features: ['Unlimited projects', '1,500 AI credits / month', '40+ AI Agent builds', 'AI agents (full power)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {

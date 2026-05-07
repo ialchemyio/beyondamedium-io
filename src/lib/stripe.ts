@@ -30,7 +30,7 @@ export const PLANS = {
   },
   pro: {
     name: 'Pro',
-    price: 3900,
+    price: 4900,
     monthlyCredits: 1500,
     maxProjects: -1,
     priceId: process.env.STRIPE_PRO_PRICE_ID,

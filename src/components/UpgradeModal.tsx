@@ -22,7 +22,7 @@ const plans: Array<{
   doneForYou?: boolean
 }> = [
   { name: 'Builder', price: 19, credits: 300, caption: '300 credits/mo', href: '/signup', color: 'from-blue-500 to-cyan-500' },
-  { name: 'Pro', price: 39, credits: 1500, caption: '1,500 credits/mo', href: '/signup', color: 'from-cyan-500 to-blue-500', popular: true },
+  { name: 'Pro', price: 49, credits: 1500, caption: '1,500 credits/mo', href: '/signup', color: 'from-cyan-500 to-blue-500', popular: true },
   { name: 'BAM', price: 99, credits: 'Done-for-you', caption: 'BAM team builds for you', href: 'https://beyondamedium.com/contact', external: true, doneForYou: true, color: 'from-amber-500 to-orange-500' },
 ]
 
