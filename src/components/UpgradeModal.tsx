@@ -37,13 +37,16 @@ export default function UpgradeModal({ isOpen, onClose, reason = 'credits', need
             <Zap className="w-6 h-6 text-amber-400" />
           </div>
           <h2 className="text-lg font-bold text-white">
-            {reason === 'credits' ? "You've reached your AI limit" : "You've reached your project limit"}
+            {reason === 'credits' ? "You're out of AI credits" : "You've reached your project limit"}
           </h2>
           <p className="text-xs text-white/40 mt-1">
             {reason === 'credits' && needed
-              ? `This action requires ${needed} credits. Upgrade your plan or buy credits.`
+              ? `This action needs ${needed} credits. Upgrade for more, or grab a credit pack.`
               : 'Upgrade to continue building.'}
           </p>
+          {reason === 'credits' && (
+            <p className="text-[11px] text-cyan-400/70 mt-2">Don&rsquo;t lose momentum — pick a plan and keep shipping.</p>
+          )}
         </div>
 
         {/* Plans */}
