@@ -34,9 +34,9 @@ const plans = [
     features: ['Unlimited projects', '1,500 AI credits / month', '40+ AI Agent builds', 'AI agents (full power)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {
-    name: 'BAM', price: 99, desc: 'Done-for-you growth engine', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Best for making money', color: 'border-amber-500/30', startingAt: true,
+    name: 'BAM', price: 99, desc: 'We build it for you', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Done-for-you', color: 'border-amber-500/30', startingAt: true,
     href: 'https://beyondamedium.com/contact',
-    features: ['Everything in Pro', '5,000 AI credits / month', '140+ AI Agent builds', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'Dedicated account manager'],
+    features: ['Done-for-you site by BAM team', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
   },
 ]
 

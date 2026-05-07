@@ -39,10 +39,10 @@ export const PLANS = {
   bam: {
     name: 'BAM',
     price: 9900,
-    monthlyCredits: 5000,
+    monthlyCredits: 0,  // Done-for-you service — no AI credits, BAM team handles everything
     maxProjects: -1,
     priceId: process.env.STRIPE_BAM_PRICE_ID,
-    features: ['Everything in Pro', '5,000 AI credits / month', '140+ AI Agent builds', 'Client-ready hosted pages', 'Funnel builder', 'Automation workflows', 'Client billing tools', 'Priority support'],
+    features: ['Done-for-you site build by BAM team', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
   },
 } as const
 
@@ -54,12 +54,12 @@ export const CREDIT_PACKS = [
   { credits: 1000, price: 6000, label: '1,000 credits', priceLabel: '$60' },
 ] as const
 
-// Credit costs — calibrated so Starter gets exactly 1 Agent build to fall
-// in love with the magic, then runs out and hits the upgrade wall fast.
+// Credit costs — Starter gets 1 Agent build to fall in love, then hits
+// the upgrade wall fast.
 export const CREDIT_COSTS = {
-  generate_page: 5,
-  generate_section: 2,
-  edit_element: 1,
+  edit_element: 3,
+  generate_section: 5,
+  generate_page: 10,
   agent_build: 35,     // The magic — full autonomous multi-page site build
 } as const
 
