@@ -22,28 +22,28 @@ const steps = [
 
 const plans = [
   {
-    name: 'Starter', price: 0, desc: 'Start for free', highlighted: false, cta: 'Start Building', badge: null, color: 'border-white/[0.05]',
-    features: ['1 project', '10 AI credits / month', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
+    name: 'Starter', price: 0, desc: 'Start for free \u2014 build 5 full sites', highlighted: false, cta: 'Start Building', badge: null, color: 'border-white/[0.05]',
+    features: ['1 project', '50 AI credits / month', '~5 full sites with AI Agent', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
   },
   {
     name: 'Builder', price: 19, desc: 'For creators getting started', highlighted: false, cta: 'Upgrade to Builder', badge: null, color: 'border-blue-500/20',
-    features: ['5 projects', '100 AI credits / month', 'All components', 'Basic templates', 'Hosted BAM sites (instant publishing)', 'Code export', 'Basic analytics'],
+    features: ['5 projects', '300 AI credits / month', '~30 AI Agent builds', 'All components', 'Templates marketplace', 'Code export', 'Basic analytics'],
   },
   {
     name: 'Pro', price: 39, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
-    features: ['Unlimited projects', '400 AI credits / month', 'AI agents (limited)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
+    features: ['Unlimited projects', '1,500 AI credits / month', '~150 AI Agent builds', 'AI agents (full power)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
   },
   {
     name: 'BAM', price: 99, desc: 'Done-for-you growth engine', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Best for making money', color: 'border-amber-500/30', startingAt: true,
     href: 'https://beyondamedium.com/contact',
-    features: ['Everything in Pro', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
+    features: ['Everything in Pro', '5,000 AI credits / month', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager'],
   },
 ]
 
 const creditPacks = [
-  { credits: 50, price: '$10' },
-  { credits: 150, price: '$25' },
-  { credits: 500, price: '$60' },
+  { credits: 100, price: '$10' },
+  { credits: 350, price: '$25' },
+  { credits: '1,000', price: '$60' },
 ]
 
 export default function LandingPage() {

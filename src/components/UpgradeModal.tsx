@@ -11,15 +11,15 @@ interface UpgradeModalProps {
 }
 
 const plans = [
-  { name: 'Builder', price: 19, credits: 100, projects: 5, color: 'from-blue-500 to-cyan-500' },
-  { name: 'Pro', price: 39, credits: 400, projects: 'Unlimited', color: 'from-cyan-500 to-blue-500', popular: true },
-  { name: 'BAM', price: 99, credits: 1000, projects: 'Unlimited', color: 'from-amber-500 to-orange-500' },
+  { name: 'Builder', price: 19, credits: 300, projects: 5, color: 'from-blue-500 to-cyan-500' },
+  { name: 'Pro', price: 39, credits: 1500, projects: 'Unlimited', color: 'from-cyan-500 to-blue-500', popular: true },
+  { name: 'BAM', price: 99, credits: 5000, projects: 'Unlimited', color: 'from-amber-500 to-orange-500' },
 ]
 
 const creditPacks = [
-  { credits: 50, price: '$10' },
-  { credits: 150, price: '$25' },
-  { credits: 500, price: '$60' },
+  { credits: 100, price: '$10' },
+  { credits: 350, price: '$25' },
+  { credits: 1000, price: '$60' },
 ]
 
 export default function UpgradeModal({ isOpen, onClose, reason = 'credits', needed }: UpgradeModalProps) {
