@@ -11,6 +11,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [marketingOptIn, setMarketingOptIn] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -18,11 +20,22 @@ export default function SignupPage() {
     e.preventDefault()
     if (password !== confirm) { setError('Passwords do not match'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+    if (!acceptedTerms) { setError('You must accept the Terms of Service and Privacy Policy to continue'); return }
 
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          accepted_terms_at: new Date().toISOString(),
+          accepted_terms_version: 1,
+          marketing_opt_in: marketingOptIn,
+        },
+      },
+    })
     if (error) {
       setError(error.message)
       setLoading(false)
@@ -55,7 +68,39 @@ export default function SignupPage() {
             <label className="block text-xs font-medium text-white/50 mb-1.5">Confirm Password</label>
             <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="••••••••" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/20 focus:border-purple-500/40 focus:outline-none" />
           </div>
-          <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50">
+          <label className="flex items-start gap-2.5 text-xs text-white/60 leading-relaxed cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              required
+              className="mt-0.5 h-4 w-4 accent-purple-500 shrink-0"
+            />
+            <span>
+              I have read and agree to the{' '}
+              <Link href="/terms" target="_blank" className="text-purple-400 hover:text-purple-300 underline">Terms of Service</Link>{' '}
+              and{' '}
+              <Link href="/privacy" target="_blank" className="text-purple-400 hover:text-purple-300 underline">Privacy Policy</Link>.
+              I understand that paid plans are subscriptions that auto-renew until I cancel.
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 text-xs text-white/50 leading-relaxed cursor-pointer">
+            <input
+              type="checkbox"
+              checked={marketingOptIn}
+              onChange={(e) => setMarketingOptIn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-purple-500 shrink-0"
+            />
+            <span>Optional: email me product updates and tips. You can unsubscribe anytime.</span>
+          </label>
+
+          <p className="text-[11px] text-white/35 leading-relaxed">
+            By creating an account, you confirm you are at least 14 years old. AI outputs may be inaccurate &mdash; please review
+            before publishing.
+          </p>
+
+          <button type="submit" disabled={loading || !acceptedTerms} className="w-full flex items-center justify-center gap-2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <UserPlus className="w-4 h-4" /> {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
