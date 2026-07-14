@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
-// POST — assign a session to a variant (weighted random)
+// POST — assign a session to a variant (weighted random). Public (runs for
+// anonymous visitors on published sites) but rate-limited and validated.
 export async function POST(request: Request) {
   try {
+    const rl = rateLimit(`assign:${clientIp(request)}`, 120, 60_000)
+    if (!rl.ok) return NextResponse.json({ error: 'Rate limited' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } })
+
     const { experimentId, sessionId } = await request.json()
     if (!experimentId || !sessionId) return NextResponse.json({ error: 'experimentId and sessionId required' }, { status: 400 })
+    if (String(experimentId).length > 200 || String(sessionId).length > 200) {
+      return NextResponse.json({ error: 'Field too long' }, { status: 400 })
+    }
 
     const supabase = await createClient()
 

@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { CREDIT_COSTS } from '@/lib/stripe'
-import { checkCredits, deductCredits } from '@/lib/credits'
+import { checkCredits, deductCredits, refundCredits } from '@/lib/credits'
+import { userOwnsProject } from '@/lib/api-auth'
+import { rateLimit } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -46,6 +48,7 @@ RULES:
 - Include navigation between pages if multiple pages.`
 
 export async function POST(request: Request) {
+  let refundCtx: { userId: string; cost: number } | null = null
   try {
     const { prompt, projectId } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'Prompt required' }, { status: 400 })
@@ -56,6 +59,17 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // Rate limit — agent builds are the most expensive AI call.
+    const rl = rateLimit(`agent:${user.id}`, 10, 60_000)
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Too many requests. Please wait a moment.' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } })
+    }
+
+    // If targeting an existing project, the caller must own it (we delete its pages).
+    if (projectId && !(await userOwnsProject(supabase, projectId, user.id))) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
 
     // Credit check + deduct
     const check = await checkCredits(user.id, creditCost)
@@ -72,6 +86,7 @@ export async function POST(request: Request) {
     if (!deduct.ok) {
       return NextResponse.json({ error: 'Insufficient credits', upgrade: true, needed: creditCost }, { status: 402 })
     }
+    refundCtx = { userId: user.id, cost: creditCost }
 
     // Call Claude
     const message = await anthropic.messages.create({
@@ -82,7 +97,10 @@ export async function POST(request: Request) {
     })
 
     const content = message.content[0]
-    if (content.type !== 'text') return NextResponse.json({ error: 'Unexpected response' }, { status: 500 })
+    if (content.type !== 'text') {
+      if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
+      return NextResponse.json({ error: 'Unexpected response' }, { status: 500 })
+    }
 
     // Parse JSON response
     let result
@@ -92,8 +110,15 @@ export async function POST(request: Request) {
       text = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '')
       result = JSON.parse(text)
     } catch {
+      if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
       return NextResponse.json({ error: 'Failed to parse agent response', raw: content.text }, { status: 500 })
     }
+    if (!result || !Array.isArray(result.pages) || result.pages.length === 0) {
+      if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
+      return NextResponse.json({ error: 'Agent returned no pages' }, { status: 500 })
+    }
+    // Success from here — the build is committed; do not refund.
+    refundCtx = null
 
     // If projectId provided, save pages directly
     if (projectId) {
@@ -162,6 +187,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error: unknown) {
+    if (refundCtx) { try { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build') } catch { /* ignore */ } }
     const message = error instanceof Error ? error.message : 'Agent failed'
     console.error('Agent error:', message)
     return NextResponse.json({ error: message }, { status: 500 })

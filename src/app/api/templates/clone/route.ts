@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireUser, userOwnsProject } from '@/lib/api-auth'
 
 // POST — clone a template into a project page
 export async function POST(request: Request) {
@@ -8,12 +9,21 @@ export async function POST(request: Request) {
     if (!templateId || !projectId) return NextResponse.json({ error: 'templateId and projectId required' }, { status: 400 })
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser(supabase)
+    if ('response' in auth) return auth.response
+    const { user } = auth
 
-    // Get template
+    // The caller must own the destination project.
+    if (!(await userOwnsProject(supabase, projectId, user.id))) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
+
+    // Get template — must be public or owned by the caller.
     const { data: template } = await supabase.from('templates').select('*').eq('id', templateId).single()
     if (!template) return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    if (!template.is_public && template.user_id !== user.id) {
+      return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    }
 
     // Create page from template
     const title = pageTitle || template.name

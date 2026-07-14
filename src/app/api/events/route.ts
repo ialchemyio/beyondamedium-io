@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
+import { requireUser, userOwnsFunnel } from '@/lib/api-auth'
 
-// POST — record a funnel event
+// POST — record a funnel event. Public by design (fires from published sites for
+// anonymous visitors) but rate-limited per IP and strictly validated.
 export async function POST(request: Request) {
   try {
+    // 120 events/min/IP — generous for real traffic, caps insertion abuse.
+    const rl = rateLimit(`events:${clientIp(request)}`, 120, 60_000)
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Rate limited' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } })
+    }
+
     const { projectId, funnelId, stepId, eventType, value, sessionId, metadata } = await request.json()
 
     if (!funnelId || !stepId || !eventType || !sessionId) {
@@ -14,15 +23,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid eventType' }, { status: 400 })
     }
 
+    // Bound the free-form fields so a caller can't stuff huge payloads.
+    const numValue = Number(value)
+    const safeValue = Number.isFinite(numValue) && numValue >= 0 ? numValue : 0
+    const safeMeta = metadata && typeof metadata === 'object' && JSON.stringify(metadata).length < 4000 ? metadata : {}
+    if (String(funnelId).length > 200 || String(stepId).length > 200 || String(sessionId).length > 200) {
+      return NextResponse.json({ error: 'Field too long' }, { status: 400 })
+    }
+
     const supabase = await createClient()
     const { error } = await supabase.from('funnel_events').insert({
       project_id: projectId || null,
       funnel_id: funnelId,
       step_id: stepId,
       event_type: eventType,
-      value: value ?? 0,
+      value: safeValue,
       session_id: sessionId,
-      metadata: metadata ?? {},
+      metadata: safeMeta,
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -32,7 +49,8 @@ export async function POST(request: Request) {
   }
 }
 
-// GET — retrieve analytics for a funnel
+// GET — retrieve analytics for a funnel. Requires auth + funnel ownership so a
+// caller can't read another account's conversion/revenue data by guessing IDs.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const funnelId = searchParams.get('funnelId')
@@ -41,6 +59,11 @@ export async function GET(request: Request) {
   if (!funnelId) return NextResponse.json({ error: 'funnelId required' }, { status: 400 })
 
   const supabase = await createClient()
+  const auth = await requireUser(supabase)
+  if ('response' in auth) return auth.response
+  if (!(await userOwnsFunnel(supabase, funnelId, auth.user.id))) {
+    return NextResponse.json({ error: 'Funnel not found' }, { status: 404 })
+  }
 
   // Calculate date range
   const now = new Date()

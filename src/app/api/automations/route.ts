@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireUser, userOwnsProject } from '@/lib/api-auth'
 
-// GET — list automations for a project
+// GET — list automations for a project (owner only)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const projectId = searchParams.get('projectId')
   if (!projectId) return NextResponse.json({ error: 'projectId required' }, { status: 400 })
 
   const supabase = await createClient()
+  const auth = await requireUser(supabase)
+  if ('response' in auth) return auth.response
+  if (!(await userOwnsProject(supabase, projectId, auth.user.id))) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+  }
+
   const { data, error } = await supabase
     .from('automations')
     .select('*')
@@ -29,8 +36,13 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser(supabase)
+    if ('response' in auth) return auth.response
+    const { user } = auth
+
+    if (!(await userOwnsProject(supabase, projectId, user.id))) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
 
     const { data, error } = await supabase.from('automations').insert({
       project_id: projectId,

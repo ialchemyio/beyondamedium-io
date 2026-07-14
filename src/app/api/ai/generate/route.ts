@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { checkCredits, deductCredits, refundCredits, getCostForMode } from '@/lib/credits'
+import { rateLimit } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -39,6 +40,12 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // Rate limit AI generation per user (30/min covers heavy editing, blocks abuse).
+    const rl = rateLimit(`generate:${user.id}`, 30, 60_000)
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Too many requests. Please slow down.' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } })
+    }
 
     // Credit check + deduct (atomic via service role)
     const creditCost = getCostForMode(mode)

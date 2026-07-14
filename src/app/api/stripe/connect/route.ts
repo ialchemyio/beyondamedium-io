@@ -67,15 +67,25 @@ export async function POST(request: Request) {
   }
 }
 
-// GET — check Connect account status
+// GET — check Connect account status (owner only)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const restaurantId = searchParams.get('restaurantId')
   if (!restaurantId) return NextResponse.json({ error: 'restaurantId required' }, { status: 400 })
 
   const supabase = await createClient()
-  const { data: restaurant } = await supabase.from('restaurants').select('stripe_account_id').eq('id', restaurantId).single()
-  if (!restaurant?.stripe_account_id) return NextResponse.json({ status: 'not_connected' })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Only the restaurant owner may read/refresh Connect status.
+  const { data: restaurant } = await supabase
+    .from('restaurants')
+    .select('stripe_account_id')
+    .eq('id', restaurantId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!restaurant) return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 })
+  if (!restaurant.stripe_account_id) return NextResponse.json({ status: 'not_connected' })
 
   const stripe = getStripe()
   const account = await stripe.accounts.retrieve(restaurant.stripe_account_id)
