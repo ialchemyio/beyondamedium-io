@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
-import { checkCredits, deductCredits, getCostForMode } from '@/lib/credits'
+import { checkCredits, deductCredits, refundCredits, getCostForMode } from '@/lib/credits'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -22,6 +22,8 @@ RULES:
 - Output format: the complete HTML content for the page body (no <html>, <head>, or <body> tags — just the inner content with a <style> tag at the top if needed).`
 
 export async function POST(request: Request) {
+  // Set once credits are deducted so we can refund if the AI call fails.
+  let refundCtx: { userId: string; cost: number; mode: string } | null = null
   try {
     const { prompt, mode, selectedHtml } = await request.json()
 
@@ -60,6 +62,7 @@ export async function POST(request: Request) {
         needed: creditCost,
       }, { status: 402 })
     }
+    refundCtx = { userId: user.id, cost: creditCost, mode: mode || 'generate_page' }
 
     let userPrompt: string
 
@@ -102,8 +105,11 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
 
     const content = message.content[0]
     if (content.type !== 'text') {
+      if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, refundCtx.mode); refundCtx = null }
       return NextResponse.json({ error: 'Unexpected response type' }, { status: 500 })
     }
+    // Success — do not refund.
+    refundCtx = null
 
     // Clean up any accidental markdown fences
     let html = content.text
@@ -120,6 +126,7 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
       },
     })
   } catch (error: unknown) {
+    if (refundCtx) { try { await refundCredits(refundCtx.userId, refundCtx.cost, refundCtx.mode) } catch { /* ignore */ } }
     const message = error instanceof Error ? error.message : 'AI generation failed'
     console.error('AI generation error:', message)
     return NextResponse.json({ error: message }, { status: 500 })

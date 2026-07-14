@@ -29,7 +29,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/automations', label: 'Automations' },
     { href: '/dashboard/domains', label: 'Domains' },
     { href: '/dashboard/analytics', label: 'Analytics' },
+    { href: '/dashboard/billing', label: 'Billing' },
   ]
+
+  liteNav.push({ href: '/dashboard/billing', label: 'Billing' })
 
   const navItems = BAM_LITE ? liteNav : fullNav
 

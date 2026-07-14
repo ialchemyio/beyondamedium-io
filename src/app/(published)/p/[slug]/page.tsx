@@ -84,69 +84,64 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
 
   const navPages = allPages ?? []
 
+  // Build the visitor-facing document as an isolated string. It is rendered inside a
+  // sandboxed, null-origin iframe (srcdoc, no allow-same-origin) so any user/AI-authored
+  // HTML/CSS/JS cannot read beyondamedium.io cookies/localStorage or call our APIs with
+  // the visitor's session — closing the same-origin stored-XSS hole.
+  const currentSlug = pageSlug ?? (page.is_home ? page.slug : '')
+  const navHtml = navPages.length > 1 ? `
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,23,42,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.1);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between">
+      <a href="/p/${escapeAttr(slug)}" target="_top" style="color:white;font-weight:700;font-size:16px;text-decoration:none">${escapeHtml(project.name)}</a>
+      <div style="display:flex;gap:24px;align-items:center">
+        ${navPages.map((p: { title: string; slug: string; is_home: boolean }) =>
+          `<a href="${p.is_home ? `/p/${escapeAttr(slug)}` : `/p/${escapeAttr(slug)}?page=${escapeAttr(p.slug)}`}" target="_top" style="color:${p.slug === currentSlug ? 'white' : 'rgba(255,255,255,0.5)'};font-size:13px;text-decoration:none;font-weight:500">${escapeHtml(p.title)}</a>`,
+        ).join('')}
+      </div>
+    </nav>` : ''
+
+  const bodyContent = page.html || '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;color:#94a3b8;font-size:18px">This page is empty. Open the editor to add content.</div>'
+  const contentPad = navPages.length > 1 ? 'padding-top:56px' : ''
+
+  const srcDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3/dist/tailwind.min.css" rel="stylesheet" />
+<style>body{margin:0;font-family:'Inter',sans-serif}*{box-sizing:border-box}</style>
+${page.css ? `<style>${page.css}</style>` : ''}
+</head>
+<body>
+${navHtml}
+<div style="${contentPad}">${bodyContent}</div>
+<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:10px;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif">Built with <a href="https://beyondamedium.io" target="_top" style="color:#22d3ee;text-decoration:none;font-weight:600">BAM</a></div>
+${page.js ? `<script>${page.js}</script>` : ''}
+</body>
+</html>`
+
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3/dist/tailwind.min.css" rel="stylesheet" />
-        {page.css && <style dangerouslySetInnerHTML={{ __html: page.css }} />}
-        <style dangerouslySetInnerHTML={{ __html: `
-          body { margin: 0; font-family: 'Inter', sans-serif; }
-          * { box-sizing: border-box; }
-        `}} />
+        <style dangerouslySetInnerHTML={{ __html: 'html,body{margin:0;height:100%;background:#fff}iframe{border:0;width:100%;height:100vh;display:block}' }} />
       </head>
       <body>
-        {/* Navigation for multi-page sites */}
-        {navPages.length > 1 && (
-          <nav style={{
-            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-            background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            padding: '0 24px', height: '56px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <a href={`/p/${slug}`} style={{ color: 'white', fontWeight: 700, fontSize: '16px', textDecoration: 'none' }}>
-              {project.name}
-            </a>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-              {navPages.map((p: { title: string; slug: string; is_home: boolean }) => (
-                <a
-                  key={p.slug}
-                  href={p.is_home ? `/p/${slug}` : `/p/${slug}?page=${p.slug}`}
-                  style={{
-                    color: p.slug === (pageSlug ?? (page.is_home ? page.slug : '')) ? 'white' : 'rgba(255,255,255,0.5)',
-                    fontSize: '13px', textDecoration: 'none', fontWeight: 500,
-                  }}
-                >
-                  {p.title}
-                </a>
-              ))}
-            </div>
-          </nav>
-        )}
-
-        {/* Page content */}
-        <div
-          style={navPages.length > 1 ? { paddingTop: '56px' } : undefined}
-          dangerouslySetInnerHTML={{ __html: page.html || '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;color:#94a3b8;font-size:18px">This page is empty. Open the editor to add content.</div>' }}
+        <iframe
+          title={project.name}
+          srcDoc={srcDoc}
+          sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-modals"
         />
-
-        {/* Powered by badge */}
-        <div style={{
-          position: 'fixed', bottom: '16px', right: '16px', zIndex: 9999,
-          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-          padding: '6px 12px', borderRadius: '8px',
-          fontSize: '10px', color: 'rgba(255,255,255,0.5)',
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          Built with <a href="https://beyondamedium.io" style={{ color: '#22d3ee', textDecoration: 'none', fontWeight: 600 }}>BAM</a>
-        </div>
-
-        {page.js && <script dangerouslySetInnerHTML={{ __html: page.js }} />}
       </body>
     </html>
   )
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+}
+function escapeAttr(s: string): string {
+  return escapeHtml(s)
 }

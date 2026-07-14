@@ -120,76 +120,117 @@ export async function checkCredits(userId: string, amount: number): Promise<Cred
   return { ok: true, remaining, monthly, purchased, total, usagePercent, warningLevel }
 }
 
+function warningFor(usagePercent: number): CreditCheckResult['warningLevel'] {
+  if (usagePercent >= 99) return 'critical'
+  if (usagePercent >= 95) return 'urgent'
+  if (usagePercent >= 90) return 'warn'
+  return 'none'
+}
+
 /**
- * Atomically deduct credits. Deducts from purchased pool first, then monthly.
+ * Atomically deduct credits via the `deduct_credits` Postgres function (row-locked).
+ * Deducts from the purchased pool first, then monthly. Concurrency-safe — parallel
+ * requests can no longer each read the same balance and over-spend.
  */
 export async function deductCredits(userId: string, amount: number, action: string): Promise<DeductResult> {
   const supabase = getServiceClient()
-  const credits = await getOrInitCredits(userId)
 
-  if (!credits) {
-    return { ok: false, deducted: 0, remaining: 0, monthly: 0, purchased: 0, total: 0, usagePercent: 100, warningLevel: 'critical', upgrade: true, reason: 'no_credits_record' }
-  }
+  // Ensure a credits row + monthly reset before the atomic deduct.
+  await getOrInitCredits(userId)
 
-  const total = credits.credits_remaining + credits.credits_purchased
-  if (total < amount) {
+  const { data, error } = await supabase.rpc('deduct_credits', {
+    p_user_id: userId,
+    p_amount: amount,
+    p_action: action,
+  })
+
+  if (error) {
+    const reason = /insufficient_credits/.test(error.message) ? 'insufficient_credits'
+      : /no_credits_record/.test(error.message) ? 'no_credits_record'
+      : error.message
+    // Best-effort read so the UI can still show the current balance.
+    const current = await getOrInitCredits(userId)
     return {
       ok: false, deducted: 0,
-      remaining: credits.credits_remaining,
-      monthly: credits.credits_monthly,
-      purchased: credits.credits_purchased,
-      total,
+      remaining: current?.credits_remaining ?? 0,
+      monthly: current?.credits_monthly ?? 0,
+      purchased: current?.credits_purchased ?? 0,
+      total: (current?.credits_remaining ?? 0) + (current?.credits_purchased ?? 0),
       usagePercent: 100,
       warningLevel: 'critical',
-      upgrade: true,
-      reason: 'insufficient_credits',
+      upgrade: reason === 'insufficient_credits',
+      reason,
     }
   }
 
-  // Deduct from purchased first, then monthly
-  let fromPurchased = 0
-  let fromMonthly = 0
-  if (credits.credits_purchased >= amount) {
-    fromPurchased = amount
-  } else {
-    fromPurchased = credits.credits_purchased
-    fromMonthly = amount - fromPurchased
-  }
-
-  const newRemaining = credits.credits_remaining - fromMonthly
-  const newPurchased = credits.credits_purchased - fromPurchased
-
-  await supabase.from('user_credits').update({
-    credits_remaining: newRemaining,
-    credits_purchased: newPurchased,
-    updated_at: new Date().toISOString(),
-  }).eq('user_id', userId)
-
-  await supabase.from('credit_transactions').insert({
-    user_id: userId,
-    amount: -amount,
-    action,
-    description: `Used ${amount} credits for ${action}`,
-  })
-
-  const used = credits.credits_monthly - newRemaining
-  const usagePercent = credits.credits_monthly > 0 ? Math.min(100, Math.round((used / credits.credits_monthly) * 100)) : 100
-
-  let warningLevel: CreditCheckResult['warningLevel'] = 'none'
-  if (usagePercent >= 99) warningLevel = 'critical'
-  else if (usagePercent >= 95) warningLevel = 'urgent'
-  else if (usagePercent >= 90) warningLevel = 'warn'
+  const rec = Array.isArray(data) ? data[0] : data
+  const used = rec.credits_monthly - rec.credits_remaining
+  const usagePercent = rec.credits_monthly > 0 ? Math.min(100, Math.round((used / rec.credits_monthly) * 100)) : 100
 
   return {
     ok: true,
     deducted: amount,
-    remaining: newRemaining,
-    monthly: credits.credits_monthly,
-    purchased: newPurchased,
-    total: newRemaining + newPurchased,
+    remaining: rec.credits_remaining,
+    monthly: rec.credits_monthly,
+    purchased: rec.credits_purchased,
+    total: rec.credits_remaining + rec.credits_purchased,
     usagePercent,
-    warningLevel,
+    warningLevel: warningFor(usagePercent),
   }
+}
+
+/**
+ * Refund credits previously deducted (e.g. when the downstream AI call fails).
+ * Returns them to the monthly pool.
+ */
+export async function refundCredits(userId: string, amount: number, action: string): Promise<void> {
+  if (amount <= 0) return
+  const supabase = getServiceClient()
+  const credits = await getOrInitCredits(userId)
+  if (!credits) return
+  await supabase.from('user_credits').update({
+    credits_remaining: credits.credits_remaining + amount,
+    updated_at: new Date().toISOString(),
+  }).eq('user_id', userId)
+  await supabase.from('credit_transactions').insert({
+    user_id: userId, amount, action: `refund_${action}`, description: `Refunded ${amount} credits (${action} failed)`,
+  })
+}
+
+/**
+ * Grant one-time purchased credits (credit pack). Atomic via `add_purchased_credits`.
+ */
+export async function addPurchasedCredits(userId: string, amount: number, action = 'credit_pack'): Promise<void> {
+  const supabase = getServiceClient()
+  const { error } = await supabase.rpc('add_purchased_credits', {
+    p_user_id: userId, p_amount: amount, p_action: action,
+  })
+  if (error) throw new Error(`add_purchased_credits failed: ${error.message}`)
+}
+
+/**
+ * Provision / refresh a subscription plan. Atomic upsert via `provision_plan`.
+ */
+export async function provisionPlan(params: {
+  userId: string
+  plan: string
+  monthlyCredits: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  periodStart?: string | null
+  periodEnd?: string | null
+}): Promise<void> {
+  const supabase = getServiceClient()
+  const { error } = await supabase.rpc('provision_plan', {
+    p_user_id: params.userId,
+    p_plan: params.plan,
+    p_monthly: params.monthlyCredits,
+    p_customer: params.stripeCustomerId ?? null,
+    p_subscription: params.stripeSubscriptionId ?? null,
+    p_period_start: params.periodStart ?? new Date().toISOString(),
+    p_period_end: params.periodEnd ?? new Date(Date.now() + 30 * 864e5).toISOString(),
+  })
+  if (error) throw new Error(`provision_plan failed: ${error.message}`)
 }
 
 /**

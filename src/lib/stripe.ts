@@ -48,11 +48,36 @@ export const PLANS = {
 
 export type PlanKey = keyof typeof PLANS
 
+// Paid subscription plans that can be checked out (BAM is done-for-you / contact sales).
+export const CHECKOUT_PLANS: PlanKey[] = ['builder', 'pro']
+
 export const CREDIT_PACKS = [
   { credits: 100, price: 1000, label: '100 credits', priceLabel: '$10' },
   { credits: 350, price: 2500, label: '350 credits', priceLabel: '$25' },
   { credits: 1000, price: 6000, label: '1,000 credits', priceLabel: '$60' },
 ] as const
+
+export type CreditPack = (typeof CREDIT_PACKS)[number]
+
+/**
+ * Resolve a plan key to its configured Stripe price ID. Server-side only —
+ * never trust a client-supplied price ID.
+ */
+export function getPlanPriceId(plan: PlanKey): string | undefined {
+  const p = PLANS[plan] as { priceId?: string }
+  return p.priceId
+}
+
+/**
+ * Reverse-map a Stripe price ID back to a plan key (for subscription.updated/deleted).
+ */
+export function planKeyFromPriceId(priceId: string | undefined | null): PlanKey | undefined {
+  if (!priceId) return undefined
+  for (const key of Object.keys(PLANS) as PlanKey[]) {
+    if ((PLANS[key] as { priceId?: string }).priceId === priceId) return key
+  }
+  return undefined
+}
 
 // Credit costs — Starter gets 1 Agent build to fall in love, then hits
 // the upgrade wall fast.
