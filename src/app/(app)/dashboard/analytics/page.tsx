@@ -17,6 +17,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(0)
   const [publishedCount, setPublishedCount] = useState(0)
+  const [aiGenerations, setAiGenerations] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -40,16 +41,43 @@ export default function AnalyticsPage() {
         setTotalPages(total)
         setPublishedCount(published)
       }
+
+      // Real AI generation count — each spend is a negative credit_transactions row.
+      const { count: genCount } = await supabase
+        .from('credit_transactions')
+        .select('*', { count: 'exact', head: true })
+        .lt('amount', 0)
+      setAiGenerations(genCount ?? 0)
+
       setLoading(false)
     }
     load()
   }, [])
 
+  // Recommendations derived from the user's real state, with best-practice fallbacks.
+  const recommendations: string[] = []
+  if (!loading) {
+    if (projects.length === 0) recommendations.push('Create your first project — describe it and let the AI build it.')
+    if (aiGenerations === 0 && projects.length > 0) recommendations.push('Try the AI builder on a project to generate a full page in seconds.')
+    if (projects.length > 0 && publishedCount === 0) recommendations.push('You have projects but none are live — publish one to start getting traffic.')
+    const drafts = projects.filter(p => !p.is_published).length
+    if (drafts > 0 && publishedCount > 0) recommendations.push(`${drafts} project${drafts === 1 ? '' : 's'} still in draft — publish to make ${drafts === 1 ? 'it' : 'them'} discoverable.`)
+    const empty = projects.filter(p => p.pageCount === 0).length
+    if (empty > 0) recommendations.push(`${empty} project${empty === 1 ? '' : 's'} ${empty === 1 ? 'has' : 'have'} no pages yet — add content in the editor.`)
+  }
+  // Evergreen best-practice tips to round out the list.
+  const evergreen = [
+    'Add a clear call-to-action above the fold on your landing pages.',
+    'Include testimonials or social proof to lift conversions.',
+    'Optimize page titles and descriptions for your target keywords.',
+  ]
+  for (const tip of evergreen) { if (recommendations.length >= 4) break; recommendations.push(tip) }
+
   const statCards = [
     { label: 'Total Projects', value: projects.length, icon: Globe, color: 'from-cyan-400 to-blue-500' },
     { label: 'Published Sites', value: publishedCount, icon: Eye, color: 'from-emerald-400 to-teal-500' },
     { label: 'Total Pages', value: totalPages, icon: FileText, color: 'from-violet-400 to-purple-500' },
-    { label: 'AI Generations', value: '—', icon: Zap, color: 'from-amber-400 to-orange-500' },
+    { label: 'AI Generations', value: aiGenerations, icon: Zap, color: 'from-amber-400 to-orange-500' },
   ]
 
   return (
@@ -109,19 +137,14 @@ export default function AnalyticsPage() {
         )}
       </div>
 
-      {/* AI Suggestions */}
+      {/* Recommendations — derived from your actual project data */}
       <div className="mt-6 bg-gradient-to-r from-cyan-500/[0.05] to-blue-500/[0.05] border border-cyan-500/10 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm font-semibold text-white/60">AI Suggestions</span>
+          <span className="text-sm font-semibold text-white/60">Recommendations</span>
         </div>
         <div className="space-y-2">
-          {[
-            'Add a clear CTA above the fold on your landing pages',
-            'Include social proof (testimonials) to increase conversions',
-            'Optimize your page titles for SEO with target keywords',
-            'Add a favicon and Open Graph image for better sharing',
-          ].map((tip, i) => (
+          {recommendations.map((tip, i) => (
             <div key={i} className="flex items-start gap-2">
               <Zap className="w-3 h-3 text-cyan-400/50 mt-0.5 shrink-0" />
               <p className="text-xs text-white/40 leading-relaxed">{tip}</p>

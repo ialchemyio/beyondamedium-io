@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { getStripe, calculateBamCut, PLANS, planKeyFromPriceId, type PlanKey } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import { provisionPlan, addPurchasedCredits } from '@/lib/credits'
+import { sendEmail, subscriptionReceiptEmail, creditPackReceiptEmail, paymentFailedEmail } from '@/lib/email'
 
 // Use service role to bypass RLS for webhook writes
 function getServiceClient() {
@@ -58,6 +59,16 @@ function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
   }
   const raw = inv.subscription ?? inv.parent?.subscription_details?.subscription
   return typeof raw === 'string' ? raw : raw?.id ?? null
+}
+
+// Look up a user's email via the admin API (webhook has no session).
+async function userEmail(supabase: ServiceClient, userId: string): Promise<string | null> {
+  try {
+    const { data } = await supabase.auth.admin.getUserById(userId)
+    return data.user?.email ?? null
+  } catch {
+    return null
+  }
 }
 
 async function periodFromSubscription(stripe: Stripe, subscriptionId: string | null | undefined) {
@@ -141,6 +152,8 @@ export async function POST(request: Request) {
           if (credits > 0) {
             await addPurchasedCredits(userId, credits, 'credit_pack')
             await recordEvent(supabase, event.id, session.amount_total ?? 0, 'credit_pack', { userId, credits })
+            const email = await userEmail(supabase, userId)
+            if (email) { const t = creditPackReceiptEmail(credits, session.amount_total ?? 0); await sendEmail({ to: email, ...t }) }
           }
           break
         }
@@ -163,6 +176,8 @@ export async function POST(request: Request) {
               periodEnd: end,
             })
             await recordEvent(supabase, event.id, session.amount_total ?? planDef.price, 'subscription_new', { userId, plan })
+            const email = await userEmail(supabase, userId)
+            if (email) { const t = subscriptionReceiptEmail(plan, session.amount_total ?? planDef.price); await sendEmail({ to: email, ...t }) }
           }
         }
         break
@@ -218,6 +233,21 @@ export async function POST(request: Request) {
           })
         }
         await recordEvent(supabase, event.id, 0, 'subscription_cancelled', { userId })
+        break
+      }
+
+      // Failed subscription renewal → dunning email so the user can fix their card.
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const subId = invoiceSubscriptionId(invoice)
+        if (subId) {
+          const { sub } = await periodFromSubscription(stripe, subId)
+          const userId = sub?.metadata?.userId
+          if (userId) {
+            const email = await userEmail(supabase, userId)
+            if (email) { const t = paymentFailedEmail(); await sendEmail({ to: email, ...t }) }
+          }
+        }
         break
       }
 

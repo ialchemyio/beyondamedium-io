@@ -45,6 +45,10 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    // Surface the underlying cause — undici "fetch failed" hides the real reason
+    // (DNS/TLS/connection) in error.cause, which we were previously swallowing.
+    const cause = (error as { cause?: { message?: string; code?: string } })?.cause
+    console.error('events POST failed:', error instanceof Error ? error.message : error, '| cause:', cause?.code, cause?.message)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed' }, { status: 500 })
   }
 }
