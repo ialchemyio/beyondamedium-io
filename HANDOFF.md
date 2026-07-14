@@ -1,5 +1,34 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-07-14 — Week 4 go-live: retain + grow (commit ba928ed)
+
+**Goal:** Transactional email, consent-gated analytics, real analytics data, and sharpen the events-500 diagnosis.
+
+### WHAT changed
+- `src/lib/email.ts` (NEW) — Resend via REST (no dep). Templates: welcome, subscription receipt, credit-pack receipt, payment-failed. **Honest no-op when `RESEND_API_KEY` unset** (logs + skips).
+- `src/app/api/stripe/webhook/route.ts` — sends receipt on subscription_new + credit_pack; new `invoice.payment_failed` case → dunning email. Looks up email via `auth.admin.getUserById`.
+- `src/app/(auth)/auth/callback/route.ts` — welcome email once (flagged in `user_metadata.welcomed_at`).
+- `src/components/Analytics.tsx` (NEW) + wired in `layout.tsx` — fires ONLY when `NEXT_PUBLIC_POSTHOG_KEY` set AND analytics cookie consent granted. Closes the "cookie banner gates nothing" finding. Inert otherwise.
+- `src/app/(app)/dashboard/analytics/page.tsx` — AI Generations now counts real `credit_transactions` (was `'—'`); static "AI Suggestions" → data-derived "Recommendations".
+- `src/app/api/events/route.ts` — logs `error.cause` (undici hides the real DNS/TLS reason).
+- `.env.example` — documents Stripe price IDs, webhook secret, RESEND_*, POSTHOG_*.
+
+### VERIFIED
+- `tsc` clean; `npm run build` success.
+- Email no-op path returns `{ok:false, skipped:true}` without a key (honest, not faked).
+- Dev: landing + /refund 200; no PostHog endpoint inlined without a key (analytics inert).
+- **UNVERIFIED (no external keys in this env):** actual Resend delivery and actual PostHog capture. Wiring + no-op are verified; live send needs the keys set in Coolify.
+
+### events-500 — sharpened diagnosis (still open)
+Local sandbox can't resolve `*.supabase.co` (`getaddrinfo ENOTFOUND`), so ALL local "fetch failed" were sandbox DNS, not bugs. On **prod**: `experiments/assign` SELECTs work ("No variants"), published-page SELECTs work, but `funnel_events` INSERT → `TypeError: fetch failed` (network layer, not Postgres). It's insert-specific + prod-only. The route now logs `error.cause` — **next step: hit `/api/events` on prod, read Coolify logs for the `cause.code` (likely ENOTFOUND/ECONNRESET/UND_ERR), which will name the root cause** (candidate: undici keep-alive/egress on POST).
+
+### NEXT
+- Set `RESEND_API_KEY`/`EMAIL_FROM` and `NEXT_PUBLIC_POSTHOG_KEY` in Coolify to activate email + analytics.
+- Full paid smoke test once Stripe env + webhook are live: test card → upgrade → credits granted → receipt email → cancel via portal → downgrade.
+- Diagnose events-500 from prod logs.
+
+---
+
 ## 2026-07-14 — Week 3 go-live: SEO + polish (commit 73be611)
 
 **Goal:** "Get found + look finished" — SEO, error boundaries, refund policy, watermark tier fix, accessibility.
