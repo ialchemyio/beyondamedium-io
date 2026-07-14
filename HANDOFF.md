@@ -1,5 +1,33 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-07-14 — Week 3 go-live: SEO + polish (commit 73be611)
+
+**Goal:** "Get found + look finished" — SEO, error boundaries, refund policy, watermark tier fix, accessibility.
+
+### WHAT changed
+- `src/app/layout.tsx` — `metadataBase`, OpenGraph/Twitter/robots metadata, title template.
+- `src/app/sitemap.ts`, `src/app/robots.ts` (NEW) — robots disallows app/api/auth/p/r subtrees.
+- `src/app/opengraph-image.tsx` (NEW) — dynamic 1200×630 branded PNG via `next/og`.
+- `src/app/page.tsx` — JSON-LD (Organization + WebSite + SoftwareApplication w/ plan offers).
+- `src/app/error.tsx`, `global-error.tsx`, `not-found.tsx` (NEW) — App Router boundaries.
+- `src/app/refund/page.tsx` (NEW) — refund/cancellation policy; linked in `SiteFooter`.
+- `src/app/(published)/p/[slug]/page.tsx` — watermark removed for paid plans (service-role plan read).
+- `src/app/(auth)/{login,signup}/page.tsx` — `htmlFor`/`id`/`autoComplete`, stronger focus ring.
+- `SiteFooter.tsx` — raised low-contrast text toward WCAG AA.
+
+### VERIFIED
+- `tsc` clean; `npm run build` success.
+- Dev curl: `/sitemap.xml` 200 (xml), `/robots.txt` 200, `/opengraph-image` 200 (image/png), `/refund` 200, bad route → 404 boundary. Landing has `application/ld+json`, `og:title/og:image`, `twitter:card`.
+
+### STATE
+- Works: full SEO surface, error boundaries, refund page, tier-gated watermark, associated form labels.
+- **events-500 investigated, NOT resolved:** `POST /api/events` returns `TypeError: fetch failed` on BOTH dev and prod — a Node/undici network-layer failure on the `funnel_events` insert (not a Postgres/HTTP error; schema matches insert exactly). SELECTs to the same Supabase host succeed (published-page 404 works), so it's specific to this insert path. Needs prod container logs / Supabase egress check to nail. Not introduced by any of this work.
+
+### NEXT (Week 4 — retain + grow)
+Transactional email (Resend: welcome/receipt/dunning), PostHog gated behind the existing cookie consent, real analytics data on the analytics page, and a full paid-checkout smoke test (test card → upgrade → credits → cancel via portal). Also: resolve events-500 with prod logs.
+
+---
+
 ## 2026-05-27 — Week 2 go-live: lock down write surface (commit 198d34d)
 
 **Goal:** Close the API attack surface from the audit (P1): unauthenticated writes, price tampering, no rate limiting.
