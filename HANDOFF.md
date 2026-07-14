@@ -1,5 +1,35 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-05-27 — Week 2 go-live: lock down write surface (commit 198d34d)
+
+**Goal:** Close the API attack surface from the audit (P1): unauthenticated writes, price tampering, no rate limiting.
+
+### WHAT changed
+- `src/lib/rate-limit.ts` (NEW) — in-memory sliding-window limiter (single Coolify container). Applied: `ai/generate` 30/min/user, `ai/agent` 10/min/user, `events` + `experiments/assign` 120/min/IP.
+- `src/lib/api-auth.ts` (NEW) — `requireUser`, `userOwnsProject`, `userOwnsFunnel`.
+- `events` GET → auth + funnel ownership; POST → rate-limit + field caps (still public for visitor tracking).
+- `experiments` POST/PATCH/DELETE → auth. `experiments/assign` → rate-limit + validation (still public).
+- `automations` GET/POST → auth + project ownership.
+- `stripe/connect` GET → auth + restaurant ownership (was enumerable).
+- `templates/clone` → destination-project ownership + template access (public-or-owned).
+- `ai/agent` → project ownership before destructive page delete; refund credits on failure.
+- `restaurants/checkout` → **server-side price lookup** from `restaurant_menu_items` (client sends id+qty only). Closes price tampering.
+- `supabase/migrations/20260527_tighten_experiment_rls.sql` (NEW) — experiments/variants writes authenticated-only; public SELECT + variant_assignments insert kept.
+
+### VERIFIED
+- `tsc --noEmit` clean; `npm run build` success.
+- Dev curl (unauth): events GET / experiments POST+DELETE / automations GET / stripe connect GET / templates clone all → **401**. events POST bad eventType → **400**.
+
+### STATE
+- Works: all target endpoints now reject unauthenticated writes; restaurant checkout is price-tamper-proof; AI endpoints rate-limited + refund on failure.
+- **REQUIRED before prod:** run `supabase/migrations/20260527_tighten_experiment_rls.sql` on IO DB (in addition to the Week 1 `20260527_credit_functions.sql`).
+- **PRE-EXISTING BUG (not a regression):** `POST /api/events` returns 500 at the DB insert on live prod (funnel tracking). Validation/auth now run correctly before it. Needs investigation — analytics ingestion may never have worked. Likely a `funnel_events` insert/RLS or schema issue.
+
+### NEXT (Week 3 — SEO + polish)
+`sitemap.ts`, `robots.ts`, OG metadata + image, JSON-LD, `metadataBase`/canonical; `error.tsx`/`not-found.tsx`/`global-error.tsx`; refund-policy page; fix watermark tier gating; `htmlFor`/`id` on auth forms; raise low-contrast text to WCAG AA. Then investigate the events-insert 500.
+
+---
+
 ## 2026-05-27 — Week 1 go-live: wire monetization + close XSS hole
 
 **Goal:** Make the app able to take money and remove the critical same-origin XSS on published sites (P0 blockers from the full audit).
