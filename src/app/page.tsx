@@ -47,9 +47,42 @@ const creditPacks = [
   { credits: '1,000', price: '$60' },
 ]
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://beyondamedium.io/#org',
+      name: 'Beyond A Medium',
+      url: 'https://beyondamedium.io',
+      description: 'AI-powered website builder — prompt to generate, design, and deploy websites.',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://beyondamedium.io/#website',
+      url: 'https://beyondamedium.io',
+      name: 'Beyond A Medium',
+      publisher: { '@id': 'https://beyondamedium.io/#org' },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'Beyond A Medium',
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Web',
+      offers: [
+        { '@type': 'Offer', name: 'Starter', price: '0', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Builder', price: '19', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Pro', price: '49', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'BAM', price: '99', priceCurrency: 'USD' },
+      ],
+    },
+  ],
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#06080d] text-white selection:bg-cyan-500/20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Grid overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
 

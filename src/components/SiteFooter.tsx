@@ -16,13 +16,14 @@ export default function SiteFooter() {
             <div className="w-5 h-5 rounded bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
               <Cpu className="w-3 h-3 text-white" />
             </div>
-            <span className="text-[11px] text-white/20 font-mono">&copy; 2026 Beyond A Medium</span>
+            <span className="text-[11px] text-white/45 font-mono">&copy; 2026 Beyond A Medium</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-white/20 font-mono">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-white/45 font-mono">
             <a href="#features" className="hover:text-white/40 transition-colors">features</a>
             <a href="#pricing" className="hover:text-white/40 transition-colors">pricing</a>
             <Link href="/privacy" className="hover:text-white/40 transition-colors">privacy</Link>
             <Link href="/terms" className="hover:text-white/40 transition-colors">terms</Link>
+            <Link href="/refund" className="hover:text-white/40 transition-colors">refunds</Link>
             <Link href="/cookies" className="hover:text-white/40 transition-colors">cookies</Link>
             <button
               type="button"
@@ -33,7 +34,7 @@ export default function SiteFooter() {
             </button>
           </div>
         </div>
-        <p className="text-[10px] text-white/15 font-mono text-center sm:text-left">
+        <p className="text-[10px] text-white/35 font-mono text-center sm:text-left">
           Beyond A Medium does not sell or share your personal information for cross-context behavioral advertising.
           AI features may produce inaccurate output &mdash; review before publishing. Subscriptions auto-renew until canceled;
           manage billing from your dashboard.

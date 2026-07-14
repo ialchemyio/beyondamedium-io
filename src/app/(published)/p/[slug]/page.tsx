@@ -1,6 +1,25 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
+
+// Paid plans get the watermark removed. Read the owner's plan with the service
+// role (RLS blocks anonymous visitors from reading another user's credits).
+async function ownerHasPaidPlan(userId: string | null | undefined): Promise<boolean> {
+  if (!userId) return false
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return false
+  try {
+    const svc = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    )
+    const { data } = await svc.from('user_credits').select('plan').eq('user_id', userId).maybeSingle()
+    return !!data && ['builder', 'pro', 'bam'].includes(data.plan)
+  } catch {
+    return false
+  }
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -102,6 +121,12 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
   const bodyContent = page.html || '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;color:#94a3b8;font-size:18px">This page is empty. Open the editor to add content.</div>'
   const contentPad = navPages.length > 1 ? 'padding-top:56px' : ''
 
+  // Free tier keeps the watermark; paid plans remove it.
+  const showWatermark = !(await ownerHasPaidPlan(project.user_id))
+  const watermarkHtml = showWatermark
+    ? `<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:10px;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif">Built with <a href="https://beyondamedium.io" target="_top" style="color:#22d3ee;text-decoration:none;font-weight:600">BAM</a></div>`
+    : ''
+
   const srcDoc = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,7 +141,7 @@ ${page.css ? `<style>${page.css}</style>` : ''}
 <body>
 ${navHtml}
 <div style="${contentPad}">${bodyContent}</div>
-<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:10px;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif">Built with <a href="https://beyondamedium.io" target="_top" style="color:#22d3ee;text-decoration:none;font-weight:600">BAM</a></div>
+${watermarkHtml}
 ${page.js ? `<script>${page.js}</script>` : ''}
 </body>
 </html>`
