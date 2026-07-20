@@ -15,7 +15,8 @@ export async function POST(request: Request) {
   try {
     const { prompt, mode, selectedHtml, style } = await request.json()
 
-    if (!prompt) {
+    // Polish works on the existing page, so it doesn't need a prompt.
+    if (!prompt && !(mode === 'polish' && selectedHtml)) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
     }
 
@@ -70,6 +71,23 @@ ${selectedHtml}
 The user wants to make this change: "${prompt}"
 
 Return the MODIFIED HTML that applies the requested change. Only return the modified HTML, nothing else. Keep the same structure but apply the changes requested.`
+    } else if (mode === 'polish' && selectedHtml) {
+      userPrompt = `Here is the current full HTML of a page:
+
+<current_page>
+${selectedHtml}
+</current_page>
+
+Redesign this page to studio quality while PRESERVING all existing content and meaning:
+- Keep every section, all copy, links, and the information architecture. Do not invent new
+  sections or delete existing ones.
+- Elevate the visual craft: typography hierarchy and scale, spacing rhythm, color application,
+  alignment, hover states, responsive behaviour.
+- Replace any placeholder copy ("Lorem ipsum", "Your Headline Here", "Feature One") with
+  specific, plausible copy that fits the page's evident subject.
+${prompt ? `- Additionally apply this direction from the user: "${prompt}"` : ''}
+
+Return only the improved HTML with a single <style> tag at the top.`
     } else if (mode === 'section') {
       userPrompt = `Generate a single website section based on this description: "${prompt}"
 

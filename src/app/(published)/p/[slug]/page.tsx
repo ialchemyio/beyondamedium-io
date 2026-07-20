@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
+import { normalizeTheme, themeHead } from '@/lib/theme'
 
 // Paid plans get the watermark removed. Read the owner's plan with the service
 // role (RLS blocks anonymous visitors from reading another user's credits).
@@ -136,6 +137,7 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3/dist/tailwind.min.css" rel="stylesheet" />
 <style>body{margin:0;font-family:'Inter',sans-serif}*{box-sizing:border-box}</style>
+${themeHead(normalizeTheme((project.settings as Record<string, unknown> | null)?.theme))}
 ${page.css ? `<style>${page.css}</style>` : ''}
 </head>
 <body>

@@ -25,12 +25,16 @@ in order. Both are idempotent (safe to re-run).
       → atomic credit RPCs + plan provisioning + column default 5→50
 - [ ] `supabase/migrations/20260527_tighten_experiment_rls.sql`
       → experiments/variants writes become authenticated-only
+- [ ] `supabase/migrations/20260720_storage_assets.sql`
+      → `project-assets` storage bucket + per-user RLS (image uploads in the builder)
 
 **Verify:** in SQL Editor run
 ```sql
 select proname from pg_proc where proname in ('deduct_credits','add_purchased_credits','provision_plan');
+select id, public from storage.buckets where id = 'project-assets';
 ```
-Expect all three rows. Without this, billing + AI generation return 500.
+Expect all three functions + the bucket row. Without the functions, billing + AI
+generation return 500; without the bucket, builder image uploads fail.
 
 ---
 
