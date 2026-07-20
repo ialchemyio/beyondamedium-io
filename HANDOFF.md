@@ -1,5 +1,27 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-07-20 — BEYOND DESIGN engine + editor UX (commit 0f50c4e)
+
+**Goal:** Revamp prompt-to-site quality past template-grade; add design-direction picker ("Claude design" → branded BEYOND DESIGN); make the editor friendlier.
+
+### WHAT changed
+- `src/lib/beyond-design.ts` (NEW) — 9 design directions (auto + 8 curated), each a full brief (type pairing, palette, spacing, detail language) + shared craft-rules floor. `buildGenerateSystem()` / `buildAgentSystem()`.
+- `src/app/api/ai/generate/route.ts` + `ai/agent/route.ts` — old generic system prompts replaced; both accept optional `style` key (unknown → auto).
+- `src/app/(app)/dashboard/[projectId]/editor/page.tsx` — BEYOND DESIGN picker in AI sidebar (grid of 9 chips, sends `style`), autosave every 30s when dirty, Cmd/Ctrl+S save shortcut (via `handleSaveRef` to avoid effect re-registration).
+
+### VERIFIED
+- `tsc` clean; `npm run build` passes.
+- Engine sanity via tsx: all 9 keys resolve; `luxe-dark`/`editorial` briefs present in output; undefined/unknown key → Beyond Auto fallback.
+
+### STATE / UNVERIFIED
+- End-to-end generation quality UNVERIFIED — needs an authed session + live ANTHROPIC key. After deploy: open editor → AI panel → pick a direction (e.g. Luxe Dark) → Full Page generate → confirm output follows the direction (fonts/palette) and has no placeholder copy.
+- Editor still uses GrapesJS 0.22 with existing custom blocks — untouched.
+
+### NEXT (builder roadmap candidates, not started)
+Restyle custom blocks per-direction; block search; image upload to Supabase storage (assets table exists, no upload UI); global theme editor (fonts/colors applied across pages); AI "polish this page" one-click pass; drag-reorder pages.
+
+---
+
 ## 2026-07-14 — Week 4 go-live: retain + grow (commit ba928ed)
 
 **Goal:** Transactional email, consent-gated analytics, real analytics data, and sharpen the events-500 diagnosis.
