@@ -1,5 +1,30 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-07-20 — Builder roadmap complete (commit 3f66f3a)
+
+**Goal:** Close the remaining builder gaps vs Squarespace — image uploads, global theme, one-click polish, block search, page reorder.
+
+### WHAT changed
+- `supabase/migrations/20260720_storage_assets.sql` (NEW) — `project-assets` bucket, public read, per-user folder write RLS, 10MB + image MIME allowlist.
+- `src/lib/theme.ts` (NEW) — `SiteTheme`, 6 presets, `normalizeTheme()`, `themeCss()` (→ `--bam-*` vars + `.bam-btn/.bam-card/.bam-container`), `themeFontUrl()`, `themeHead()`.
+- `editor/page.tsx` — Supabase-backed AssetManager + toolbar upload; theme panel (presets/fonts/colors/sliders) live-injected into canvas; Polish button; block search; page up/down reorder.
+- `(published)/p/[slug]/page.tsx` — injects `themeHead()` from `projects.settings.theme`, so themes apply to live sites.
+- `api/ai/generate/route.ts` — new `polish` mode (preserves content, elevates design, replaces placeholder copy); prompt now optional for polish.
+
+### VERIFIED
+- `tsc` clean; `npm run build` passes.
+- Theme engine via tsx: presets resolve, CSS vars emitted, multi-word fonts URL-encoded (`Playfair+Display`), `normalizeTheme()` safe against null/partial/garbage.
+
+### STATE / UNVERIFIED
+- **REQUIRED:** run `20260720_storage_assets.sql` on the IO DB or uploads fail (added to LAUNCH_CHECKLIST §1).
+- UNVERIFIED end-to-end: live image upload round-trip and polish generation (need authed session + live keys). Test after deploy.
+- Theme applies via CSS vars + helper classes. Older AI-generated pages using hardcoded inline styles won't follow the theme until regenerated/polished — expected.
+
+### NEXT (candidates)
+Per-direction block restyling; drag-and-drop page reorder (currently arrows); asset deletion UI; theme-aware block variants; undo for Polish (currently one-shot — user can Cmd+Z in GrapesJS).
+
+---
+
 ## 2026-07-20 — BEYOND DESIGN engine + editor UX (commit 0f50c4e)
 
 **Goal:** Revamp prompt-to-site quality past template-grade; add design-direction picker ("Claude design" → branded BEYOND DESIGN); make the editor friendlier.
