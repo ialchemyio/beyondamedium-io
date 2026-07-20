@@ -5,52 +5,14 @@ import { CREDIT_COSTS } from '@/lib/stripe'
 import { checkCredits, deductCredits, refundCredits } from '@/lib/credits'
 import { userOwnsProject } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { buildAgentSystem } from '@/lib/beyond-design'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const AGENT_SYSTEM = `You are BAM OS Builder Agent — an autonomous AI that builds complete websites.
-
-When a user describes what they want, you plan and execute the build in structured steps. You output a JSON object with the following structure:
-
-{
-  "plan": [
-    { "step": 1, "action": "planning", "description": "Analyzing requirements..." },
-    { "step": 2, "action": "structure", "description": "Creating page structure..." },
-    { "step": 3, "action": "content", "description": "Writing copy and content..." },
-    { "step": 4, "action": "styling", "description": "Applying design and styling..." },
-    { "step": 5, "action": "complete", "description": "Finalizing and optimizing..." }
-  ],
-  "pages": [
-    {
-      "title": "Home",
-      "slug": "index",
-      "isHome": true,
-      "html": "<full HTML content with inline styles>",
-      "css": "<additional CSS if needed>"
-    }
-  ],
-  "projectName": "suggested project name",
-  "description": "site description for SEO"
-}
-
-RULES:
-- Output ONLY valid JSON. No markdown, no explanations.
-- Generate complete, beautiful, production-ready HTML with inline styles.
-- Use Inter font (include Google Fonts link in first page's HTML).
-- Include Tailwind CDN in the first page's HTML style block.
-- Make designs premium quality — like a $5000 agency website.
-- Use realistic content — real business names, descriptions, prices. Not lorem ipsum.
-- For images, use colored placeholder divs (not external URLs).
-- Include proper semantic HTML.
-- Generate 1-3 pages depending on the request complexity.
-- Each page should be a complete standalone page.
-- Make it responsive.
-- Include navigation between pages if multiple pages.`
 
 export async function POST(request: Request) {
   let refundCtx: { userId: string; cost: number } | null = null
   try {
-    const { prompt, projectId } = await request.json()
+    const { prompt, projectId, style } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'Prompt required' }, { status: 400 })
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set' }, { status: 500 })
 
@@ -92,7 +54,7 @@ export async function POST(request: Request) {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 16000,
-      system: AGENT_SYSTEM,
+      system: buildAgentSystem(style),
       messages: [{ role: 'user', content: `Build this website: "${prompt}"` }],
     })
 

@@ -63,7 +63,22 @@ export default function EditorPage() {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiMessages, setAiMessages] = useState<Array<{ role: 'user' | 'ai'; text: string; type?: string }>>([])
   const [aiMode, setAiMode] = useState<'page' | 'section' | 'edit'>('page')
+  const [aiStyle, setAiStyle] = useState('auto')
+  const [showStyles, setShowStyles] = useState(false)
   const aiScrollRef = useRef<HTMLDivElement>(null)
+
+  // BEYOND DESIGN directions (mirror of src/lib/beyond-design.ts keys)
+  const designDirections = [
+    { key: 'auto', name: 'Beyond Auto', desc: 'AI picks for your brand' },
+    { key: 'editorial', name: 'Editorial', desc: 'Magazine serif elegance' },
+    { key: 'luxe-dark', name: 'Luxe Dark', desc: 'Black + gold restraint' },
+    { key: 'brutalist', name: 'Brutalist', desc: 'Raw mono confidence' },
+    { key: 'soft-organic', name: 'Soft Organic', desc: 'Warm rounded wellness' },
+    { key: 'glass-tech', name: 'Glass Tech', desc: 'Modern SaaS glass + glow' },
+    { key: 'swiss', name: 'Swiss Grid', desc: 'Precise typographic grid' },
+    { key: 'retro-print', name: 'Retro Print', desc: '70s print warmth' },
+    { key: 'minimal-mono', name: 'Minimal Mono', desc: 'Quiet portfolio calm' },
+  ]
 
   // Load project + pages
   useEffect(() => {
@@ -236,6 +251,25 @@ export default function EditorPage() {
     editorRef.current.setDevice(deviceMap[device])
   }, [device])
 
+  // Autosave — every 30s while there are unsaved changes.
+  useEffect(() => {
+    if (!hasChanges) return
+    const t = setTimeout(() => { handleSaveRef.current?.() }, 30_000)
+    return () => clearTimeout(t)
+  }, [hasChanges])
+
+  // Cmd/Ctrl+S saves instead of triggering the browser dialog.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        handleSaveRef.current?.()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   // Save
   const handleSave = useCallback(async () => {
     if (!editorRef.current || !activePage) return
@@ -256,6 +290,10 @@ export default function EditorPage() {
     setHasChanges(false)
     setTimeout(() => setSaved(false), 2000)
   }, [activePage])
+
+  // Stable ref so autosave/shortcut effects don't re-register per keystroke.
+  const handleSaveRef = useRef(handleSave)
+  useEffect(() => { handleSaveRef.current = handleSave }, [handleSave])
 
   // Publish
   async function handlePublish() {
@@ -319,7 +357,7 @@ export default function EditorPage() {
       const res = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userMsg, mode: aiMode, selectedHtml }),
+        body: JSON.stringify({ prompt: userMsg, mode: aiMode, selectedHtml, style: aiStyle }),
       })
 
       const data = await res.json()
@@ -674,6 +712,41 @@ export default function EditorPage() {
                   {label}
                 </button>
               ))}
+            </div>
+
+            {/* BEYOND DESIGN — style direction picker */}
+            <div className="border-b border-white/[0.04]">
+              <button
+                onClick={() => setShowStyles(!showStyles)}
+                className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-bold tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-400">BEYOND DESIGN</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-white/50">{designDirections.find(d => d.key === aiStyle)?.name}</span>
+                  <ChevronDown className={`w-3 h-3 text-white/30 transition-transform ${showStyles ? 'rotate-180' : ''}`} />
+                </span>
+              </button>
+              {showStyles && (
+                <div className="grid grid-cols-3 gap-1.5 px-2 pb-2">
+                  {designDirections.map(d => (
+                    <button
+                      key={d.key}
+                      onClick={() => { setAiStyle(d.key); setShowStyles(false) }}
+                      title={d.desc}
+                      className={`px-1.5 py-2 rounded-lg border text-center transition-all ${
+                        aiStyle === d.key
+                          ? 'border-cyan-500/40 bg-cyan-500/[0.08] text-cyan-300'
+                          : 'border-white/[0.05] text-white/40 hover:text-white/70 hover:border-white/[0.12]'
+                      }`}
+                    >
+                      <span className="block text-[9px] font-semibold leading-tight">{d.name}</span>
+                      <span className="block text-[8px] text-white/25 leading-tight mt-0.5">{d.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Messages */}

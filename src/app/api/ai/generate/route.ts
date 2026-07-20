@@ -3,30 +3,17 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { checkCredits, deductCredits, refundCredits, getCostForMode } from '@/lib/credits'
 import { rateLimit } from '@/lib/rate-limit'
+import { buildGenerateSystem } from '@/lib/beyond-design'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const SYSTEM_PROMPT = `You are an expert web designer and developer. You generate beautiful, modern, production-ready HTML and CSS for websites.
-
-RULES:
-- Output ONLY valid HTML and CSS. No markdown, no explanations, no code fences.
-- Use inline styles or a <style> tag in the HTML. No external CSS files.
-- Use modern design: clean typography, good spacing, professional colors.
-- Use the Inter font from Google Fonts (include the link tag).
-- Make designs responsive using CSS grid/flexbox.
-- Use real placeholder content (not lorem ipsum) — realistic business names, descriptions, prices.
-- Include proper semantic HTML (section, header, nav, footer, etc).
-- Make it look like a premium Squarespace/Framer template.
-- For images, use placeholder divs with background colors and text like "Image" — do NOT use external image URLs.
-- Output format: the complete HTML content for the page body (no <html>, <head>, or <body> tags — just the inner content with a <style> tag at the top if needed).`
-
 export async function POST(request: Request) {
   // Set once credits are deducted so we can refund if the AI call fails.
   let refundCtx: { userId: string; cost: number; mode: string } | null = null
   try {
-    const { prompt, mode, selectedHtml } = await request.json()
+    const { prompt, mode, selectedHtml, style } = await request.json()
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -106,7 +93,7 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      system: SYSTEM_PROMPT,
+      system: buildGenerateSystem(style),
       messages: [{ role: 'user', content: userPrompt }],
     })
 
