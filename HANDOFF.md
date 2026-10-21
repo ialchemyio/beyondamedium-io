@@ -1,5 +1,56 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-10-20 — /sites/carlosnunez now 308s to carlosnunez.ai (commit f8bd060)
+
+**Goal:** Stop https://beyondamedium.io/sites/carlosnunez serving a stale copy of carlosnunez.ai.
+
+### WHY
+`next.config.ts` rewrote `/sites/carlosnunez` to `https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez`, an old Vercel deployment of the portfolio. That copy still showed "Brands Served" and the invented "Nike Running" sample case study, which the owner retracted from the real site. It had no canonical and no noindex, so it could be indexed as duplicate content. The real site is now carlosnunez.ai on Coolify, so the hub now redirects instead of proxying.
+
+### WHAT changed
+- `next.config.ts`: removed `carlosnunez` from `subSiteRewrites`; added a `movedSites` list and `redirects()`. `/sites/carlosnunez` goes to `https://carlosnunez.ai` and `/sites/carlosnunez/:path*` goes to `https://carlosnunez.ai/:path*`, both `permanent: true` (308). Redirects run before the `beforeFiles` rewrites. To retire another proxied site later, move its row from `subSiteRewrites` to `movedSites`.
+- `vercel.json`: removed the two carlosnunez rewrites and added the same two redirects, so the legacy Vercel project (`beyondamedium-io.vercel.app`) agrees if it still builds from `main`.
+- Path is preserved on purpose: `/about`, `/contact`, `/work`, `/systems/*` exist on carlosnunez.ai (200). `/work/elevate-nike-running` lands on carlosnunez.ai's 404, the honest result for a retracted case study. `/lab` and `/ai-lab` are 308'd onward to `/kit` by carlosnunez.ai itself.
+- Pushed to `origin/main` (57d5dee..f8bd060). The documented deploy path is a Coolify auto-deploy on push to `main` (`LAUNCH_CHECKLIST.md`, line 4).
+
+### VERIFIED (local)
+- `npm run build`: passes. `npx eslint next.config.ts`: clean. `npx tsc --noEmit`: exit 0. `vercel.json` parses (2 redirects, 16 rewrites, 0 carlosnunez rewrites).
+- Standalone server (`PORT=3099 node .next/standalone/server.js`):
+  - `/sites/carlosnunez` returns **308** with `location: https://carlosnunez.ai/`.
+  - `/sites/carlosnunez/about` returns **308** with `location: https://carlosnunez.ai/about`.
+  - `/sites/carlosnunez/` returns 308 to `/sites/carlosnunez`, then the same chain.
+  - Regression check: `/sites/djsammyjay` and `/sites/JGFamilyRoofing` still return 200 through the proxy (`x-vercel-id` present).
+  - `curl -sL .../sites/carlosnunez | grep -c "Nike Running"` returns 0.
+
+### VERIFIED (live, 2026-10-21 UTC)
+- Before the push: `curl -sI https://beyondamedium.io/sites/carlosnunez` returned **HTTP/2 200** with `x-vercel-id`. `grep -c "Nike Running"` returned 1 and `grep -c "Brands Served"` returned 1.
+- Pushed at 02:53:35 UTC. Coolify served the first 308 at 02:55:44. The deploy is rolling, so 200 and 308 alternated for about 40 s. The URL then returned 308 on 10 consecutive requests by 02:56:26.
+- After the push: `curl -sI https://beyondamedium.io/sites/carlosnunez` returns **HTTP/2 308** with `location: https://carlosnunez.ai/` and no `x-vercel-*` headers. `grep -c "Nike Running"` returns **0** and `grep -c "Brands Served"` returns **0**. 10 more samples were all 308.
+- Subpaths: `/sites/carlosnunez/about` returns 308 to `https://carlosnunez.ai/about`.
+- No regressions: `/sites/djsammyjay`, `/sites/JGFamilyRoofing`, `/sites/lumpiaandmore`, `/`, `/login` and `/robots.txt` all return 200.
+- The legacy Vercel project still builds from `main`. `https://beyondamedium-io.vercel.app/sites/carlosnunez` now also returns 308 to `https://carlosnunez.ai/` (from the `vercel.json` change).
+
+### STATE
+- Fixed: the stale copy is no longer reachable through beyondamedium.io or beyondamedium-io.vercel.app.
+- **Still public (owner action, not done):** the upstream itself, `https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez`, returns 200 with the stale copy (`server: Vercel`). Nothing links to it now, but it is still crawlable. This repo can't fix it; the user rules for this session also say don't edit carlos-nunez-portfolio.
+
+### OWNER STEPS (Vercel dashboard, not performed by the agent)
+carlosnunez.ai is served from Coolify. Its responses carry no `x-vercel-*` headers, so the old Vercel project is not in its serving path.
+1. Vercel → open the same team as the beyondamedium-io project (org id `team_oYaAUG7u8f5hhSn8TG79tx9q`, per both repos' `.vercel/project.json`) → project **carlos-nunez-portfolio** (`prj_Vq6yMSxFKvfqfHgz2Aaja5nZ8XVf`) → **Settings → Domains**. Confirm `carlosnunez.ai` is NOT listed. If it is listed, stop and ask before going further.
+2. Same project → **Settings → General → Delete Project** (bottom of the page). Type the project name to confirm.
+   - Alternative if you want to keep it: **Settings → Deployment Protection → Vercel Authentication → All Deployments** (a `.vercel.app` production URL is public by default).
+3. Verify: `curl -s -o /dev/null -w "%{http_code}\n" https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez` should return 404 (deleted) or 401/302 to Vercel login (protected).
+4. Optional, for speed: in Google Search Console for beyondamedium.io, use Removals → Temporary removal on the `https://beyondamedium.io/sites/carlosnunez` prefix. The 308 will de-index it on its own over time.
+5. Separate, already on `LAUNCH_CHECKLIST.md` §8: the legacy **beyondamedium-io** Vercel project still auto-builds on every push to `main` (confirmed today). Deleting it, then removing `vercel.json` and `.vercel/`, would end the duplicated rewrite list.
+
+### CONFLICTS
+None with the root CLAUDE.md. The push follows the documented deploy path (LAUNCH_CHECKLIST.md: `main` auto-deploys via Coolify).
+
+### NEXT
+Owner: do step 1–3 above to remove the last public stale copy. Agent follow-up: run the same check on the other 8 proxied `/sites/*` targets. For each, does the client now have its own domain while the hub still proxies an old Vercel copy? (`curl -s https://beyondamedium.io/sites/<slug> | head` vs the client's live domain.)
+
+---
+
 ## 2026-07-20 — Builder roadmap complete (commit 3f66f3a)
 
 **Goal:** Close the remaining builder gaps vs Squarespace — image uploads, global theme, one-click polish, block search, page reorder.
