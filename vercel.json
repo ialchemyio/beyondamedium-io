@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/sites/carlosnunez",
+      "destination": "https://carlosnunez.ai",
+      "permanent": true
+    },
+    {
+      "source": "/sites/carlosnunez/:path*",
+      "destination": "https://carlosnunez.ai/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/sites/djsammyjay",
@@ -47,14 +59,6 @@
     {
       "source": "/sites/fl00redEnt/:path*",
       "destination": "https://fl00red.vercel.app/sites/fl00redEnt/:path*"
-    },
-    {
-      "source": "/sites/carlosnunez",
-      "destination": "https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez"
-    },
-    {
-      "source": "/sites/carlosnunez/:path*",
-      "destination": "https://carlos-nunez-portfolio.vercel.app/sites/carlosnunez/:path*"
     },
     {
       "source": "/sites/JGFamilyRoofing",
