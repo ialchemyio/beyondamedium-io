@@ -130,7 +130,12 @@ export function getDirection(key: string | undefined | null): DesignDirection {
 const CRAFT_RULES = `
 CRAFT RULES (non-negotiable):
 - Real, specific copy for the business described — never lorem ipsum, never "Your Headline Here".
-  Invent a plausible brand voice: names, prices, menu items, testimonials with full names and roles.
+  Write in a confident brand voice, but every fact comes from the user's request: business name,
+  services, menu items, prices, hours, locations, team, and history.
+- NEVER INVENT social proof or facts: no reviews, testimonials, star ratings, customer names, client
+  logos, prices, awards, certifications, or statistics ("500+ happy clients") unless the request supplies
+  them. Where such content belongs but was not supplied, emit a visible, styled placeholder in brackets,
+  e.g. "[Testimonial: add a real customer quote]", "[Customer name]", "[Price]", "[Award or certification]".
 - Typographic hierarchy: exactly one h1; eyebrow label + headline + subcopy pattern for sections;
   line-height 1.1 on display text, 1.6-1.75 on body; max-width 65ch on paragraphs.
 - Spacing rhythm: consistent scale (8/16/24/40/64/96/120px). Sections breathe — 96px+ vertical padding.

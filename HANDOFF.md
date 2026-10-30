@@ -1,5 +1,28 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-10-30 — BEYOND DESIGN no longer tells the model to invent social proof
+
+**Goal:** Stop every AI-generated customer site shipping fabricated testimonials, names, and prices (root CLAUDE.md §5b item 6).
+
+### WHY
+`CRAFT_RULES` in `src/lib/beyond-design.ts` said "Invent a plausible brand voice: names, prices, menu items, testimonials with full names and roles." Both `buildGenerateSystem` (`/api/ai/generate`) and `buildAgentSystem` (`/api/ai/agent`) include it, so all generated sites had fake social proof.
+
+### WHAT changed
+- `src/lib/beyond-design.ts`: replaced that line. Facts must now come from the user's request. A new NEVER INVENT rule bans invented reviews, testimonials, ratings, customer names, client logos, prices, awards, certifications and stats. Where that content is missing, the model emits visible bracket placeholders such as `[Testimonial: add a real customer quote]` and `[Price]`. The other craft rules are unchanged.
+- `src/lib/beyond-design.test.ts` (new): the repo's first test. It checks both builders across the default and all 8 directions (20 cases). The prompt must not contain "testimonials with full names" or "invent a plausible". It must contain the never-invent rule and the placeholder examples.
+- `package.json`: added `"test": "tsx --test 'src/**/*.test.ts'"`. It uses Node's built-in runner and the existing `tsx`, so there is no new dependency.
+
+### VERIFIED
+- `npm test`: tests 20, pass 20, fail 0.
+- `npx eslint src/lib/beyond-design.ts src/lib/beyond-design.test.ts`: clean. `npx tsc --noEmit`: exit 0.
+- `npm run lint` (whole repo) still reports 66 problems (18 errors). All are in files this change did not touch (dashboard pages, CookieBanner, etc.).
+- Generated output was not tested with a live Anthropic call: **UNVERIFIED** that the model now emits the placeholders.
+- Committed only. Not pushed: a push to `main` auto-deploys via Coolify.
+
+### STATE / NEXT
+- In `src/app/api/ai/generate/route.ts`, the default page prompt still lists a "Testimonials or social proof" section. Under the new system rule that section should come out as placeholders. Polish mode still says "specific, plausible copy". The system rule should override both, but aligning those two user prompts is the next small step.
+- Push to `origin/main` (owner action, since it deploys), then generate one restaurant site and check that it contains `[Testimonial` and no invented full names.
+
 ## 2026-10-20 — /sites/carlosnunez now 308s to carlosnunez.ai (commit f8bd060)
 
 **Goal:** Stop https://beyondamedium.io/sites/carlosnunez serving a stale copy of carlosnunez.ai.
