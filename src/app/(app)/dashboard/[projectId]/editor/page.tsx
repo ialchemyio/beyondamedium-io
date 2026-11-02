@@ -7,7 +7,7 @@ import {
   ArrowLeft, Save, Monitor, Tablet, Smartphone, Code2,
   Eye, Undo2, Redo2, Check, Sparkles, Plus, FileText,
   ChevronDown, Trash2, Cpu, Send, Bot, Loader2, Wand2,
-  X as XIcon, Rocket, Palette, Search, ArrowUp, ArrowDown, ImageIcon,
+  X as XIcon, Rocket, Palette, Search, ArrowUp, ArrowDown, ImageIcon, PenLine,
 } from 'lucide-react'
 import { DEFAULT_THEME, THEME_PRESETS, FONT_OPTIONS, normalizeTheme, themeCss, themeFontUrl, type SiteTheme } from '@/lib/theme'
 import { SEO_TITLE_MAX, SEO_DESC_MAX, type SeoMap } from '@/lib/seo'
@@ -66,7 +66,7 @@ export default function EditorPage() {
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiMessages, setAiMessages] = useState<Array<{ role: 'user' | 'ai'; text: string; type?: string }>>([])
-  const [aiMode, setAiMode] = useState<'page' | 'section' | 'edit'>('page')
+  const [aiMode, setAiMode] = useState<'page' | 'section' | 'edit' | 'copy'>('page')
   const [aiStyle, setAiStyle] = useState('auto')
   const [showStyles, setShowStyles] = useState(false)
   const aiScrollRef = useRef<HTMLDivElement>(null)
@@ -542,28 +542,40 @@ export default function EditorPage() {
   }
 
   // AI generation
-  async function handleAiGenerate() {
-    if (!aiPrompt.trim() || aiLoading || !editorRef.current) return
-    setAiLoading(true)
+  // Copywriting rewrite: keep markup identical, change only the words, add no facts.
+  function copyPrompt(instruction: string): string {
+    return `Rewrite only the visible text of this element: ${instruction}.
+Keep every tag, class, attribute, link, and the HTML structure exactly the same. Do not change styles.
+Do not add facts, prices, names, numbers, or claims that are not already in the text.`
+  }
 
-    const userMsg = aiPrompt.trim()
-    setAiMessages(prev => [...prev, { role: 'user', text: userMsg }])
-    setAiPrompt('')
+  async function handleAiGenerate(override?: { instruction: string; label: string }) {
+    const isCopy = aiMode === 'copy' || !!override
+    const raw = override ? override.instruction : aiPrompt.trim()
+    if (!raw || aiLoading || !editorRef.current) return
 
-    // Get selected element HTML for edit mode
-    let selectedHtml = ''
-    if (aiMode === 'edit') {
-      const selected = editorRef.current.getSelected()
-      if (selected) {
-        selectedHtml = selected.toHTML()
-      }
+    // Edit and Copy work on the selected element. Check before spending credits.
+    const needsSelection = aiMode === 'edit' || isCopy
+    const selected = needsSelection ? editorRef.current.getSelected() : null
+    if (needsSelection && !selected) {
+      setAiMessages(prev => [...prev, { role: 'ai', text: 'Select an element on the canvas first. Nothing was charged.', type: 'error' }])
+      return
     }
+
+    setAiLoading(true)
+    const userMsg = override ? override.label : raw
+    setAiMessages(prev => [...prev, { role: 'user', text: isCopy ? `✍️ ${userMsg}` : userMsg }])
+    if (!override) setAiPrompt('')
+
+    const selectedHtml = selected ? selected.toHTML() : ''
+    const apiMode = isCopy ? 'edit' : aiMode
+    const prompt = isCopy ? copyPrompt(raw) : raw
 
     try {
       const res = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userMsg, mode: aiMode, selectedHtml, style: aiStyle }),
+        body: JSON.stringify({ prompt, mode: apiMode, selectedHtml, style: aiStyle }),
       })
 
       const data = await res.json()
@@ -587,7 +599,12 @@ export default function EditorPage() {
         window.dispatchEvent(new CustomEvent('bam:credits-updated', { detail: data.credits }))
       }
 
-      if (aiMode === 'page') {
+      if (selected) {
+        // Edit / Copy: replace the element that was selected when the request started.
+        // Checked first so an element-level result can never overwrite the whole page.
+        selected.replaceWith(data.html)
+        setAiMessages(prev => [...prev, { role: 'ai', text: isCopy ? 'Copy rewritten. Cmd+Z to undo.' : 'Element updated.', type: 'success' }])
+      } else if (aiMode === 'page') {
         // Replace entire canvas
         editorRef.current.setComponents(data.html)
         setAiMessages(prev => [...prev, { role: 'ai', text: 'Page generated and loaded into the canvas.', type: 'success' }])
@@ -595,15 +612,6 @@ export default function EditorPage() {
         // Append section to canvas
         editorRef.current.addComponents(data.html)
         setAiMessages(prev => [...prev, { role: 'ai', text: 'Section added to your page.', type: 'success' }])
-      } else if (aiMode === 'edit') {
-        // Replace selected element
-        const selected = editorRef.current.getSelected()
-        if (selected) {
-          selected.replaceWith(data.html)
-          setAiMessages(prev => [...prev, { role: 'ai', text: 'Element updated.', type: 'success' }])
-        } else {
-          setAiMessages(prev => [...prev, { role: 'ai', text: 'No element selected. Select an element on the canvas first.', type: 'error' }])
-        }
       }
 
       setHasChanges(true)
@@ -1136,12 +1144,14 @@ export default function EditorPage() {
                 { mode: 'page' as const, label: 'Full Page', icon: FileText },
                 { mode: 'section' as const, label: 'Section', icon: Plus },
                 { mode: 'edit' as const, label: 'Edit', icon: Wand2 },
+                { mode: 'copy' as const, label: 'Copy', icon: PenLine },
               ]).map(({ mode, label, icon: Icon }) => (
                 <button
                   key={mode}
                   onClick={() => setAiMode(mode)}
-                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                    aiMode === mode ? 'bg-cyan-500/10 text-cyan-400' : 'text-white/30 hover:text-white/50 hover:bg-white/[0.03]'
+                  aria-pressed={aiMode === mode}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                    aiMode === mode ? 'bg-[#1f8fff]/15 text-[#8ec5ff]' : 'text-white/55 hover:text-white/80 hover:bg-white/[0.04]'
                   }`}
                 >
                   <Icon className="w-3 h-3" />
@@ -1226,12 +1236,38 @@ export default function EditorPage() {
                   <div className="bg-white/[0.04] px-3 py-2 rounded-xl flex items-center gap-2">
                     <Loader2 className="w-3 h-3 text-cyan-400 animate-spin" />
                     <span className="text-xs text-white/40">
-                      {aiMode === 'page' ? 'Generating page...' : aiMode === 'section' ? 'Creating section...' : 'Editing element...'}
+                      {aiMode === 'page' ? 'Generating page...' : aiMode === 'section' ? 'Creating section...' : aiMode === 'copy' ? 'Rewriting copy...' : 'Editing element...'}
                     </span>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* AI copywriting quick actions */}
+            {aiMode === 'copy' && (
+              <div className="px-3 pt-3 border-t border-white/[0.06]">
+                <p className="text-[11px] text-white/55 mb-2">Select text on the canvas, then pick a rewrite · {CREDIT_COSTS.edit_element} credits</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {([
+                    ['Shorter', 'make it shorter and tighter, keeping the meaning'],
+                    ['Longer', 'expand it with more helpful detail, without inventing facts'],
+                    ['Persuasive', 'make it more persuasive and benefit-led'],
+                    ['Professional', 'make the tone more professional and polished'],
+                    ['Friendlier', 'make the tone warmer and friendlier'],
+                    ['Fix grammar', 'fix spelling, grammar, and punctuation only'],
+                  ] as const).map(([label, instruction]) => (
+                    <button
+                      key={label}
+                      onClick={() => handleAiGenerate({ instruction, label })}
+                      disabled={aiLoading}
+                      className="px-2.5 py-1.5 rounded-full border border-white/[0.1] text-[11px] text-white/75 hover:border-[#4aa8ff]/60 hover:text-white hover:bg-[#1f8fff]/10 transition-colors disabled:opacity-40"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Input */}
             <div className="p-3 border-t border-white/[0.06]">
@@ -1244,6 +1280,7 @@ export default function EditorPage() {
                     placeholder={
                       aiMode === 'page' ? 'Describe the full page you want...' :
                       aiMode === 'section' ? 'Describe a section to add...' :
+                      aiMode === 'copy' ? 'Or describe how to rewrite it...' :
                       'Describe the change to make...'
                     }
                     rows={2}
@@ -1251,15 +1288,16 @@ export default function EditorPage() {
                   />
                 </div>
                 <button
-                  onClick={handleAiGenerate}
+                  onClick={() => handleAiGenerate()}
                   disabled={aiLoading || !aiPrompt.trim()}
+                  aria-label="Send"
                   className="p-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:brightness-110 disabled:opacity-30 transition-all shrink-0"
                 >
                   {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[9px] text-white/15 mt-1.5 text-center font-mono">
-                {aiMode === 'page' ? 'generates full page' : aiMode === 'section' ? 'adds to current page' : 'edits selected element'} &middot; enter to send
+              <p className="text-[11px] text-white/45 mt-1.5 text-center">
+                {aiMode === 'page' ? 'Replaces this page' : aiMode === 'section' ? 'Adds to this page' : aiMode === 'copy' ? 'Rewrites the selected text' : 'Edits the selected element'} &middot; Enter to send
               </p>
             </div>
           </div>
