@@ -38,20 +38,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="h-14 border-b border-white/[0.06] bg-[#06080d]/90 backdrop-blur-xl flex items-center justify-between px-6 shrink-0">
+      <header className="h-14 border-b border-white/[0.06] bg-[#05060a]/85 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 gap-4">
         <div className="flex items-center gap-6">
           <Link href={BAM_LITE ? '/dashboard/restaurants' : '/dashboard'} className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-            </div>
-            <span className="text-sm font-semibold text-white/80">BAM OS{BAM_LITE && <span className="text-[9px] text-cyan-400/70 ml-1.5 font-mono">LITE</span>}</span>
+            <span className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center">
+              <span className="font-display text-[12px] font-extrabold text-white">B</span>
+            </span>
+            <span className="font-display text-[15px] font-bold text-white">bam<span className="text-[#4aa8ff]">.</span>{BAM_LITE && <span className="text-[11px] text-[#8ec5ff] ml-1.5 font-mono">LITE</span>}</span>
           </Link>
           <nav className="flex items-center gap-0.5 overflow-x-auto">
             {navItems.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-2.5 py-1.5 text-xs text-white/40 hover:text-white/70 rounded-lg hover:bg-white/[0.04] transition-colors whitespace-nowrap flex items-center gap-1"
+                className="px-2.5 py-1.5 text-[13px] text-white/60 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors whitespace-nowrap flex items-center gap-1"
               >
                 {item.highlight && <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />}
                 {item.label}
@@ -62,9 +62,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex items-center gap-3">
           <CreditsIndicator variant="compact" />
           <div className="w-px h-4 bg-white/[0.06]" />
-          <span className="text-[11px] text-white/25 font-mono">{user.email}</span>
+          {!BAM_LITE && (
+            <Link href="/dashboard/new" className="bam-pill hidden md:inline-flex px-3.5 py-1.5 text-[12px]">Build with AI</Link>
+          )}
+          <span className="hidden lg:inline text-[12px] text-white/50 font-mono">{user.email}</span>
           <form action="/api/auth/signout" method="POST">
-            <button type="submit" className="text-[11px] text-white/30 hover:text-white/60 transition-colors">Sign out</button>
+            <button type="submit" className="text-[12px] text-white/55 hover:text-white transition-colors">Sign out</button>
           </form>
         </div>
       </header>

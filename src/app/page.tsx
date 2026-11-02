@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
 import { DESIGN_DIRECTIONS } from '@/lib/beyond-design'
 import { CREDIT_COSTS } from '@/lib/credit-costs'
+import { previewFor, readableOn } from '@/lib/direction-previews'
 
 const plans = [
   {
@@ -33,34 +34,6 @@ const creditPacks = [
   { credits: '350', price: '$25' },
   { credits: '1,000', price: '$60' },
 ]
-
-// Preview swatches for each BEYOND DESIGN direction, mirroring its brief in
-// src/lib/beyond-design.ts. Illustrative styling, not customer sites.
-const DIRECTION_PREVIEW: Record<string, { bg: string; fg: string; accent: string; font: string; line?: string }> = {
-  editorial: { bg: '#FAF7F2', fg: '#1A1815', accent: '#C2532F', font: 'Georgia, "Times New Roman", serif', line: '#E5DFD5' },
-  'luxe-dark': { bg: '#0A0A0B', fg: '#F5F5F4', accent: '#C9A96A', font: '"Inter Tight", system-ui, sans-serif' },
-  brutalist: { bg: '#F2F2F2', fg: '#000000', accent: '#FF3B00', font: 'ui-monospace, "SF Mono", Menlo, monospace' },
-  'soft-organic': { bg: '#FDF9F3', fg: '#3D3A36', accent: '#D08C60', font: '"Nunito Sans", system-ui, sans-serif' },
-  'glass-tech': { bg: '#06080D', fg: '#F8FAFC', accent: '#22D3EE', font: '"Inter Tight", system-ui, sans-serif' },
-  swiss: { bg: '#FFFFFF', fg: '#000000', accent: '#E30613', font: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
-  'retro-print': { bg: '#F4E9D8', fg: '#2B2118', accent: '#D9480F', font: 'Georgia, serif' },
-  'minimal-mono': { bg: '#FFFFFF', fg: '#111111', accent: '#111111', font: 'ui-monospace, Menlo, monospace' },
-}
-
-// WCAG contrast, used to pick legible button text on each preview accent.
-function luminance(hex: string): number {
-  const h = hex.replace('#', '')
-  const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
-    .map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-function contrast(a: string, b: string): number {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
-  return (hi + 0.05) / (lo + 0.05)
-}
-function readableOn(bg: string): string {
-  return contrast('#ffffff', bg) >= contrast('#000000', bg) ? '#ffffff' : '#000000'
-}
 
 const faqs = [
   {
@@ -495,7 +468,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {directions.map(d => {
-              const p = DIRECTION_PREVIEW[d.key] ?? DIRECTION_PREVIEW.swiss
+              const p = previewFor(d.key)
               return (
                 <div key={d.key} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#0b0d14] transition-transform duration-300 hover:-translate-y-1">
                   <div className="aspect-[4/3] p-4 flex flex-col justify-between" style={{ background: p.bg, color: p.fg }}>
