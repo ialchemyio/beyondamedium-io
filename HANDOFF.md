@@ -1,5 +1,20 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Bespoke premium previews for every BEYOND DESIGN direction
+
+**Goal:** Owner: each design direction preview must have its own premium look, not one template recolored.
+
+### WHAT / WHY
+- The old previews were one layout ("Studio / Made with intent. / Get in touch") with swapped colors, and several **contradicted their own briefs** (Brutalist shown orange, brief says white + #0044FF; Retro shown in Georgia, brief says Archivo Black + mustard/teal/orange; "Minimal Mono" shown monospace, brief means monochrome sans).
+- `src/components/DirectionPreview.tsx` (NEW): 8 bespoke compositions built from each brief (Editorial magazine spread, Luxe Dark hotel, Brutalist dev-tool grid, Soft Organic wellness, Glass Tech SaaS, Swiss grid poster, Retro Print 70s poster, Minimal Mono portfolio) + an "AI picks" mosaic for Beyond Auto. Container-query (cqw) sizing; aria-hidden.
+- `src/lib/preview-fonts.ts` (NEW): brief typefaces via next/font, `preload: false` (Playfair Display, JetBrains Mono, Nunito Sans, Archivo Black); Inter Tight gains weight 300 (Luxe brief).
+- Landing directions grid and wizard style picker both use it. `src/lib/direction-previews.ts` deleted (no consumers left).
+
+### VERIFIED
+Browser: all 5 brief fonts report `loaded`; no text clipped in any preview at 306px (desktop) or 158px (375px phone) card widths, no page overflow; wizard-size grid + Auto mosaic screenshot. impeccable detect at 1280/1440/390: 0 contrast / undersized findings. 46/46 tests, tsc clean, `next build` exit 0.
+
+---
+
 ## 2026-11-02 — Coolify Watch Paths set (docs/SQL pushes no longer redeploy)
 
 - Coolify (Tailscale `http://100.123.195.49:8000`) → BAM.IO → production → beyondamedium-io app → General → Build & deploy → **Watch paths** (was empty = every push deployed):

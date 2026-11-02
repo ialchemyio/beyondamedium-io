@@ -7,7 +7,7 @@ import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
 import { DESIGN_DIRECTIONS } from '@/lib/beyond-design'
 import { CREDIT_COSTS } from '@/lib/credit-costs'
-import { previewFor, readableOn } from '@/lib/direction-previews'
+import DirectionPreview from '@/components/DirectionPreview'
 
 const plans = [
   {
@@ -467,27 +467,17 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {directions.map(d => {
-              const p = previewFor(d.key)
-              return (
-                <div key={d.key} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#0b0d14] transition-transform duration-300 hover:-translate-y-1">
-                  <div className="aspect-[4/3] p-4 flex flex-col justify-between" style={{ background: p.bg, color: p.fg }}>
-                    <div className="flex items-center justify-between" style={{ fontFamily: p.font }}>
-                      <span className="text-[12px] font-bold">Studio</span>
-                      <span className="flex gap-2 text-[11px]"><span>Work</span><span>About</span></span>
-                    </div>
-                    <div style={{ fontFamily: p.font }}>
-                      <p className="text-[22px] sm:text-[26px] leading-[1.02] font-semibold">Made with<br />intent.</p>
-                      <span className="mt-3 inline-block text-[11px] px-2.5 py-1 rounded-sm" style={{ background: p.accent, color: readableOn(p.accent) }}>Get in touch</span>
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 border-t border-white/[0.06]">
-                    <p className="font-display text-[15px] font-semibold">{d.name}</p>
-                    <p className="text-[13px] text-white/55">{d.tagline}</p>
-                  </div>
+            {directions.map(d => (
+              <div key={d.key} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#0b0d14] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)] transition-all duration-500 hover:-translate-y-1.5 hover:border-white/25 hover:shadow-[0_30px_80px_-30px_rgba(31,143,255,0.45)]">
+                <div className="overflow-hidden">
+                  <DirectionPreview dirKey={d.key} className="transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                 </div>
-              )
-            })}
+                <div className="px-4 py-3 border-t border-white/[0.06]">
+                  <p className="font-display text-[15px] font-semibold">{d.name}</p>
+                  <p className="text-[13px] text-white/60">{d.tagline}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

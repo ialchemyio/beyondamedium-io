@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Wand2, AlertTriangle, Lock } from 'lucide-react'
 import { DESIGN_DIRECTIONS } from '@/lib/beyond-design'
-import { previewFor, readableOn } from '@/lib/direction-previews'
+import DirectionPreview from '@/components/DirectionPreview'
 import { CREDIT_COSTS } from '@/lib/credit-costs'
 import {
   EMPTY_BRIEF, INDUSTRY_OPTIONS, MAX_EXTRA_PAGES, PAGE_OPTIONS,
@@ -312,19 +312,13 @@ export default function SiteWizardPage() {
             <legend className={labelCls}>Pick a design direction</legend>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
               {DESIGN_DIRECTIONS.map(d => {
-                const p = previewFor(d.key)
                 const on = style === d.key
                 return (
                   <button
                     key={d.key} type="button" aria-pressed={on} onClick={() => setStyle(d.key)}
                     className={`rounded-2xl overflow-hidden border text-left transition-all ${on ? 'border-[#4aa8ff] ring-2 ring-[#4aa8ff]/40' : 'border-white/10 hover:border-white/25'}`}
                   >
-                    <div className="aspect-[16/10] p-3 flex flex-col justify-end" style={{ background: p.bg, color: p.fg, fontFamily: p.font }}>
-                      {d.key === 'auto'
-                        ? <Sparkles className="w-6 h-6 text-[#8ec5ff] mb-auto" />
-                        : <span className="text-[18px] leading-tight font-semibold mb-auto">Aa</span>}
-                      <span className="self-start text-[11px] px-2 py-0.5 rounded-sm" style={{ background: p.accent, color: readableOn(p.accent) }}>{d.key === 'auto' ? 'AI picks' : 'Button'}</span>
-                    </div>
+                    <DirectionPreview dirKey={d.key} />
                     <div className="px-3 py-2.5 bg-[#0b0d14]">
                       <p className="text-[14px] font-semibold text-white">{d.name}</p>
                       <p className="text-[12px] text-white/60 leading-snug">{d.tagline}</p>
