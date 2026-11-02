@@ -1,5 +1,29 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Plan project limits enforced (commit 0b1107d, not pushed)
+
+**Goal:** Close the revenue leak where `PLANS.maxProjects` (Starter 1 / Builder 5 / Pro+BAM unlimited) was advertised but never enforced.
+
+### WHAT changed
+- `supabase/migrations/20261102_project_limits.sql` (NEW): `plan_project_limit()`, `my_project_quota()` (auth.uid only), trigger `projects_enforce_limit` with per-user advisory lock; service role bypasses; existing over-limit users grandfathered.
+- `src/lib/project-limits.ts` + test (4 tests incl. SQL↔`PLANS` drift check).
+- `api/ai/agent`: quota pre-check before charging credits; refund on failed project insert (was losing 35 credits).
+- Dashboard, wizard, templates, premium-templates: quota chip/banners, limit → upgrade modal (reason `projects`), premium no longer fails silently.
+
+### VERIFIED
+- Throwaway local Postgres 16, migration applied unchanged twice: starter 1/blocked, builder 5/blocked, pro 12+, service_role bypass, over-limit blocked, quota fn correct; concurrent race → 1 row (control without lock → 2). Server stopped + deleted.
+- At-limit UI in browser via temporary stubbed harness (deleted): chip, banners, Blank project → `bam:show-upgrade {reason:'projects'}`, no create form.
+- 40/40 tests, tsc clean, `next build` exit 0.
+
+### STATE
+- **REQUIRED to activate:** run `20261102_project_limits.sql` in the IO Supabase SQL editor (added to LAUNCH_CHECKLIST §1). Until then the code is inert (quota RPC missing → never blocks), so deploying first is safe.
+- UNVERIFIED on real Supabase (DNS-blocked here): `auth.role()` returning `authenticated` for browser/SSR clients is standard Supabase behavior but untested live.
+
+### NEXT
+Push, run the migration, then on prod as a Starter account with 1 project: click Blank project (expect upgrade modal) and open the wizard (expect the limit banner).
+
+---
+
 ## 2026-11-01 — Snapps-grade upgrade: premium redesign, AI Site Wizard, one-click AI SEO, AI copywriting
 
 **Goal:** Bring BAM builder to the look and feature set of snapps.ai (owner request: "FULL UPGRADE … similar build and premium look").
