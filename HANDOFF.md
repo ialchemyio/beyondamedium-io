@@ -1,5 +1,20 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Wizard build verified on prod; editor CSS parser fix (pending deploy)
+
+**Wizard build (prod build 0BFyTO1M, after the model fix 80be3f8):**
+- "Wizard Test Cafe" / Cafe / Ventura, CA / Home+About+Contact / Beyond Auto → landed in the editor for project `dac2f652…` within ~60–117s. No Cloudflare 524.
+- Content comes from the brief ("Come say hello in Ventura."). The missing facts are honest placeholders (`[Add opening hours]`, `[Menu: …]`, `[Testimonial: add a real customer quote and name]`). No invented reviews or numbers.
+- Owner still needs to **revert `user_credits.plan`** to its prior value (temporary `pro` for this test).
+
+**Bug found:** in the editor, the generated `.btn` buttons rendered white-on-transparent (invisible).
+- Root cause: GrapesJS's default browser CSS parser reads CSSOM longhands, and a shorthand with `var()` (`background: var(--terra)`) expands to empty longhands, so it was dropped. Proven in the browser: `background:var(--x)` gives empty longhands, while `background-color:var(--x)` survives.
+- Any Save then wrote the lossy CSS back to `pages.css`.
+- Fix: added the official `grapesjs-parser-postcss@1.0.3` (pinned) as the first editor plugin.
+- VERIFIED in the harness: `.btn{background:var(--terra);border:1px solid var(--line)}` renders `rgb(180,83,42)`, and the exported CSS keeps both shorthands verbatim. `tsc` passes, `npm test` 46/46, the build compiles.
+
+**RISK (UNVERIFIED):** before e8c15c7 the unsaved flag latched true on load, so autosave (30s, only when dirty) may have written parser-damaged CSS into projects opened before today. Spot-check older projects' `pages.css` for missing `background:var(` rules.
+
 ## 2026-11-02 — ALL AI features were down: retired model ID (fixed, pending deploy)
 
 **Found by:** live wizard build test. It failed with `404 not_found_error: model: claude-sonnet-4-20250514`. Owner temporarily set their `user_credits.plan = 'pro'` so the at-limit account could build. **Revert that after testing** (the value before was noted by the owner).

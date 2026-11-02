@@ -139,6 +139,10 @@ export default function EditorPage() {
       const customCode = (await import('grapesjs-custom-code')).default
       const tabs = (await import('grapesjs-tabs')).default
       const navbar = (await import('grapesjs-navbar')).default
+      // The default browser CSS parser drops shorthands that use var(), e.g.
+      // `background: var(--accent)` — AI-built sites lost their button colors
+      // in the editor and the next Save wrote the damage back. PostCSS keeps them.
+      const parserPostCSS = (await import('grapesjs-parser-postcss')).default
       if (cancelled || !containerRef.current) return
 
       // Import GrapeJS CSS
@@ -156,7 +160,7 @@ export default function EditorPage() {
         width: 'auto',
         storageManager: false,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        plugins: [blocksBasic, presetWebpage, pluginForms, customCode, tabs, navbar] as any[],
+        plugins: [parserPostCSS, blocksBasic, presetWebpage, pluginForms, customCode, tabs, navbar] as any[],
         pluginsOpts: {
           [blocksBasic as unknown as string]: {
             flexGrid: true,
