@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODEL, responseText, aiErrorMessage } from '@/lib/ai'
 import { createClient } from '@/lib/supabase/server'
 import { CREDIT_COSTS } from '@/lib/stripe'
 import { checkCredits, deductCredits, refundCredits } from '@/lib/credits'
@@ -66,29 +67,31 @@ export async function POST(request: Request) {
     refundCtx = { userId: user.id, cost: creditCost }
 
     // Call Claude
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 16000,
+    // Streamed so a multi-page build can use a large budget (thinking shares it)
+    // without tripping the SDK's non-streaming timeout guard.
+    const message = await anthropic.messages.stream({
+      model: AI_MODEL,
+      max_tokens: 32000,
+      output_config: { effort: 'medium' },
       system: buildAgentSystem(style),
       messages: [{ role: 'user', content: `Build this website: "${prompt}"` }],
-    })
+    }).finalMessage()
 
-    const content = message.content[0]
-    if (content.type !== 'text') {
+    const text = responseText(message)
+    if (!text) {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
-      return NextResponse.json({ error: 'Unexpected response' }, { status: 500 })
+      return NextResponse.json({ error: 'The AI did not return a site. No credits were used — please try again.' }, { status: 500 })
     }
 
     // Parse JSON response
     let result
     try {
-      let text = content.text.trim()
       // Strip markdown fences if present
-      text = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '')
-      result = JSON.parse(text)
+      const json = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '')
+      result = JSON.parse(json)
     } catch {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
-      return NextResponse.json({ error: 'Failed to parse agent response', raw: content.text }, { status: 500 })
+      return NextResponse.json({ error: 'The AI returned a site we could not read. No credits were used — please try again.' }, { status: 500 })
     }
     if (!result || !Array.isArray(result.pages) || result.pages.length === 0) {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
@@ -172,7 +175,7 @@ export async function POST(request: Request) {
     })
   } catch (error: unknown) {
     if (refundCtx) { try { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build') } catch { /* ignore */ } }
-    const message = error instanceof Error ? error.message : 'Agent failed'
+    const message = aiErrorMessage(error, 'Agent failed')
     console.error('Agent error:', message)
     return NextResponse.json({ error: message }, { status: 500 })
   }

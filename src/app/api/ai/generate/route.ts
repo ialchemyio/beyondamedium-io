@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODEL, responseText, aiErrorMessage } from '@/lib/ai'
 import { createClient } from '@/lib/supabase/server'
 import { checkCredits, deductCredits, refundCredits, getCostForMode } from '@/lib/credits'
 import { rateLimit } from '@/lib/rate-limit'
@@ -109,14 +110,15 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     }
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8000,
+      model: AI_MODEL,
+      max_tokens: 16000,
+      output_config: { effort: 'medium' },
       system: buildGenerateSystem(style),
       messages: [{ role: 'user', content: userPrompt }],
     })
 
-    const content = message.content[0]
-    if (content.type !== 'text') {
+    const text = responseText(message)
+    if (!text) {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, refundCtx.mode); refundCtx = null }
       return NextResponse.json({ error: 'Unexpected response type' }, { status: 500 })
     }
@@ -124,7 +126,7 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     refundCtx = null
 
     // Clean up any accidental markdown fences
-    let html = content.text
+    let html = text
     html = html.replace(/^```html?\n?/i, '').replace(/\n?```$/i, '').trim()
 
     return NextResponse.json({
@@ -139,7 +141,7 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     })
   } catch (error: unknown) {
     if (refundCtx) { try { await refundCredits(refundCtx.userId, refundCtx.cost, refundCtx.mode) } catch { /* ignore */ } }
-    const message = error instanceof Error ? error.message : 'AI generation failed'
+    const message = aiErrorMessage(error, 'AI generation failed')
     console.error('AI generation error:', message)
     return NextResponse.json({ error: message }, { status: 500 })
   }

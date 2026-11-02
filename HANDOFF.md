@@ -1,5 +1,29 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — ALL AI features were down: retired model ID (fixed, pending deploy)
+
+**Found by:** live wizard build test. It failed with `404 not_found_error: model: claude-sonnet-4-20250514`. Owner temporarily set their `user_credits.plan = 'pro'` so the at-limit account could build. **Revert that after testing** (the value before was noted by the owner).
+
+**Impact:** every AI route hardcoded that ID: `api/ai/agent` (wizard/full build), `api/ai/generate` (page/section/edit/copy/polish), `api/ai/seo`. All AI features were failing on prod. Refunds worked (credits stayed 50), but the raw API JSON was shown to the user.
+
+**WHAT changed:**
+- New `src/lib/ai.ts`:
+  - `AI_MODEL` (`claude-sonnet-5-5`; env `ANTHROPIC_MODEL` overrides).
+  - `responseText()`: joins text blocks, because current models think by default so `content[0]` can be a `thinking` block. Refusal and `max_tokens` cut-offs count as no result, so the caller refunds.
+  - `aiErrorMessage()`: plain user message; the raw error goes to the server log only.
+- `agent/route.ts`: streamed (`.stream().finalMessage()`), `max_tokens` 32000, effort medium. No longer returns the raw model text on a parse failure.
+- `generate/route.ts`: `max_tokens` 16000, effort medium.
+- `seo/route.ts`: `max_tokens` 8000, effort low.
+
+**VERIFIED:**
+- Live API with the local key: `create` (effort low) → `end_turn`, text block, valid JSON, 1.4s.
+- `stream` (effort medium, 32k) → `end_turn`, 705 output tokens, 5.0s.
+- `tsc` passes; eslint clean; `npm test` 46/46; `npm run build` compiles.
+
+**RISK (UNVERIFIED):** a full 3-page build must finish within Cloudflare's ~100s proxy timeout (524). Check on the first prod build.
+
+**NEXT:** deploy → rerun the wizard build on prod → owner reverts the plan.
+
 ## 2026-11-02 — Live Save round-trip verified on prod
 
 Owner asked for a live save test. On the throwaway "Yeee" project (`20dd3fc0…`), Home page (was empty), in the owner's logged-in Chrome:
