@@ -1,5 +1,15 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Editor top bar: Publish no longer clips on narrow windows
+
+**WHAT:** `src/app/(app)/dashboard/[projectId]/editor/page.tsx`. Below `xl` (1280px) the top bar hides the project name text (the B mark keeps it as `title`). The left cluster is `min-w-0` so the page switcher truncates, and the right cluster is `shrink-0`, so Save/Publish never clip.
+**WHY:** Owner's live window (1085px) had Publish cut off at the right edge.
+**VERIFIED:**
+- Harness with long project and page names; Publish right edge = width − 12 at 1024/1085/1280/1440.
+- `tsc` passes; `npm test` 46/46; `npm run build` compiles.
+- Harness deleted.
+**NEXT:** push, then a real Save round-trip on prod (still UNVERIFIED).
+
 ## 2026-11-02 — Live editor test fixes (Save honesty, unsaved state, layout)
 
 **Goal:** Owner asked to test the restyled editor live while logged in (Chrome). I only exercised the UI on project `2f766a27…` (Elev8D): no Save, Publish or AI sends.

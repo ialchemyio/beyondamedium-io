@@ -722,22 +722,23 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
   return (
     <div className="fixed inset-0 bg-[#0b0d14] flex flex-col" style={{ zIndex: 9999 }}>
       {/* ─── Top Bar ──────────────────── */}
-      <div className="h-[52px] border-b border-white/[0.07] flex items-center justify-between px-3 shrink-0 bg-[#0b0d14]/95 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
+      <div className="h-[52px] border-b border-white/[0.07] flex items-center justify-between gap-3 px-3 shrink-0 bg-[#0b0d14]/95 backdrop-blur-xl">
+        {/* Left side gives way first (min-w-0) so Save/Publish never clip */}
+        <div className="flex items-center gap-2 min-w-0">
           <button onClick={handleExit} aria-label="Back to dashboard" title="Back to dashboard" className={toolBtn(false)}>
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="w-px h-5 bg-white/[0.08]" />
           <div className="flex items-center gap-2 pl-1">
-            <span className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center shrink-0">
+            <span title={project.name} className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center shrink-0">
               <span className="font-display text-[12px] font-extrabold text-white">B</span>
             </span>
-            <span className="font-display text-[14px] font-semibold text-white truncate max-w-[180px]">{project.name}</span>
+            <span className="hidden xl:inline font-display text-[14px] font-semibold text-white truncate max-w-[180px]">{project.name}</span>
           </div>
 
           {/* Page switcher */}
-          <div className="relative ml-1">
-            <button onClick={() => setShowPages(!showPages)} aria-expanded={showPages} title={pages.find(p => p.id === activePage)?.title} className="flex items-center gap-1.5 h-8 max-w-[220px] pl-2.5 pr-2 bg-white/[0.04] border border-white/[0.08] rounded-full text-[12px] text-white/80 hover:text-white hover:border-white/[0.16] transition-colors">
+          <div className="relative ml-1 min-w-0">
+            <button onClick={() => setShowPages(!showPages)} aria-expanded={showPages} title={pages.find(p => p.id === activePage)?.title} className="flex items-center gap-1.5 h-8 max-w-full xl:max-w-[220px] pl-2.5 pr-2 bg-white/[0.04] border border-white/[0.08] rounded-full text-[12px] text-white/80 hover:text-white hover:border-white/[0.16] transition-colors">
               <FileText className="w-3.5 h-3.5 shrink-0 text-[#8ec5ff]" />
               <span className="truncate">{pages.find(p => p.id === activePage)?.title ?? 'Page'}</span>
               <ChevronDown className={`w-3.5 h-3.5 shrink-0 text-white/50 transition-transform ${showPages ? 'rotate-180' : ''}`} />
@@ -788,7 +789,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {/* Undo/Redo */}
           <button onClick={() => editorRef.current?.UndoManager.undo()} aria-label="Undo" title="Undo" className={toolBtn(false)}>
             <Undo2 className="w-4 h-4" />
