@@ -4,6 +4,32 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import { normalizeTheme, themeHead } from '@/lib/theme'
 import { seoForPage } from '@/lib/seo'
+import { headers } from 'next/headers'
+import { isPlatformHost, lookupKey } from '@/lib/custom-domains'
+
+// Published sites are public, but RLS only lets owners read their projects and
+// pages. Read with the service role, always filtered to is_published = true, so
+// visitors can see published sites without opening the tables to anonymous
+// REST enumeration. Falls back to the session client if the key is missing.
+async function readClient() {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  }
+  return createClient()
+}
+
+// The customer's own domain when this request arrived through one, else null.
+// Only trusted when the real Host is a non-BAM domain matching the header the
+// middleware sets, so a visitor cannot spoof it on beyondamedium.io.
+async function customDomainHost(): Promise<string | null> {
+  const h = await headers()
+  const host = h.get('host')
+  const claimed = h.get('x-bam-custom-domain')
+  if (!host || !claimed || isPlatformHost(host)) return null
+  return lookupKey(host) === lookupKey(claimed) ? host.toLowerCase() : null
+}
 
 // Paid plans get the watermark removed. Read the owner's plan with the service
 // role (RLS blocks anonymous visitors from reading another user's credits).
@@ -31,7 +57,7 @@ interface PageProps {
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const { page: pageSlug } = await searchParams
-  const supabase = await createClient()
+  const supabase = await readClient()
   const { data: project } = await supabase
     .from('projects')
     .select('id, name, description, settings')
@@ -52,7 +78,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const seo = seoForPage(project.settings, currentSlug)
   const title = seo?.title || project.name
   const description = seo?.description || project.description || `${project.name} — Built with Beyond A Medium`
-  const canonical = pageSlug ? `/p/${slug}?page=${encodeURIComponent(pageSlug)}` : `/p/${slug}`
+  const domain = await customDomainHost()
+  const query = pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''
+  // On a customer domain the site lives at its root; canonical points there.
+  const canonical = domain ? `https://${domain}/${query}` : `/p/${slug}${query}`
 
   return {
     // absolute: owner-written titles already include the brand; skip the root "%s — Beyond A Medium" template.
@@ -68,7 +97,11 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
   const { slug } = await params
   const { page: pageSlug } = await searchParams
 
-  const supabase = await createClient()
+  const supabase = await readClient()
+  const domain = await customDomainHost()
+  // Links inside the site: root-relative on a customer domain, /p/<slug> on BAM.
+  const siteBase = domain ? '/' : `/p/${escapeAttr(slug)}`
+  const pageHref = (s: string) => (domain ? `/?page=${escapeAttr(s)}` : `/p/${escapeAttr(slug)}?page=${escapeAttr(s)}`)
 
   // Get published project
   const { data: project } = await supabase
@@ -130,10 +163,10 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
   const currentSlug = pageSlug ?? (page.is_home ? page.slug : '')
   const navHtml = navPages.length > 1 ? `
     <nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,23,42,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.1);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between">
-      <a href="/p/${escapeAttr(slug)}" target="_top" style="color:white;font-weight:700;font-size:16px;text-decoration:none">${escapeHtml(project.name)}</a>
+      <a href="${siteBase}" target="_top" style="color:white;font-weight:700;font-size:16px;text-decoration:none">${escapeHtml(project.name)}</a>
       <div style="display:flex;gap:24px;align-items:center">
         ${navPages.map((p: { title: string; slug: string; is_home: boolean }) =>
-          `<a href="${p.is_home ? `/p/${escapeAttr(slug)}` : `/p/${escapeAttr(slug)}?page=${escapeAttr(p.slug)}`}" target="_top" style="color:${p.slug === currentSlug ? 'white' : 'rgba(255,255,255,0.5)'};font-size:13px;text-decoration:none;font-weight:500">${escapeHtml(p.title)}</a>`,
+          `<a href="${p.is_home ? siteBase : pageHref(p.slug)}" target="_top" style="color:${p.slug === currentSlug ? 'white' : 'rgba(255,255,255,0.5)'};font-size:13px;text-decoration:none;font-weight:500">${escapeHtml(p.title)}</a>`,
         ).join('')}
       </div>
     </nav>` : ''

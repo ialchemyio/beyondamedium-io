@@ -29,12 +29,15 @@ in order. Both are idempotent (safe to re-run).
       → `project-assets` storage bucket + per-user RLS (image uploads in the builder)
 - [ ] `supabase/migrations/20261102_project_limits.sql`
       → enforces plan project limits (Starter 1, Builder 5, Pro/BAM unlimited) via a DB trigger + `my_project_quota()`
+- [ ] `supabase/migrations/20261102_custom_domains.sql`
+      → `custom_domains` table (request → team activates); migrates any old `projects.custom_domain` values as requests
 
 **Verify:** in SQL Editor run
 ```sql
 select proname from pg_proc where proname in ('deduct_credits','add_purchased_credits','provision_plan');
 select id, public from storage.buckets where id = 'project-assets';
 select tgname from pg_trigger where tgname = 'projects_enforce_limit';
+select count(*) from public.custom_domains;
 ```
 Expect all three functions + the bucket row. Without the functions, billing + AI
 generation return 500; without the bucket, builder image uploads fail.
@@ -93,6 +96,18 @@ Fires only when a key is set AND the visitor accepts analytics cookies.
 Reject cookies → no events fire.
 
 ---
+
+## 4b. Custom domains (optional env + team runbook)
+- [ ] Coolify: `BAM_TEAM_EMAIL` = where domain requests are emailed (needs `RESEND_API_KEY`; otherwise check the table)
+- [ ] Optional: `NEXT_PUBLIC_CUSTOM_DOMAIN_TARGET` (**Build Variable**) = the server IP or hostname customers point DNS at.
+      Leave unset to keep the origin IP private; customers are then told the team will email the records.
+
+**Activating a requested domain:**
+1. Customer DNS: `A @ → <server IP>` and `CNAME www → <their domain>`, DNS-only (not proxied).
+2. Coolify → app → Domains: add `https://<domain>,https://www.<domain>` → Redeploy (Traefik routes it + issues the cert).
+3. Supabase SQL: `update public.custom_domains set status='active', activated_at=now() where domain='<domain>';`
+4. Verify: `curl -sI https://<domain>` → 200, and the page shows their site (allow ~60s for the app's domain cache).
+   To decline: `update public.custom_domains set status='rejected', note='<reason shown to the customer>' where domain='<domain>';`
 
 ## 5. Supabase auth URLs (confirm)
 Supabase → Authentication → URL Configuration:

@@ -34,7 +34,7 @@ export default function ProjectSettingsPage() {
     const supabase = createClient()
     await supabase.from('projects').update({
       name: project.name, slug: project.slug, description: project.description,
-      custom_domain: project.custom_domain, is_published: project.is_published,
+      is_published: project.is_published,
     }).eq('id', projectId)
     setSaving(false)
     setSaved(true)
@@ -85,8 +85,10 @@ export default function ProjectSettingsPage() {
           <textarea value={project.description} onChange={e => setProject({ ...project, description: e.target.value })} rows={3} className={inp + ' resize-y'} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/50 mb-1.5">Custom Domain</label>
-          <input value={project.custom_domain ?? ''} onChange={e => setProject({ ...project, custom_domain: e.target.value || null })} placeholder="www.example.com" className={inp} />
+          <p className="block text-xs font-medium text-white/60 mb-1.5">Custom Domain</p>
+          <Link href="/dashboard/domains" className="text-sm text-[#8ec5ff] hover:text-white underline underline-offset-2">
+            Manage custom domains
+          </Link>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={project.is_published} onChange={e => setProject({ ...project, is_published: e.target.checked })} className="w-4 h-4 rounded" />
