@@ -1,5 +1,18 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — App header no longer causes sideways scroll
+
+**WHY:** At 1085px every dashboard page (the wizard included) was 1204px wide. The header's left side (logo+nav, 758px) plus the right side (credits, Build with AI, email, Sign out, 406px) didn't fit, and the "Build with AI" pill wrapped onto 3 lines.
+**WHAT:** `src/app/(app)/layout.tsx`:
+- Left cluster and nav get `min-w-0`, so the nav scrolls internally if needed; the logo and right cluster get `shrink-0`.
+- Email is `hidden xl:inline`, truncated to 200px, with a `title`.
+- The pill and Sign out are `whitespace-nowrap`.
+- Nav links are `px-2 xl:px-2.5`.
+**VERIFIED:**
+- Same changes applied as inline styles to the live header at 1085px: page width 1204 → 1085, nav 633/633 (no internal scroll), pill one line (30px), Sign out right edge 1061.
+- `tsc` passes, `npm test` 46/46, the build compiles.
+- UNVERIFIED: the deployed classes themselves (pending push).
+
 ## 2026-11-02 — Wizard build verified on prod; editor CSS parser fix (pending deploy)
 
 **Wizard build (prod build 0BFyTO1M, after the model fix 80be3f8):**
