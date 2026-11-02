@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Globe, Settings, ExternalLink, Layout, Wand2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { isProjectLimitError, parseQuota, quotaReached, quotaLabel, type ProjectQuota } from '@/lib/project-limits'
 
 interface Project {
   id: string
@@ -27,16 +28,26 @@ export default function DashboardPage() {
   const [newName, setNewName] = useState('')
   const [newSlug, setNewSlug] = useState('')
   const [creating, setCreating] = useState(false)
+  const [quota, setQuota] = useState<ProjectQuota | null>(null)
 
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
+      const [{ data }, { data: quotaRow }] = await Promise.all([
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.rpc('my_project_quota'),
+      ])
       setProjects(data ?? [])
+      setQuota(parseQuota(quotaRow))
       setLoading(false)
     }
     load()
   }, [])
+
+  const atLimit = quotaReached(quota)
+  const openProjectUpgrade = () => window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'projects' } }))
+  // At the plan limit, "new project" actions open the upgrade modal instead.
+  const startBlank = () => (atLimit ? openProjectUpgrade() : setShowCreate(true))
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -45,7 +56,7 @@ export default function DashboardPage() {
 
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setCreating(false); return }
 
     const slug = newSlug || slugify(newName)
 
@@ -56,8 +67,13 @@ export default function DashboardPage() {
       .single()
 
     if (error) {
-      alert(error.message)
       setCreating(false)
+      if (isProjectLimitError(error)) {
+        setShowCreate(false)
+        openProjectUpgrade()
+        return
+      }
+      alert(error.message)
       return
     }
 
@@ -80,13 +96,26 @@ export default function DashboardPage() {
           <h1 className="font-display text-[28px] font-bold text-white">Your projects</h1>
           <p className="text-[14px] text-white/60 mt-1">Build, edit, and publish your websites.</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="bam-pill-ghost px-5 py-2.5 text-[14px]"
-        >
-          <Plus className="w-4 h-4" /> Blank project
-        </button>
+        <div className="flex items-center gap-3">
+          {quota && (
+            <span className={`text-[12px] px-3 py-1.5 rounded-full border ${atLimit ? 'border-amber-400/35 bg-amber-500/10 text-amber-200' : 'border-white/10 text-white/65'}`}>
+              {quotaLabel(quota)}
+            </span>
+          )}
+          <button onClick={startBlank} className="bam-pill-ghost px-5 py-2.5 text-[14px]">
+            <Plus className="w-4 h-4" /> Blank project
+          </button>
+        </div>
       </div>
+
+      {atLimit && (
+        <div role="status" className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <p className="flex-1 text-[14px] text-amber-100">
+            Your plan&rsquo;s project limit is reached. Upgrade to create more sites. You can still edit and rebuild the projects you have.
+          </p>
+          <button onClick={openProjectUpgrade} className="bam-pill px-5 py-2 text-[13px] shrink-0">See plans</button>
+        </div>
+      )}
 
       {/* AI Site Wizard launch card */}
       <Link
@@ -155,7 +184,7 @@ export default function DashboardPage() {
           <p className="text-sm text-white/60 mb-6">Create your first website to get started.</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/dashboard/new" className="bam-pill px-6 py-2.5 text-sm"><Wand2 className="w-4 h-4" /> Build with AI</Link>
-            <button onClick={() => setShowCreate(true)} className="bam-pill-ghost px-6 py-2.5 text-sm">Blank project</button>
+            <button onClick={startBlank} className="bam-pill-ghost px-6 py-2.5 text-sm">Blank project</button>
           </div>
         </div>
       ) : (

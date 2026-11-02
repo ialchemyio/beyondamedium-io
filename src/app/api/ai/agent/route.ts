@@ -6,6 +6,7 @@ import { checkCredits, deductCredits, refundCredits } from '@/lib/credits'
 import { userOwnsProject } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { buildAgentSystem } from '@/lib/beyond-design'
+import { isProjectLimitError, parseQuota, quotaReached } from '@/lib/project-limits'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -31,6 +32,20 @@ export async function POST(request: Request) {
     // If targeting an existing project, the caller must own it (we delete its pages).
     if (projectId && !(await userOwnsProject(supabase, projectId, user.id))) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
+
+    // A new project must fit the plan's project limit. Check before charging
+    // credits or calling the model; the DB trigger is the final guard.
+    if (!projectId) {
+      const { data: quotaRow } = await supabase.rpc('my_project_quota')
+      const quota = parseQuota(quotaRow)
+      if (quotaReached(quota)) {
+        return NextResponse.json({
+          error: `Your ${quota?.plan ?? 'current'} plan includes ${quota?.max_projects} project${quota?.max_projects === 1 ? '' : 's'}, and you've used ${quota?.used}. Upgrade to build another site, or rebuild an existing project.`,
+          upgrade: true,
+          reason: 'projects',
+        }, { status: 402 })
+      }
     }
 
     // Credit check + deduct
@@ -119,7 +134,14 @@ export async function POST(request: Request) {
         description: result.description || '',
       }).select().single()
 
-      if (projError) return NextResponse.json({ error: projError.message }, { status: 500 })
+      if (projError) {
+        // The build ran but could not be saved: give the credits back.
+        await refundCredits(user.id, creditCost, 'agent_build')
+        if (isProjectLimitError(projError)) {
+          return NextResponse.json({ error: 'You have reached your plan\'s project limit. Upgrade to build another site. Your credits were returned.', upgrade: true, reason: 'projects' }, { status: 402 })
+        }
+        return NextResponse.json({ error: `${projError.message}. Your credits were returned.` }, { status: 500 })
+      }
 
       for (let i = 0; i < result.pages.length; i++) {
         const page = result.pages[i]

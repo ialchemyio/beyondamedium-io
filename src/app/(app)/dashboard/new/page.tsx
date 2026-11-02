@@ -11,6 +11,8 @@ import {
   EMPTY_BRIEF, INDUSTRY_OPTIONS, MAX_EXTRA_PAGES, PAGE_OPTIONS,
   buildSitePrompt, validateBrief, type SiteBrief,
 } from '@/lib/site-brief'
+import { createClient } from '@/lib/supabase/client'
+import { parseQuota, quotaReached, quotaLabel, type ProjectQuota } from '@/lib/project-limits'
 
 const STEPS = ['Business', 'Details', 'Pages', 'Design', 'Build'] as const
 
@@ -37,8 +39,16 @@ export default function SiteWizardPage() {
   const [result, setResult] = useState<BuildResult | null>(null)
   const [failure, setFailure] = useState('')
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [quota, setQuota] = useState<ProjectQuota | null>(null)
 
   useEffect(() => () => { if (timer.current) clearInterval(timer.current) }, [])
+
+  // Know up front whether the plan has room for another project.
+  useEffect(() => {
+    createClient().rpc('my_project_quota').then(({ data }) => setQuota(parseQuota(data)), () => {})
+  }, [])
+  const atLimit = quotaReached(quota)
+  const openProjectUpgrade = () => window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'projects' } }))
 
   const set = <K extends keyof SiteBrief>(k: K, v: SiteBrief[K]) => setBrief(b => ({ ...b, [k]: v }))
   const fullBrief = (): SiteBrief => ({ ...brief, services: servicesText.split('\n') })
@@ -83,6 +93,10 @@ export default function SiteWizardPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (res.status === 402 || data.upgrade) {
+        if (data.reason === 'projects') {
+          openProjectUpgrade()
+          throw new Error(data.error || 'You have reached your plan\'s project limit.')
+        }
         window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'credits', needed: data.needed ?? CREDIT_COSTS.agent_build } }))
         throw new Error(`A full site build needs ${CREDIT_COSTS.agent_build} credits. Top up or upgrade to continue.`)
       }
@@ -197,6 +211,15 @@ export default function SiteWizardPage() {
           </li>
         ))}
       </ol>
+
+      {atLimit && quota && (
+        <div role="alert" className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <p className="flex-1 text-[14px] text-amber-100">
+            You&rsquo;ve used your plan&rsquo;s projects ({quotaLabel(quota)}). Upgrade to build another site, or rebuild an existing project from its editor.
+          </p>
+          <button type="button" onClick={openProjectUpgrade} className="bam-pill px-5 py-2 text-[13px] shrink-0">See plans</button>
+        </div>
+      )}
 
       <div className="bam-glass rounded-3xl p-6 sm:p-8">
         {step === 0 && (
@@ -348,8 +371,8 @@ export default function SiteWizardPage() {
               Continue <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <button type="button" onClick={build} className="bam-pill text-[15px] px-7 py-3">
-              <Sparkles className="w-4 h-4" /> Build my site
+            <button type="button" onClick={atLimit ? openProjectUpgrade : build} className="bam-pill text-[15px] px-7 py-3">
+              <Sparkles className="w-4 h-4" /> {atLimit ? 'Upgrade to build' : 'Build my site'}
             </button>
           )}
         </div>

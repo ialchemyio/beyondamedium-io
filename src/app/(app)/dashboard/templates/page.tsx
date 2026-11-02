@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { isProjectLimitError } from '@/lib/project-limits'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Layout, Download, Search, Sparkles, Eye, TrendingUp, Crown, Lock } from 'lucide-react'
@@ -111,9 +112,15 @@ export default function TemplatesPage() {
     let projectId = projects?.[0]?.id
 
     if (!projectId) {
-      const { data: newProject } = await supabase.from('projects').insert({
+      const { data: newProject, error: projError } = await supabase.from('projects').insert({
         user_id: user.id, name: 'My Website', slug: `site-${Date.now().toString(36)}`, description: '',
       }).select().single()
+      if (projError) {
+        setCloning(null)
+        if (isProjectLimitError(projError)) window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'projects' } }))
+        else alert(projError.message)
+        return
+      }
       projectId = newProject?.id
     }
 

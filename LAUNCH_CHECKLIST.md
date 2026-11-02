@@ -27,11 +27,14 @@ in order. Both are idempotent (safe to re-run).
       → experiments/variants writes become authenticated-only
 - [ ] `supabase/migrations/20260720_storage_assets.sql`
       → `project-assets` storage bucket + per-user RLS (image uploads in the builder)
+- [ ] `supabase/migrations/20261102_project_limits.sql`
+      → enforces plan project limits (Starter 1, Builder 5, Pro/BAM unlimited) via a DB trigger + `my_project_quota()`
 
 **Verify:** in SQL Editor run
 ```sql
 select proname from pg_proc where proname in ('deduct_credits','add_purchased_credits','provision_plan');
 select id, public from storage.buckets where id = 'project-assets';
+select tgname from pg_trigger where tgname = 'projects_enforce_limit';
 ```
 Expect all three functions + the bucket row. Without the functions, billing + AI
 generation return 500; without the bucket, builder image uploads fail.

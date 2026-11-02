@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { isProjectLimitError } from '@/lib/project-limits'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -101,11 +102,16 @@ export default function RevenueSystemsPage() {
     if (!user || !system) { setCloning(null); return }
 
     const slug = system.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '-' + Date.now().toString(36)
-    const { data: project } = await supabase.from('projects').insert({
+    const { data: project, error: projError } = await supabase.from('projects').insert({
       user_id: user.id, name: system.name, slug, description: system.description,
     }).select().single()
 
-    if (!project) { setCloning(null); return }
+    if (projError || !project) {
+      setCloning(null)
+      if (isProjectLimitError(projError)) window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'projects' } }))
+      else alert(projError?.message ?? 'Could not create the project.')
+      return
+    }
 
     await supabase.from('pages').insert({
       project_id: project.id, title: 'Home', slug: 'index', html: system.html, css: system.html.includes('<style>') ? '' : '', is_home: true, sort_order: 0,
