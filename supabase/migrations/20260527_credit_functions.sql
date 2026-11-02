@@ -127,6 +127,14 @@ $$;
 alter table public.user_credits alter column credits_remaining set default 50;
 alter table public.user_credits alter column credits_monthly set default 50;
 
-revoke all on function public.deduct_credits(uuid, int, text) from anon, authenticated;
-revoke all on function public.add_purchased_credits(uuid, int, text) from anon, authenticated;
-revoke all on function public.provision_plan(uuid, text, int, text, text, timestamptz, timestamptz) from anon, authenticated;
+-- Postgres grants EXECUTE on new functions to PUBLIC, so revoking from anon /
+-- authenticated alone still lets anyone call these (verified locally). These are
+-- SECURITY DEFINER and take an arbitrary user id: callable by the public they
+-- would let anyone grant themselves credits or a paid plan. Only the server's
+-- service role may execute them.
+revoke all on function public.deduct_credits(uuid, int, text) from public, anon, authenticated;
+revoke all on function public.add_purchased_credits(uuid, int, text) from public, anon, authenticated;
+revoke all on function public.provision_plan(uuid, text, int, text, text, timestamptz, timestamptz) from public, anon, authenticated;
+grant execute on function public.deduct_credits(uuid, int, text) to service_role;
+grant execute on function public.add_purchased_credits(uuid, int, text) to service_role;
+grant execute on function public.provision_plan(uuid, text, int, text, text, timestamptz, timestamptz) to service_role;

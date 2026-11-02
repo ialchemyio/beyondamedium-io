@@ -42,8 +42,11 @@ as $$
   left join public.user_credits uc on uc.user_id = me.uid
 $$;
 
-revoke all on function public.my_project_quota() from anon;
-grant execute on function public.my_project_quota() to authenticated;
+-- Postgres grants EXECUTE to PUBLIC by default; revoke that too (anon could call it).
+revoke all on function public.my_project_quota() from public, anon;
+grant execute on function public.my_project_quota() to authenticated, service_role;
+revoke all on function public.plan_project_limit(text) from public, anon;
+grant execute on function public.plan_project_limit(text) to authenticated, service_role;
 
 -- BEFORE INSERT guard on projects.
 create or replace function public.enforce_project_limit()
