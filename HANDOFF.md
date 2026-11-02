@@ -1,5 +1,14 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Coolify Watch Paths set (docs/SQL pushes no longer redeploy)
+
+- Coolify (Tailscale `http://100.123.195.49:8000`) → BAM.IO → production → beyondamedium-io app → General → Build & deploy → **Watch paths** (was empty = every push deployed):
+  `src/**`, `public/**`, `package.json`, `package-lock.json`, `Dockerfile`, `next.config.ts`, `tsconfig.json`, `postcss.config.mjs`.
+- Saved ("Application settings updated"), value confirmed after reload. Coolify shows "Changes pending" (generic: config differs from last deploy); watch paths are read by the webhook at push time, so no redeploy was done. The badge clears on the next real deploy.
+- **If you add a new top-level build input** (e.g. `tailwind.config.*`, `middleware` outside `src/`, a new config file), add it to Watch paths or its changes won't deploy.
+
+---
+
 ## 2026-11-02 — Prod migrations complete + verified (owner ran RUN_ON_PROD_2026-11-02.sql)
 
 ### VERIFIED on prod (anon-key REST probes from the browser pane, read-only)
