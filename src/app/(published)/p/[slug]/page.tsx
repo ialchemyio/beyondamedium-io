@@ -177,7 +177,7 @@ export default async function PublishedSitePage({ params, searchParams }: PagePr
   // Free tier keeps the watermark; paid plans remove it.
   const showWatermark = !(await ownerHasPaidPlan(project.user_id))
   const watermarkHtml = showWatermark
-    ? `<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:10px;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif">Built with <a href="https://beyondamedium.io" target="_top" style="color:#22d3ee;text-decoration:none;font-weight:600">BAM</a></div>`
+    ? `<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:10px;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif">Built with <a href="https://beyondamedium.io" target="_top" style="color:#8ec5ff;text-decoration:none;font-weight:600">BAM</a></div>`
     : ''
 
   const srcDoc = `<!DOCTYPE html>

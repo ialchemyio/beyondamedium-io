@@ -52,7 +52,7 @@ export default function CreditsIndicator({ variant = 'compact', refreshTrigger =
 
   // Color scheme based on warning level
   const colors = {
-    none: { bg: 'bg-white/[0.04]', text: 'text-white/60', accent: 'bg-cyan-500', glow: '' },
+    none: { bg: 'bg-white/[0.04]', text: 'text-white/60', accent: 'bg-[#1f8fff]', glow: '' },
     warn: { bg: 'bg-amber-500/10', text: 'text-amber-300', accent: 'bg-amber-500', glow: 'shadow-amber-500/20' },
     urgent: { bg: 'bg-orange-500/15', text: 'text-orange-300', accent: 'bg-orange-500', glow: 'shadow-orange-500/30' },
     critical: { bg: 'bg-red-500/15', text: 'text-red-300', accent: 'bg-red-500', glow: 'shadow-red-500/40 animate-pulse' },

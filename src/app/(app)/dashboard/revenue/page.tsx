@@ -51,7 +51,7 @@ export default function RevenuePage() {
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
   const stats = [
-    { label: 'Total Orders', value: totalOrders.toString(), icon: ShoppingBag, color: 'text-cyan-400' },
+    { label: 'Total Orders', value: totalOrders.toString(), icon: ShoppingBag, color: 'text-[#8ec5ff]' },
     { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-400' },
     { label: 'BAM Revenue (14%)', value: `$${bamRevenue.toFixed(2)}`, icon: Percent, color: 'text-amber-400' },
     { label: 'Restaurant Revenue', value: `$${clientRevenue.toFixed(2)}`, icon: TrendingUp, color: 'text-violet-400' },
@@ -86,10 +86,10 @@ export default function RevenuePage() {
 
       {/* AOV indicator */}
       {totalOrders > 0 && (
-        <div className="bg-cyan-500/[0.04] border border-cyan-500/15 rounded-2xl p-4 mb-6 flex items-center gap-3">
-          <TrendingUp className="w-4 h-4 text-cyan-400" />
+        <div className="bg-[#1f8fff]/[0.04] border border-[#4aa8ff]/15 rounded-2xl p-4 mb-6 flex items-center gap-3">
+          <TrendingUp className="w-4 h-4 text-[#8ec5ff]" />
           <div>
-            <p className="text-xs text-cyan-400 font-medium">Avg Order Value: ${avgOrderValue.toFixed(2)}</p>
+            <p className="text-xs text-[#8ec5ff] font-medium">Avg Order Value: ${avgOrderValue.toFixed(2)}</p>
             <p className="text-[10px] text-white/40">{totalOrders} completed orders this period</p>
           </div>
         </div>

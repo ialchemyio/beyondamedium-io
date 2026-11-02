@@ -1518,209 +1518,124 @@ async function uploadAssets(files: File[], projectId: string): Promise<string[]>
 
 function addCustomBlocks(editor: GjsEditor) {
   const bm = editor.BlockManager
+  // Every block reads the site theme (var(--bam-*), .bam-btn, .bam-card), so it
+  // matches whatever theme the site uses. Copy is bracketed placeholders, never
+  // invented names, reviews, prices or stats: users fill in their real details.
+  const wrap = (inner: string, bg = 'var(--bam-bg)') =>
+    `<section style="padding:88px 24px;background:${bg}"><div class="bam-container">${inner}</div></section>`
+  const heading = (text: string) =>
+    `<h2 style="font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.15;margin:0 0 12px">${text}</h2>`
+  const lede = (text: string) =>
+    `<p class="bam-muted" style="font-size:18px;line-height:1.6;margin:0 0 40px;max-width:620px">${text}</p>`
 
-  // Hero Section
   bm.add('hero-section', {
     label: 'Hero Section',
     category: 'Sections',
-    content: `<section style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 40px;background:linear-gradient(135deg,#0f172a,#1e293b)">
-      <div style="max-width:800px">
-        <h1 style="font-size:48px;font-weight:800;color:white;margin-bottom:20px;line-height:1.1">Your Amazing Headline Here</h1>
-        <p style="font-size:20px;color:rgba(255,255,255,0.6);margin-bottom:40px;line-height:1.6">Describe your product or service in a compelling way that makes visitors want to learn more.</p>
-        <a href="#" style="display:inline-block;padding:16px 32px;background:#06b6d4;color:white;font-weight:600;border-radius:12px;text-decoration:none;font-size:16px">Get Started</a>
-      </div>
-    </section>`,
+    content: `<section style="padding:120px 24px 104px;background:var(--bam-bg)"><div class="bam-container" style="max-width:820px;text-align:center">
+        <p style="font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bam-primary);margin:0 0 16px">[Your business · City]</p>
+        <h1 style="font-size:clamp(36px,6vw,60px);font-weight:800;line-height:1.05;margin:0 0 20px">[What you do, in one clear line]</h1>
+        <p class="bam-muted" style="font-size:19px;line-height:1.6;margin:0 auto 36px;max-width:600px">[Who it's for and why they should choose you. One or two sentences.]</p>
+        <a href="#" class="bam-btn">[Main action, e.g. Book a visit]</a>
+      </div></section>`,
   })
 
-  // Features Grid
   bm.add('features-grid', {
     label: 'Features Grid',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:#ffffff">
-      <div style="max-width:1000px;margin:0 auto">
-        <h2 style="font-size:36px;font-weight:700;text-align:center;margin-bottom:16px;color:#0f172a">Features</h2>
-        <p style="text-align:center;color:#64748b;margin-bottom:48px;font-size:18px">Everything you need to succeed</p>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px">
-          <div style="padding:32px;border-radius:16px;border:1px solid #e2e8f0">
-            <h3 style="font-size:18px;font-weight:600;margin-bottom:8px;color:#0f172a">Feature One</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">Description of this amazing feature and why it matters to your users.</p>
-          </div>
-          <div style="padding:32px;border-radius:16px;border:1px solid #e2e8f0">
-            <h3 style="font-size:18px;font-weight:600;margin-bottom:8px;color:#0f172a">Feature Two</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">Description of this amazing feature and why it matters to your users.</p>
-          </div>
-          <div style="padding:32px;border-radius:16px;border:1px solid #e2e8f0">
-            <h3 style="font-size:18px;font-weight:600;margin-bottom:8px;color:#0f172a">Feature Three</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">Description of this amazing feature and why it matters to your users.</p>
-          </div>
-        </div>
-      </div>
-    </section>`,
+    content: wrap(`${heading('[What you offer]')}${lede('[A sentence that sums up your services.]')}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px">
+          ${['[Service one]', '[Service two]', '[Service three]'].map(t => `<div class="bam-card">
+            <h3 style="font-size:19px;font-weight:600;margin:0 0 8px">${t}</h3>
+            <p class="bam-muted" style="font-size:15px;line-height:1.6;margin:0">[What it is and how it helps your customer.]</p>
+          </div>`).join('')}
+        </div>`),
   })
 
-  // Pricing Table
   bm.add('pricing-section', {
     label: 'Pricing Table',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:#f8fafc">
-      <div style="max-width:1000px;margin:0 auto">
-        <h2 style="font-size:36px;font-weight:700;text-align:center;margin-bottom:48px;color:#0f172a">Pricing</h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-          <div style="padding:40px;background:white;border-radius:16px;border:1px solid #e2e8f0;text-align:center">
-            <h3 style="font-size:20px;font-weight:600;color:#0f172a">Starter</h3>
-            <div style="font-size:48px;font-weight:800;margin:16px 0;color:#0f172a">$9<span style="font-size:16px;color:#94a3b8">/mo</span></div>
-            <ul style="list-style:none;padding:0;margin:24px 0;text-align:left;color:#64748b;font-size:14px;line-height:2.2">
-              <li>5 Projects</li><li>Basic Analytics</li><li>Email Support</li>
+    content: wrap(`${heading('[Pricing]')}${lede('[Add your real prices. Delete any column you don’t need.]')}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px">
+          ${['[Option one]', '[Option two]', '[Option three]'].map((t, i) => `<div class="bam-card" style="${i === 1 ? 'outline:2px solid var(--bam-primary);' : ''}display:flex;flex-direction:column;gap:12px">
+            <h3 style="font-size:19px;font-weight:600;margin:0">${t}</h3>
+            <div style="font-size:36px;font-weight:800">[$ price]</div>
+            <ul class="bam-muted" style="margin:0;padding-left:18px;font-size:15px;line-height:2">
+              <li>[What’s included]</li><li>[What’s included]</li><li>[What’s included]</li>
             </ul>
-            <a href="#" style="display:block;padding:12px;background:#e2e8f0;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600">Choose Plan</a>
-          </div>
-          <div style="padding:40px;background:#0f172a;border-radius:16px;text-align:center;color:white;transform:scale(1.05)">
-            <h3 style="font-size:20px;font-weight:600">Pro</h3>
-            <div style="font-size:48px;font-weight:800;margin:16px 0">$29<span style="font-size:16px;color:rgba(255,255,255,0.5)">/mo</span></div>
-            <ul style="list-style:none;padding:0;margin:24px 0;text-align:left;color:rgba(255,255,255,0.7);font-size:14px;line-height:2.2">
-              <li>Unlimited Projects</li><li>Advanced Analytics</li><li>Priority Support</li><li>Custom Domain</li>
-            </ul>
-            <a href="#" style="display:block;padding:12px;background:#06b6d4;color:white;border-radius:10px;text-decoration:none;font-weight:600">Choose Plan</a>
-          </div>
-          <div style="padding:40px;background:white;border-radius:16px;border:1px solid #e2e8f0;text-align:center">
-            <h3 style="font-size:20px;font-weight:600;color:#0f172a">Enterprise</h3>
-            <div style="font-size:48px;font-weight:800;margin:16px 0;color:#0f172a">$99<span style="font-size:16px;color:#94a3b8">/mo</span></div>
-            <ul style="list-style:none;padding:0;margin:24px 0;text-align:left;color:#64748b;font-size:14px;line-height:2.2">
-              <li>Everything in Pro</li><li>White Label</li><li>API Access</li><li>Dedicated Support</li>
-            </ul>
-            <a href="#" style="display:block;padding:12px;background:#e2e8f0;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600">Choose Plan</a>
-          </div>
-        </div>
-      </div>
-    </section>`,
+            <a href="#" class="bam-btn" style="text-align:center;margin-top:auto">[Choose]</a>
+          </div>`).join('')}
+        </div>`, 'var(--bam-surface)'),
   })
 
-  // CTA Section
   bm.add('cta-section', {
     label: 'CTA Section',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:linear-gradient(135deg,#06b6d4,#3b82f6);text-align:center">
-      <h2 style="font-size:36px;font-weight:700;color:white;margin-bottom:16px">Ready to get started?</h2>
-      <p style="font-size:18px;color:rgba(255,255,255,0.8);margin-bottom:32px">Join thousands of happy customers today.</p>
-      <a href="#" style="display:inline-block;padding:16px 40px;background:white;color:#0f172a;font-weight:700;border-radius:12px;text-decoration:none;font-size:16px">Start Free Trial</a>
-    </section>`,
+    content: `<section style="padding:88px 24px;background:var(--bam-primary);text-align:center"><div class="bam-container" style="max-width:720px">
+        <h2 style="font-size:clamp(28px,4vw,40px);font-weight:700;color:#fff;margin:0 0 12px">[Ready to get started?]</h2>
+        <p style="font-size:18px;line-height:1.6;color:rgba(255,255,255,.85);margin:0 0 32px">[One line on what happens next.]</p>
+        <a href="#" class="bam-btn" style="background:#fff;color:var(--bam-text)">[Main action]</a>
+      </div></section>`,
   })
 
-  // Testimonials
   bm.add('testimonials', {
     label: 'Testimonials',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:white">
-      <div style="max-width:1000px;margin:0 auto">
-        <h2 style="font-size:36px;font-weight:700;text-align:center;margin-bottom:48px;color:#0f172a">What Our Customers Say</h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-          <div style="padding:32px;background:#f8fafc;border-radius:16px">
-            <p style="color:#475569;font-size:14px;line-height:1.7;margin-bottom:20px">"This product changed the way we work. Highly recommended!"</p>
-            <div style="font-weight:600;color:#0f172a;font-size:14px">Sarah Johnson</div>
-            <div style="color:#94a3b8;font-size:12px">CEO, TechCorp</div>
-          </div>
-          <div style="padding:32px;background:#f8fafc;border-radius:16px">
-            <p style="color:#475569;font-size:14px;line-height:1.7;margin-bottom:20px">"Amazing quality and incredible support. Five stars!"</p>
-            <div style="font-weight:600;color:#0f172a;font-size:14px">Mike Chen</div>
-            <div style="color:#94a3b8;font-size:12px">Founder, StartupXYZ</div>
-          </div>
-          <div style="padding:32px;background:#f8fafc;border-radius:16px">
-            <p style="color:#475569;font-size:14px;line-height:1.7;margin-bottom:20px">"Best investment we made this year. ROI was immediate."</p>
-            <div style="font-weight:600;color:#0f172a;font-size:14px">Lisa Park</div>
-            <div style="color:#94a3b8;font-size:12px">Director, GlobalInc</div>
-          </div>
-        </div>
-      </div>
-    </section>`,
+    content: wrap(`${heading('[What customers say]')}${lede('[Only use real quotes from real customers, with their permission.]')}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px">
+          ${[1, 2, 3].map(() => `<figure class="bam-card" style="margin:0">
+            <blockquote style="font-size:16px;line-height:1.7;margin:0 0 20px">“[Paste a real customer quote here.]”</blockquote>
+            <figcaption><strong>[Customer name]</strong><br><span class="bam-muted" style="font-size:14px">[Their role or town]</span></figcaption>
+          </figure>`).join('')}
+        </div>`),
   })
 
-  // Footer
   bm.add('footer-section', {
     label: 'Footer',
     category: 'Sections',
-    content: `<footer style="padding:60px 40px 30px;background:#0f172a;color:rgba(255,255,255,0.5)">
-      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px">
-        <div>
-          <div style="font-size:20px;font-weight:700;color:white;margin-bottom:12px">Company</div>
-          <p style="font-size:14px;line-height:1.7">Building amazing products for the modern web.</p>
+    content: `<footer style="padding:56px 24px 28px;background:var(--bam-surface)"><div class="bam-container">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:32px;margin-bottom:32px">
+          <div><div style="font-size:19px;font-weight:700;margin-bottom:8px">[Business name]</div><p class="bam-muted" style="font-size:14px;line-height:1.7;margin:0">[One line about you.]</p></div>
+          <div><div style="font-weight:600;font-size:14px;margin-bottom:8px">Visit</div><p class="bam-muted" style="font-size:14px;line-height:1.8;margin:0">[Street address]<br>[City, State]</p></div>
+          <div><div style="font-weight:600;font-size:14px;margin-bottom:8px">Contact</div><p style="font-size:14px;line-height:1.8;margin:0"><a href="mailto:[you@yourbusiness.com]">[you@yourbusiness.com]</a><br><a href="tel:[phone]">[Phone]</a></p></div>
         </div>
-        <div>
-          <div style="font-weight:600;color:white;margin-bottom:12px;font-size:14px">Product</div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">Features</a></div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">Pricing</a></div>
-        </div>
-        <div>
-          <div style="font-weight:600;color:white;margin-bottom:12px;font-size:14px">Company</div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">About</a></div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">Blog</a></div>
-        </div>
-        <div>
-          <div style="font-weight:600;color:white;margin-bottom:12px;font-size:14px">Legal</div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">Privacy</a></div>
-          <div style="font-size:13px;line-height:2.2"><a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none">Terms</a></div>
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;text-align:center;font-size:12px">&copy; 2026 Company. All rights reserved.</div>
-    </footer>`,
+        <div class="bam-muted" style="border-top:1px solid rgba(127,127,127,.2);padding-top:20px;font-size:13px">© [Year] [Business name]</div>
+      </div></footer>`,
   })
 
-  // Contact Form
+  // Published sites have no form backend yet, so this block uses links that
+  // actually reach the owner rather than a form whose submissions go nowhere.
   bm.add('contact-form', {
-    label: 'Contact Form',
+    label: 'Contact',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:#f8fafc">
-      <div style="max-width:600px;margin:0 auto">
-        <h2 style="font-size:36px;font-weight:700;text-align:center;margin-bottom:8px;color:#0f172a">Contact Us</h2>
-        <p style="text-align:center;color:#64748b;margin-bottom:40px">We'd love to hear from you</p>
-        <form style="display:flex;flex-direction:column;gap:16px">
-          <input type="text" placeholder="Your Name" style="padding:14px 16px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;background:white" />
-          <input type="email" placeholder="Email Address" style="padding:14px 16px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;background:white" />
-          <textarea placeholder="Your Message" rows="4" style="padding:14px 16px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;background:white;resize:vertical"></textarea>
-          <button type="submit" style="padding:14px;background:#0f172a;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Send Message</button>
-        </form>
-      </div>
-    </section>`,
+    content: wrap(`<div style="max-width:620px;margin:0 auto;text-align:center">${heading('[Get in touch]')}
+        <p class="bam-muted" style="font-size:18px;line-height:1.6;margin:0 0 32px">[When and how you usually reply.]</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a href="mailto:[you@yourbusiness.com]" class="bam-btn">Email us</a>
+          <a href="tel:[phone]" class="bam-btn" style="background:transparent;color:var(--bam-text);box-shadow:inset 0 0 0 1px rgba(127,127,127,.4)">Call [phone]</a>
+        </div></div>`, 'var(--bam-surface)'),
   })
 
-  // Image + Text
   bm.add('image-text', {
     label: 'Image + Text',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:white">
-      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center">
-        <div style="background:#e2e8f0;border-radius:16px;height:400px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px">Image Placeholder</div>
-        <div>
-          <h2 style="font-size:32px;font-weight:700;color:#0f172a;margin-bottom:16px;line-height:1.2">Tell your story with impact</h2>
-          <p style="color:#64748b;font-size:16px;line-height:1.7;margin-bottom:24px">Share what makes your product or service special. Connect with your audience on a personal level.</p>
-          <a href="#" style="display:inline-block;padding:12px 24px;background:#0f172a;color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">Learn More</a>
-        </div>
-      </div>
-    </section>`,
+    content: wrap(`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:56px;align-items:center">
+        <div style="background:var(--bam-surface);border-radius:var(--bam-radius);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;color:var(--bam-muted);font-size:14px">[Drop in a real photo]</div>
+        <div>${heading('[Your story]')}
+          <p class="bam-muted" style="font-size:17px;line-height:1.7;margin:0 0 24px">[What makes your business yours: how you started, what you care about.]</p>
+          <a href="#" class="bam-btn">[Learn more]</a>
+        </div></div>`),
   })
 
-  // FAQ
   bm.add('faq-section', {
     label: 'FAQ',
     category: 'Sections',
-    content: `<section style="padding:80px 40px;background:white">
-      <div style="max-width:700px;margin:0 auto">
-        <h2 style="font-size:36px;font-weight:700;text-align:center;margin-bottom:48px;color:#0f172a">FAQ</h2>
-        <div style="border-top:1px solid #e2e8f0">
-          <div style="padding:24px 0;border-bottom:1px solid #e2e8f0">
-            <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:8px">How does it work?</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">Our platform makes it easy to get started. Simply sign up, choose a template, and customize it to your needs.</p>
-          </div>
-          <div style="padding:24px 0;border-bottom:1px solid #e2e8f0">
-            <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:8px">Can I cancel anytime?</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">Yes, you can cancel your subscription at any time. No questions asked.</p>
-          </div>
-          <div style="padding:24px 0;border-bottom:1px solid #e2e8f0">
-            <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:8px">Do you offer support?</h3>
-            <p style="color:#64748b;font-size:14px;line-height:1.6">We offer 24/7 support via email and live chat for all paid plans.</p>
-          </div>
-        </div>
-      </div>
-    </section>`,
+    content: wrap(`<div style="max-width:720px;margin:0 auto">${heading('[Questions, answered]')}
+        <div style="margin-top:32px;border-top:1px solid rgba(127,127,127,.2)">
+          ${[1, 2, 3].map(() => `<div style="padding:22px 0;border-bottom:1px solid rgba(127,127,127,.2)">
+            <h3 style="font-size:17px;font-weight:600;margin:0 0 8px">[A question customers really ask]</h3>
+            <p class="bam-muted" style="font-size:15px;line-height:1.6;margin:0">[Your answer.]</p>
+          </div>`).join('')}
+        </div></div>`),
   })
 }
 

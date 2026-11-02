@@ -112,17 +112,17 @@ function BillingInner() {
           {PLANS.map(p => {
             const current = plan === p.key
             return (
-              <div key={p.key} className={`rounded-2xl p-5 border flex flex-col ${p.popular ? 'border-cyan-500/30 bg-cyan-500/[0.04]' : 'border-white/[0.06] bg-white/[0.02]'}`}>
+              <div key={p.key} className={`rounded-2xl p-5 border flex flex-col ${p.popular ? 'border-[#4aa8ff]/30 bg-[#1f8fff]/[0.04]' : 'border-white/[0.06] bg-white/[0.02]'}`}>
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-white">{p.name}</h3>
-                  {p.popular && <span className="text-[9px] font-bold tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full">POPULAR</span>}
+                  {p.popular && <span className="text-[9px] font-bold tracking-wider text-[#8ec5ff] bg-[#1f8fff]/10 px-2 py-0.5 rounded-full">POPULAR</span>}
                 </div>
                 <p className="mt-2"><span className="text-3xl font-bold text-white">${p.price}</span><span className="text-white/30 text-xs">/mo</span></p>
                 <p className="text-[11px] text-white/40 mt-1">{p.credits}</p>
                 <ul className="space-y-1.5 my-4 flex-1">
                   {p.features.map(f => (
                     <li key={f} className="flex items-start gap-2 text-[11px] text-white/50">
-                      <Check className="w-3 h-3 mt-0.5 shrink-0 text-cyan-400/70" /> {f}
+                      <Check className="w-3 h-3 mt-0.5 shrink-0 text-[#8ec5ff]/70" /> {f}
                     </li>
                   ))}
                 </ul>
@@ -131,7 +131,7 @@ function BillingInner() {
                   disabled={current || busy === p.key}
                   className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 ${
                     current ? 'bg-white/[0.04] text-white/40 cursor-default'
-                    : p.popular ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'
+                    : p.popular ? 'bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white hover:brightness-110'
                     : 'bg-white/[0.06] text-white hover:bg-white/[0.1]'}`}>
                   {busy === p.key ? <Loader2 className="w-4 h-4 animate-spin" />
                     : current ? 'Current plan'
@@ -143,7 +143,7 @@ function BillingInner() {
         </div>
         <p className="text-[11px] text-white/30 mt-3">
           Subscriptions auto-renew monthly until cancelled. Cancel anytime from &ldquo;Manage subscription.&rdquo; See our{' '}
-          <a href="/terms" className="text-cyan-400 hover:text-cyan-300">Terms</a>. Need a done-for-you site?{' '}
+          <a href="/terms" className="text-[#8ec5ff] hover:text-[#b9dcff]">Terms</a>. Need a done-for-you site?{' '}
           <a href="https://beyondamedium.com/contact" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 inline-flex items-center gap-0.5">BAM plan <ExternalLink className="w-3 h-3" /></a>
         </p>
       </div>
@@ -161,7 +161,7 @@ function BillingInner() {
                 <>
                   <p className="text-lg font-bold text-white">{pk.credits.toLocaleString()}</p>
                   <p className="text-[10px] text-white/40">credits</p>
-                  <p className="text-sm text-cyan-400 font-mono mt-1">{pk.price}</p>
+                  <p className="text-sm text-[#8ec5ff] font-mono mt-1">{pk.price}</p>
                 </>
               )}
             </button>

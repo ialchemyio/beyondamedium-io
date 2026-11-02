@@ -26,7 +26,7 @@ export default function OpenGraphImage() {
             style={{
               width: 64, height: 64, borderRadius: 16, display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
+              background: 'linear-gradient(135deg, #4aa8ff, #7c5cff)',
               color: 'white', fontSize: 34, fontWeight: 800,
             }}
           >

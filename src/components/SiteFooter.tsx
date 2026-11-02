@@ -13,7 +13,7 @@ export default function SiteFooter() {
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 rounded bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+            <div className="w-5 h-5 rounded bg-gradient-to-br from-[#1570e0] to-[#0a5bd8] flex items-center justify-center">
               <Cpu className="w-3 h-3 text-white" />
             </div>
             <span className="text-[11px] text-white/60 font-mono">&copy; 2026 Beyond A Medium</span>

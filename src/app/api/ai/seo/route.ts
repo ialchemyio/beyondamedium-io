@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { AI_MODEL, responseText, aiErrorMessage } from '@/lib/ai'
+import { AI_MODEL, responseText, aiErrorMessage, logAiUsage } from '@/lib/ai'
 import { createClient } from '@/lib/supabase/server'
 import { deductCredits, refundCredits } from '@/lib/credits'
 import { CREDIT_COSTS } from '@/lib/credit-costs'
@@ -80,6 +80,7 @@ export async function POST(request: Request) {
     })
 
     const text = responseText(message)
+    await logAiUsage({ route: 'seo_all_pages', userId: user.id, projectId, message, credits: cost, ok: !!text })
     const entries = text ? parseSeoJson(text) : null
     const generated: SeoMap = entries ? normalizeSeo(entries, pages.map(p => p.slug)) : {}
     if (!Object.keys(generated).length) throw new Error('The AI did not return usable SEO. No credits were used.')

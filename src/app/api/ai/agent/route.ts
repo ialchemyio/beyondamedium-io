@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { AI_MODEL, responseText, aiErrorMessage } from '@/lib/ai'
+import { AI_MODEL, responseText, aiErrorMessage, logAiUsage } from '@/lib/ai'
 import { createClient } from '@/lib/supabase/server'
 import { CREDIT_COSTS } from '@/lib/stripe'
 import { checkCredits, deductCredits, refundCredits } from '@/lib/credits'
@@ -8,6 +8,7 @@ import { userOwnsProject } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { buildAgentSystem } from '@/lib/beyond-design'
 import { isProjectLimitError, parseQuota, quotaReached } from '@/lib/project-limits'
+import { newProjectSettings } from '@/lib/theme'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -78,6 +79,7 @@ export async function POST(request: Request) {
     }).finalMessage()
 
     const text = responseText(message)
+    await logAiUsage({ route: 'agent_build', userId: user.id, projectId, message, credits: creditCost, ok: !!text })
     if (!text) {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, 'agent_build'); refundCtx = null }
       return NextResponse.json({ error: 'The AI did not return a site. No credits were used — please try again.' }, { status: 500 })
@@ -135,6 +137,7 @@ export async function POST(request: Request) {
         name: result.projectName || prompt.slice(0, 50),
         slug,
         description: result.description || '',
+        settings: newProjectSettings(),
       }).select().single()
 
       if (projError) {

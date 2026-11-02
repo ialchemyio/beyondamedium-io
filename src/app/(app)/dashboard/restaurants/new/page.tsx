@@ -128,7 +128,7 @@ export default function NewRestaurantPage() {
     router.push(`/dashboard/restaurants/${restaurantId}`)
   }
 
-  const inp = 'w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none transition-colors'
+  const inp = 'w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none transition-colors'
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -142,7 +142,7 @@ export default function NewRestaurantPage() {
 
       <div className="flex items-center gap-2 mb-8">
         {[1,2,3,4].map(n => (
-          <div key={n} className={`flex-1 h-1 rounded-full transition-colors ${step >= n ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-white/[0.06]'}`} />
+          <div key={n} className={`flex-1 h-1 rounded-full transition-colors ${step >= n ? 'bg-gradient-to-r from-[#1570e0] to-[#0a5bd8]' : 'bg-white/[0.06]'}`} />
         ))}
       </div>
 
@@ -150,8 +150,8 @@ export default function NewRestaurantPage() {
       {step === 1 && (
         <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-8 space-y-5">
           <div className="text-center mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-3">
-              <ChefHat className="w-6 h-6 text-cyan-400" />
+            <div className="w-12 h-12 rounded-2xl bg-[#1f8fff]/10 flex items-center justify-center mx-auto mb-3">
+              <ChefHat className="w-6 h-6 text-[#8ec5ff]" />
             </div>
             <h1 className="text-xl font-bold text-white">Business Info</h1>
             <p className="text-sm text-white/40 mt-1">Tell us about your restaurant</p>
@@ -176,7 +176,7 @@ export default function NewRestaurantPage() {
             <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(555) 123-4567" className={inp} />
           </div>
 
-          <button onClick={createRestaurant} disabled={!name.trim() || loading} className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
+          <button onClick={createRestaurant} disabled={!name.trim() || loading} className="w-full py-3 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             Continue to Menu
           </button>
@@ -217,7 +217,7 @@ export default function NewRestaurantPage() {
             <Plus className="w-3.5 h-3.5" /> Add Another Item
           </button>
 
-          <button onClick={saveMenu} disabled={loading} className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
+          <button onClick={saveMenu} disabled={loading} className="w-full py-3 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             Continue to Payments
           </button>
@@ -235,13 +235,13 @@ export default function NewRestaurantPage() {
             <p className="text-sm text-white/40 mt-1">Get paid directly to your bank account</p>
           </div>
 
-          <div className="bg-cyan-500/[0.05] border border-cyan-500/15 rounded-xl p-4 space-y-2">
-            <p className="text-xs text-cyan-300 font-medium">How payments work</p>
+          <div className="bg-[#1f8fff]/[0.05] border border-[#4aa8ff]/15 rounded-xl p-4 space-y-2">
+            <p className="text-xs text-[#b9dcff] font-medium">How payments work</p>
             <div className="text-[11px] text-white/50 space-y-1.5">
-              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-cyan-400 mt-0.5 shrink-0" /> Customers pay through Stripe checkout</div>
-              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-cyan-400 mt-0.5 shrink-0" /> 86% goes directly to your bank account</div>
-              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-cyan-400 mt-0.5 shrink-0" /> 14% platform fee (covers hosting, support, payments)</div>
-              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-cyan-400 mt-0.5 shrink-0" /> Daily automatic payouts from Stripe</div>
+              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-[#8ec5ff] mt-0.5 shrink-0" /> Customers pay through Stripe checkout</div>
+              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-[#8ec5ff] mt-0.5 shrink-0" /> 86% goes directly to your bank account</div>
+              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-[#8ec5ff] mt-0.5 shrink-0" /> 14% platform fee (covers hosting, support, payments)</div>
+              <div className="flex items-start gap-2"><Check className="w-3 h-3 text-[#8ec5ff] mt-0.5 shrink-0" /> Daily automatic payouts from Stripe</div>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ export default function NewRestaurantPage() {
             <p className="text-sm text-white/40 mt-1">Publish your site and start taking orders</p>
           </div>
 
-          <button onClick={publish} disabled={loading} className="w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
+          <button onClick={publish} disabled={loading} className="w-full py-3 bg-gradient-to-r from-emerald-500 to-[#4aa8ff] text-white font-semibold rounded-xl hover:brightness-110 disabled:opacity-30 transition-all flex items-center justify-center gap-2">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
             Publish Restaurant
           </button>

@@ -48,9 +48,9 @@ function wrap(title: string, body: string): string {
       ${body}
     </div>
     <p style="font-size:11px;color:#94a3b8;margin-top:20px;line-height:1.6">
-      Beyond A Medium · <a href="${SITE}" style="color:#0891b2">beyondamedium.io</a><br/>
+      Beyond A Medium · <a href="${SITE}" style="color:#1268da">beyondamedium.io</a><br/>
       You received this because you have an account with us. Manage billing in your
-      <a href="${SITE}/dashboard/billing" style="color:#0891b2">dashboard</a>.
+      <a href="${SITE}/dashboard/billing" style="color:#1268da">dashboard</a>.
     </p>
   </div></body></html>`
 }
@@ -66,7 +66,7 @@ export function welcomeEmail(): { subject: string; html: string } {
         Your account is ready. Describe what you want to build, and the AI will generate it — then
         design it on the canvas and ship it in one click.
       </p>
-      <a href="${SITE}/dashboard" style="display:inline-block;margin-top:16px;background:linear-gradient(90deg,#06b6d4,#3b82f6);color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:10px 20px;border-radius:10px">Start building</a>`),
+      <a href="${SITE}/dashboard" style="display:inline-block;margin-top:16px;background:linear-gradient(90deg,#1570e0,#0a5bd8);color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:10px 20px;border-radius:10px">Start building</a>`),
   }
 }
 
@@ -82,7 +82,7 @@ export function subscriptionReceiptEmail(plan: string, amountCents: number): { s
         <tr><td style="padding:6px 0;color:#64748b">Plan</td><td style="text-align:right;font-weight:600">${nice}</td></tr>
         <tr><td style="padding:6px 0;color:#64748b">Billed</td><td style="text-align:right;font-weight:600">${money(amountCents)}/mo</td></tr>
       </table>
-      <p style="font-size:12px;color:#94a3b8;margin-top:16px">Auto-renews monthly until cancelled. Cancel anytime from your billing dashboard. See our <a href="${SITE}/refund" style="color:#0891b2">refund policy</a>.</p>`),
+      <p style="font-size:12px;color:#94a3b8;margin-top:16px">Auto-renews monthly until cancelled. Cancel anytime from your billing dashboard. See our <a href="${SITE}/refund" style="color:#1268da">refund policy</a>.</p>`),
   }
 }
 

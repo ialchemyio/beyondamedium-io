@@ -16,7 +16,24 @@ export interface SiteTheme {
   maxWidth: number
 }
 
+/** Theme for new projects. Saved on the project at creation (newProjectSettings). */
 export const DEFAULT_THEME: SiteTheme = {
+  fontHeading: 'Sora',
+  fontBody: 'DM Sans',
+  colorPrimary: '#2563eb',
+  colorBg: '#ffffff',
+  colorSurface: '#f5f7fa',
+  colorText: '#111827',
+  colorMuted: '#5b6472',
+  radius: 10,
+  maxWidth: 1120,
+}
+
+/**
+ * Fallback for projects that never saved a theme. Frozen: existing sites were
+ * built (and published) against it, so changing it would silently recolor them.
+ */
+export const LEGACY_THEME: SiteTheme = {
   fontHeading: 'Inter',
   fontBody: 'Inter',
   colorPrimary: '#06b6d4',
@@ -26,6 +43,11 @@ export const DEFAULT_THEME: SiteTheme = {
   colorMuted: '#64748b',
   radius: 12,
   maxWidth: 1100,
+}
+
+/** `settings` for a newly created project, so it starts on the current default theme. */
+export function newProjectSettings(): { theme: SiteTheme } {
+  return { theme: { ...DEFAULT_THEME } }
 }
 
 /** Google Fonts available in the theme editor (paired with the design directions). */
@@ -63,15 +85,15 @@ export const THEME_PRESETS: Array<{ name: string; theme: SiteTheme }> = [
 export function normalizeTheme(raw: unknown): SiteTheme {
   const t = (raw ?? {}) as Partial<SiteTheme>
   return {
-    fontHeading: typeof t.fontHeading === 'string' ? t.fontHeading : DEFAULT_THEME.fontHeading,
-    fontBody: typeof t.fontBody === 'string' ? t.fontBody : DEFAULT_THEME.fontBody,
-    colorPrimary: typeof t.colorPrimary === 'string' ? t.colorPrimary : DEFAULT_THEME.colorPrimary,
-    colorBg: typeof t.colorBg === 'string' ? t.colorBg : DEFAULT_THEME.colorBg,
-    colorSurface: typeof t.colorSurface === 'string' ? t.colorSurface : DEFAULT_THEME.colorSurface,
-    colorText: typeof t.colorText === 'string' ? t.colorText : DEFAULT_THEME.colorText,
-    colorMuted: typeof t.colorMuted === 'string' ? t.colorMuted : DEFAULT_THEME.colorMuted,
-    radius: typeof t.radius === 'number' ? t.radius : DEFAULT_THEME.radius,
-    maxWidth: typeof t.maxWidth === 'number' ? t.maxWidth : DEFAULT_THEME.maxWidth,
+    fontHeading: typeof t.fontHeading === 'string' ? t.fontHeading : LEGACY_THEME.fontHeading,
+    fontBody: typeof t.fontBody === 'string' ? t.fontBody : LEGACY_THEME.fontBody,
+    colorPrimary: typeof t.colorPrimary === 'string' ? t.colorPrimary : LEGACY_THEME.colorPrimary,
+    colorBg: typeof t.colorBg === 'string' ? t.colorBg : LEGACY_THEME.colorBg,
+    colorSurface: typeof t.colorSurface === 'string' ? t.colorSurface : LEGACY_THEME.colorSurface,
+    colorText: typeof t.colorText === 'string' ? t.colorText : LEGACY_THEME.colorText,
+    colorMuted: typeof t.colorMuted === 'string' ? t.colorMuted : LEGACY_THEME.colorMuted,
+    radius: typeof t.radius === 'number' ? t.radius : LEGACY_THEME.radius,
+    maxWidth: typeof t.maxWidth === 'number' ? t.maxWidth : LEGACY_THEME.maxWidth,
   }
 }
 

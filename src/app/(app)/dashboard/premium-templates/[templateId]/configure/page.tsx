@@ -456,7 +456,7 @@ function StepSocial({ social, setSocial, addMarket, removeMarket, updateMarket }
             </div>
           ))}
         </div>
-        <button onClick={addMarket} className="text-xs text-cyan-400/60 hover:text-cyan-400 mt-2 transition-colors">
+        <button onClick={addMarket} className="text-xs text-[#8ec5ff]/70 hover:text-[#8ec5ff] mt-2 transition-colors">
           + Add market
         </button>
       </div>

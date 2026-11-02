@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Layout, Download, Search, Sparkles, Eye, TrendingUp, Crown, Lock } from 'lucide-react'
 import UpgradeModal from '@/components/UpgradeModal'
+import { newProjectSettings } from '@/lib/theme'
 
 interface Template {
   id: string
@@ -36,13 +37,13 @@ const CATEGORIES = [
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
-  saas: 'from-blue-500 to-cyan-500',
+  saas: 'from-blue-500 to-[#4aa8ff]',
   restaurant: 'from-red-500 to-orange-500',
   fitness: 'from-green-500 to-emerald-500',
   ecommerce: 'from-purple-500 to-pink-500',
   realestate: 'from-amber-500 to-yellow-500',
   coaching: 'from-indigo-500 to-blue-500',
-  agency: 'from-cyan-500 to-teal-500',
+  agency: 'from-[#4aa8ff] to-teal-500',
   medical: 'from-sky-500 to-blue-500',
   legal: 'from-slate-500 to-zinc-500',
   construction: 'from-orange-500 to-amber-500',
@@ -113,7 +114,7 @@ export default function TemplatesPage() {
 
     if (!projectId) {
       const { data: newProject, error: projError } = await supabase.from('projects').insert({
-        user_id: user.id, name: 'My Website', slug: `site-${Date.now().toString(36)}`, description: '',
+        user_id: user.id, name: 'My Website', slug: `site-${Date.now().toString(36)}`, description: '', settings: newProjectSettings(),
       }).select().single()
       if (projError) {
         setCloning(null)
@@ -148,7 +149,7 @@ export default function TemplatesPage() {
           <div className="h-12 flex items-center justify-between px-6 shrink-0">
             <span className="text-sm font-medium text-white/70">{previewTemplate.name}</span>
             <div className="flex items-center gap-3">
-              <button onClick={(e) => { e.stopPropagation(); cloneTemplate(previewTemplate.id) }} className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110">
+              <button onClick={(e) => { e.stopPropagation(); cloneTemplate(previewTemplate.id) }} className="px-4 py-1.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-lg hover:brightness-110">
                 Use This Template
               </button>
               <button onClick={() => setPreviewId(null)} className="text-xs text-white/40 hover:text-white/70">Close</button>
@@ -164,7 +165,7 @@ export default function TemplatesPage() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-2xl font-bold text-white">Templates</h1>
-          <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded-full font-mono">{templates.length}</span>
+          <span className="text-xs bg-[#1f8fff]/10 text-[#8ec5ff] px-2 py-0.5 rounded-full font-mono">{templates.length}</span>
         </div>
         <p className="text-sm text-white/40">One-click clone. Fully customizable. Built to convert.</p>
       </div>
@@ -176,7 +177,7 @@ export default function TemplatesPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search templates..."
-          className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none"
+          className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none"
         />
       </div>
 
@@ -188,7 +189,7 @@ export default function TemplatesPage() {
             onClick={() => setCategory(cat.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
               category === cat.id
-                ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                ? 'bg-[#1f8fff]/10 text-[#8ec5ff] border border-[#4aa8ff]/20'
                 : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50 hover:bg-white/[0.04]'
             }`}
           >
@@ -260,7 +261,7 @@ export default function TemplatesPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs text-white font-semibold flex items-center gap-1.5 hover:brightness-110 transition-all ${
                         template.is_premium && userPlan === 'starter'
                           ? 'bg-gradient-to-r from-amber-500 to-orange-500'
-                          : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                          : 'bg-gradient-to-r from-[#1570e0] to-[#0a5bd8]'
                       }`}
                     >
                       {template.is_premium && userPlan === 'starter' ? (

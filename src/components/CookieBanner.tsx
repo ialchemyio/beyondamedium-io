@@ -108,8 +108,8 @@ export default function CookieBanner() {
               <p className="text-xs text-white/55">
                 We use strictly necessary cookies to run Beyond A Medium and, with your consent, optional cookies to improve the
                 product. We do not sell your personal information. See our{' '}
-                <Link href="/cookies" className="text-cyan-400 hover:text-cyan-300 underline">Cookie Policy</Link> and{' '}
-                <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300 underline">Privacy Policy</Link>.
+                <Link href="/cookies" className="text-[#8ec5ff] hover:text-[#b9dcff] underline">Cookie Policy</Link> and{' '}
+                <Link href="/privacy" className="text-[#8ec5ff] hover:text-[#b9dcff] underline">Privacy Policy</Link>.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap shrink-0">
@@ -142,7 +142,7 @@ export default function CookieBanner() {
               <p className="font-semibold text-white">Cookie preferences</p>
               <p className="text-xs text-white/55 mt-1">
                 Choose which categories of cookies you allow. Strictly necessary cookies are always on. Read more in our{' '}
-                <Link href="/cookies" className="text-cyan-400 hover:text-cyan-300 underline">Cookie Policy</Link>.
+                <Link href="/cookies" className="text-[#8ec5ff] hover:text-[#b9dcff] underline">Cookie Policy</Link>.
               </p>
             </div>
             <ul className="space-y-2 text-xs">
@@ -151,7 +151,7 @@ export default function CookieBanner() {
                   <p className="font-medium text-white">Strictly necessary</p>
                   <p className="text-white/50">Required for sign-in, checkout, security. Always active.</p>
                 </div>
-                <span className="text-cyan-400 font-mono text-[10px] mt-1">ALWAYS ON</span>
+                <span className="text-[#8ec5ff] font-mono text-[10px] mt-1">ALWAYS ON</span>
               </li>
               <li className="flex items-start justify-between gap-4 rounded-lg border border-white/10 p-3">
                 <div>
@@ -163,7 +163,7 @@ export default function CookieBanner() {
                   checked={functional}
                   onChange={(e) => setFunctional(e.target.checked)}
                   aria-label="Functional cookies"
-                  className="mt-1 h-4 w-4 accent-cyan-500"
+                  className="mt-1 h-4 w-4 accent-[#1f8fff]"
                 />
               </li>
               <li className="flex items-start justify-between gap-4 rounded-lg border border-white/10 p-3">
@@ -176,7 +176,7 @@ export default function CookieBanner() {
                   checked={analytics}
                   onChange={(e) => setAnalytics(e.target.checked)}
                   aria-label="Analytics cookies"
-                  className="mt-1 h-4 w-4 accent-cyan-500"
+                  className="mt-1 h-4 w-4 accent-[#1f8fff]"
                 />
               </li>
               <li className="flex items-start justify-between gap-4 rounded-lg border border-white/10 p-3">
@@ -189,7 +189,7 @@ export default function CookieBanner() {
                   checked={marketing}
                   onChange={(e) => setMarketing(e.target.checked)}
                   aria-label="Marketing cookies"
-                  className="mt-1 h-4 w-4 accent-cyan-500"
+                  className="mt-1 h-4 w-4 accent-[#1f8fff]"
                 />
               </li>
             </ul>

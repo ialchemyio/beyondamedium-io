@@ -47,7 +47,7 @@ export default function RestaurantsPage() {
           <h1 className="text-2xl font-bold text-white">Restaurants</h1>
           <p className="text-sm text-white/40 mt-1">Launch and manage food ordering sites</p>
         </div>
-        <Link href="/dashboard/restaurants/new" className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-xl hover:brightness-110 flex items-center gap-2">
+        <Link href="/dashboard/restaurants/new" className="px-5 py-2.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-xl hover:brightness-110 flex items-center gap-2">
           <Plus className="w-4 h-4" /> New Restaurant
         </Link>
       </div>
@@ -78,7 +78,7 @@ export default function RestaurantsPage() {
           <ChefHat className="w-12 h-12 text-white/10 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white/40 mb-2">No restaurants yet</h3>
           <p className="text-sm text-white/25 mb-6">Launch your first food ordering site in 4 steps.</p>
-          <Link href="/dashboard/restaurants/new" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110">
+          <Link href="/dashboard/restaurants/new" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-sm font-semibold rounded-xl hover:brightness-110">
             <Plus className="w-4 h-4" /> Launch a Restaurant
           </Link>
         </div>
@@ -104,7 +104,7 @@ export default function RestaurantsPage() {
                 <Link href={`/dashboard/restaurants/${r.id}`} className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.05] text-white/60 text-[11px] rounded-lg hover:bg-white/[0.08]">
                   <Settings className="w-3 h-3" /> Manage
                 </Link>
-                <a href={`/r/${r.slug}`} target="_blank" className="flex items-center gap-1 px-3 py-1.5 bg-cyan-500/10 text-cyan-400 text-[11px] rounded-lg hover:bg-cyan-500/20">
+                <a href={`/r/${r.slug}`} target="_blank" className="flex items-center gap-1 px-3 py-1.5 bg-[#1f8fff]/10 text-[#8ec5ff] text-[11px] rounded-lg hover:bg-[#1f8fff]/20">
                   <ExternalLink className="w-3 h-3" /> View Site
                 </a>
               </div>

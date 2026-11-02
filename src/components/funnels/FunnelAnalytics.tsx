@@ -128,7 +128,7 @@ export default function FunnelAnalytics({ funnelId, nodes, onUpdateNodeData }: F
           {showPeriod && (
             <div className="absolute top-full right-0 mt-1 bg-[#0c1018] border border-white/[0.08] rounded-lg py-1 z-50">
               {(['24h', '7d', '30d'] as const).map(p => (
-                <button key={p} onClick={() => { setPeriod(p); setShowPeriod(false) }} className={`block w-full text-left px-3 py-1 text-[10px] ${period === p ? 'text-cyan-400' : 'text-white/40 hover:text-white/60'}`}>{p}</button>
+                <button key={p} onClick={() => { setPeriod(p); setShowPeriod(false) }} className={`block w-full text-left px-3 py-1 text-[10px] ${period === p ? 'text-[#8ec5ff]' : 'text-white/40 hover:text-white/60'}`}>{p}</button>
               ))}
             </div>
           )}
@@ -157,10 +157,10 @@ export default function FunnelAnalytics({ funnelId, nodes, onUpdateNodeData }: F
             </div>
             <div className="bg-white/[0.03] rounded-xl p-3">
               <div className="flex items-center gap-1 mb-1">
-                <TrendingUp className="w-3 h-3 text-cyan-400/50" />
+                <TrendingUp className="w-3 h-3 text-[#8ec5ff]/50" />
                 <span className="text-[8px] text-white/25 uppercase">Conv. Rate</span>
               </div>
-              <p className="text-lg font-bold text-cyan-400/70">{summary?.overallConversionRate ?? '0'}%</p>
+              <p className="text-lg font-bold text-[#8ec5ff]/70">{summary?.overallConversionRate ?? '0'}%</p>
             </div>
             <div className="bg-white/[0.03] rounded-xl p-3">
               <div className="flex items-center gap-1 mb-1">
@@ -211,7 +211,7 @@ export default function FunnelAnalytics({ funnelId, nodes, onUpdateNodeData }: F
                     </div>
                     <div className="text-right">
                       {s.views > 0 ? (
-                        <p className="text-[10px] text-cyan-400/60 font-mono">{((s.conversions / s.views) * 100).toFixed(1)}%</p>
+                        <p className="text-[10px] text-[#8ec5ff]/60 font-mono">{((s.conversions / s.views) * 100).toFixed(1)}%</p>
                       ) : (
                         <p className="text-[10px] text-white/15 font-mono">—</p>
                       )}
@@ -239,11 +239,11 @@ export default function FunnelAnalytics({ funnelId, nodes, onUpdateNodeData }: F
                   <div key={i} className={`rounded-lg px-3 py-2 flex items-start gap-2 ${
                     insight.type === 'warning' ? 'bg-amber-500/[0.04] border border-amber-500/10' :
                     insight.type === 'success' ? 'bg-emerald-500/[0.04] border border-emerald-500/10' :
-                    'bg-cyan-500/[0.04] border border-cyan-500/10'
+                    'bg-[#1f8fff]/[0.04] border border-[#4aa8ff]/10'
                   }`}>
                     {insight.type === 'warning' && <AlertTriangle className="w-3 h-3 text-amber-400/50 mt-0.5 shrink-0" />}
                     {insight.type === 'success' && <TrendingUp className="w-3 h-3 text-emerald-400/50 mt-0.5 shrink-0" />}
-                    {insight.type === 'tip' && <Zap className="w-3 h-3 text-cyan-400/50 mt-0.5 shrink-0" />}
+                    {insight.type === 'tip' && <Zap className="w-3 h-3 text-[#8ec5ff]/50 mt-0.5 shrink-0" />}
                     <p className="text-[9px] text-white/40 leading-relaxed">{insight.text}</p>
                   </div>
                 ))}

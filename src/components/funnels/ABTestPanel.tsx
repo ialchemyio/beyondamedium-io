@@ -36,12 +36,12 @@ interface ABTestPanelProps {
   stepId: string
 }
 
-const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none'
 const lbl = 'block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5'
 
-const VARIANT_COLORS = ['text-cyan-400', 'text-violet-400', 'text-amber-400', 'text-emerald-400', 'text-pink-400']
-const VARIANT_BG = ['bg-cyan-500/10', 'bg-violet-500/10', 'bg-amber-500/10', 'bg-emerald-500/10', 'bg-pink-500/10']
-const VARIANT_BORDER = ['border-cyan-500/20', 'border-violet-500/20', 'border-amber-500/20', 'border-emerald-500/20', 'border-pink-500/20']
+const VARIANT_COLORS = ['text-[#8ec5ff]', 'text-violet-400', 'text-amber-400', 'text-emerald-400', 'text-pink-400']
+const VARIANT_BG = ['bg-[#1f8fff]/10', 'bg-violet-500/10', 'bg-amber-500/10', 'bg-emerald-500/10', 'bg-pink-500/10']
+const VARIANT_BORDER = ['border-[#4aa8ff]/20', 'border-violet-500/20', 'border-amber-500/20', 'border-emerald-500/20', 'border-pink-500/20']
 
 export default function ABTestPanel({ funnelId, stepId }: ABTestPanelProps) {
   const [experiment, setExperiment] = useState<Experiment | null>(null)
@@ -189,12 +189,12 @@ export default function ABTestPanel({ funnelId, stepId }: ABTestPanelProps) {
             <div className="space-y-2 max-w-[200px] mx-auto">
               <input value={newName} onChange={e => setNewName(e.target.value)} className={inp} placeholder="Experiment name" autoFocus />
               <div className="flex gap-1.5">
-                <button onClick={createExperiment} className="flex-1 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-[10px] font-medium">Create</button>
+                <button onClick={createExperiment} className="flex-1 py-1.5 bg-[#1f8fff]/20 text-[#8ec5ff] rounded-lg text-[10px] font-medium">Create</button>
                 <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-[10px] text-white/30">Cancel</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-semibold rounded-xl hover:brightness-110 flex items-center gap-1.5 mx-auto">
+            <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-[10px] font-semibold rounded-xl hover:brightness-110 flex items-center gap-1.5 mx-auto">
               <FlaskConical className="w-3 h-3" /> Create A/B Test
             </button>
           )}
@@ -241,7 +241,7 @@ export default function ABTestPanel({ funnelId, stepId }: ABTestPanelProps) {
             <input type="number" value={autoThreshold} onChange={e => setAutoThreshold(Number(e.target.value))} className={inp + ' w-20'} min={10} />
             <span className="text-[10px] text-white/30">conversions per variant</span>
           </div>
-          <button onClick={setAutoWinner} className="w-full py-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg text-[10px] font-medium">Save</button>
+          <button onClick={setAutoWinner} className="w-full py-1.5 bg-[#1f8fff]/10 text-[#8ec5ff] rounded-lg text-[10px] font-medium">Save</button>
           {experiment.auto_winner_threshold > 0 && (
             <p className="text-[9px] text-white/20">Auto-winner enabled at {experiment.auto_winner_threshold} conversions</p>
           )}
@@ -308,7 +308,7 @@ export default function ABTestPanel({ funnelId, stepId }: ABTestPanelProps) {
 
               {/* Select winner button */}
               {!experiment.winner_variant_id && experiment.status === 'running' && (
-                <button onClick={() => selectWinner(variant.id)} className="mt-2 w-full py-1.5 text-[9px] text-white/20 hover:text-cyan-400 border border-dashed border-white/[0.06] hover:border-cyan-500/20 rounded-lg transition-colors flex items-center justify-center gap-1">
+                <button onClick={() => selectWinner(variant.id)} className="mt-2 w-full py-1.5 text-[9px] text-white/20 hover:text-[#8ec5ff] border border-dashed border-white/[0.06] hover:border-[#4aa8ff]/20 rounded-lg transition-colors flex items-center justify-center gap-1">
                   <Trophy className="w-2.5 h-2.5" /> Select as winner
                 </button>
               )}

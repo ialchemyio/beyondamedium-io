@@ -28,7 +28,7 @@ interface Funnel {
 
 // ─── Custom Funnel Step Nodes ────────────────────────────────
 const STEP_COLORS: Record<string, { border: string; bg: string; text: string }> = {
-  landing: { border: 'border-cyan-500/50', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
+  landing: { border: 'border-[#4aa8ff]/50', bg: 'bg-[#1f8fff]/10', text: 'text-[#8ec5ff]' },
   offer: { border: 'border-violet-500/50', bg: 'bg-violet-500/10', text: 'text-violet-400' },
   checkout: { border: 'border-emerald-500/50', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
   upsell: { border: 'border-amber-500/50', bg: 'bg-amber-500/10', text: 'text-amber-400' },
@@ -69,7 +69,7 @@ function FunnelStepNode({ data }: { data: { label: string; stepType: string; con
       )}
       {actions.length > 0 && (
         <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center gap-1">
-          <Zap className="w-2.5 h-2.5 text-cyan-400/40" />
+          <Zap className="w-2.5 h-2.5 text-[#8ec5ff]/40" />
           <span className="text-[8px] text-white/25">{actions.length} action{actions.length > 1 ? 's' : ''}</span>
         </div>
       )}
@@ -145,10 +145,10 @@ const FUNNEL_TEMPLATES = [
   },
 ]
 
-const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none'
 
 const STEP_ACTIONS = [
-  { id: 'send_email', label: 'Send Email', icon: Mail, color: 'text-cyan-400' },
+  { id: 'send_email', label: 'Send Email', icon: Mail, color: 'text-[#8ec5ff]' },
   { id: 'add_to_db', label: 'Add to Database', icon: Database, color: 'text-blue-400' },
   { id: 'ai_agent', label: 'Trigger AI Agent', icon: Bot, color: 'text-violet-400' },
   { id: 'show_upsell', label: 'Show Upsell', icon: Gift, color: 'text-amber-400' },
@@ -191,7 +191,7 @@ function StepConfigPanel({ node, onUpdate, onDelete }: { node: Node; onUpdate: (
       <div className="border-t border-white/[0.06] pt-4">
         <button onClick={() => setShowActions(!showActions)} className="w-full flex items-center justify-between mb-3">
           <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider flex items-center gap-1.5">
-            <Zap className="w-3 h-3 text-cyan-400/50" /> Actions on this step
+            <Zap className="w-3 h-3 text-[#8ec5ff]/50" /> Actions on this step
           </span>
           {showActions ? <ChevronDown className="w-3 h-3 text-white/20" /> : <ChevronRight className="w-3 h-3 text-white/20" />}
         </button>
@@ -307,14 +307,14 @@ export default function FunnelsPage() {
       <div className="w-[260px] border-r border-white/[0.06] bg-[#0a0d12] flex flex-col overflow-hidden shrink-0">
         <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
           <h2 className="text-sm font-semibold text-white/70">Funnels</h2>
-          <button onClick={() => setShowCreate(true)} className="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg hover:bg-cyan-500/20"><Plus className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setShowCreate(true)} className="p-1.5 bg-[#1f8fff]/10 text-[#8ec5ff] rounded-lg hover:bg-[#1f8fff]/20"><Plus className="w-3.5 h-3.5" /></button>
         </div>
 
         {showCreate && (
           <div className="p-3 border-b border-white/[0.06]">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Funnel name" className={inp} autoFocus onKeyDown={e => e.key === 'Enter' && createFunnel()} />
             <div className="flex gap-1.5 mt-2">
-              <button onClick={createFunnel} className="flex-1 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-[10px] font-medium">Create</button>
+              <button onClick={createFunnel} className="flex-1 py-1.5 bg-[#1f8fff]/20 text-[#8ec5ff] rounded-lg text-[10px] font-medium">Create</button>
               <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-[10px] text-white/30">Cancel</button>
             </div>
           </div>
@@ -364,7 +364,7 @@ export default function FunnelsPage() {
 
             {/* Add Step */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 relative">
-              <button onClick={() => setShowStepLib(!showStepLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/60 font-medium hover:border-cyan-500/30 hover:text-cyan-400 transition-colors flex items-center gap-2 shadow-xl">
+              <button onClick={() => setShowStepLib(!showStepLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/60 font-medium hover:border-[#4aa8ff]/30 hover:text-[#8ec5ff] transition-colors flex items-center gap-2 shadow-xl">
                 <Plus className="w-4 h-4" /> Add Step
               </button>
               {showStepLib && (
@@ -382,20 +382,20 @@ export default function FunnelsPage() {
               )}
             </div>
 
-            <button onClick={saveFunnel} className="absolute top-4 right-4 z-10 px-3 py-1.5 bg-[#0d1117] border border-white/[0.08] rounded-lg text-[10px] text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 transition-colors flex items-center gap-1.5">
+            <button onClick={saveFunnel} className="absolute top-4 right-4 z-10 px-3 py-1.5 bg-[#0d1117] border border-white/[0.08] rounded-lg text-[10px] text-white/40 hover:text-[#8ec5ff] hover:border-[#4aa8ff]/30 transition-colors flex items-center gap-1.5">
               <Check className="w-3 h-3" /> Save
             </button>
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center mx-auto mb-5">
-                <DollarSign className="w-8 h-8 text-cyan-400/30" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4aa8ff]/10 to-blue-500/10 flex items-center justify-center mx-auto mb-5">
+                <DollarSign className="w-8 h-8 text-[#8ec5ff]/30" />
               </div>
               <h3 className="text-xl font-bold text-white/50 mb-2">Build a Revenue System</h3>
               <p className="text-sm text-white/25 mb-8">Design conversion funnels that turn visitors into customers. Each step can trigger automations — emails, database updates, AI agents, and more.</p>
               <div className="flex flex-col items-center gap-3">
-                <button onClick={() => setShowCreate(true)} className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center gap-2">
+                <button onClick={() => setShowCreate(true)} className="px-6 py-3 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center gap-2">
                   <Plus className="w-4 h-4" /> Create Custom Funnel
                 </button>
                 <p className="text-[10px] text-white/20">or start with a template</p>

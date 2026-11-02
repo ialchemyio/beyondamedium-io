@@ -1,5 +1,34 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Polish batch: honest blocks, AI cost log, new default theme, rebrand sweep
+
+**WHAT / WHY:**
+1. **Editor section blocks** (`addCustomBlocks`, editor page) rewritten.
+   - They used to ship invented social proof: "Sarah Johnson, CEO, TechCorp", "Join thousands of happy customers", made-up $9/$29/$99 plans, all in hardcoded old cyan.
+   - Now every block uses the site theme (`var(--bam-*)`, `.bam-btn`, `.bam-card`) with bracketed placeholders.
+   - The "Contact Form" block became "Contact" (mailto/tel links): published sites have no form backend, so the old form silently dropped submissions.
+2. **AI cost log:**
+   - `logAiUsage()` + `estimateCostUsd()` in `src/lib/ai.ts`, called by agent/generate/seo right after each API call (failed and refunded calls included).
+   - It always prints a JSON line to the server log, and inserts into `ai_usage` once the migration runs.
+   - **Owner must run `supabase/migrations/20261103_ai_usage.sql`** in the IO project (until then the insert is skipped with a warning; nothing breaks). A margin query is in the file's footer.
+3. **Theme:**
+   - New `DEFAULT_THEME` (Sora/DM Sans, `#2563eb`, AA-checked), saved explicitly on every new project via `newProjectSettings()` at all 4 insert sites.
+   - Old cyan frozen as `LEGACY_THEME`, the fallback for projects without a saved theme, so existing published sites don't recolor.
+4. **Rebrand sweep:** remaining old cyan → BAM blue across 31 files (billing, upgrade modal, legal pages, cookie banner, funnels, automations, restaurants, emails, OG image, error/404, published watermark link).
+   - Button gradients use the AA-safe `#1570e0→#0a5bd8`.
+   - Kept on purpose: `LEGACY_THEME`, the "Glass Tech" preset, the "Cyan" swatch in the template colour picker.
+5. Legal page titles no longer repeat "— Beyond A Medium" (the title template already adds it).
+
+**VERIFIED:**
+- `tsc` passes; `npm test` 52/52 (new: `theme.test.ts` legacy fallback/new default/contrast; `ai.test.ts` cost estimate and response-text rules); `npm run build` exit 0.
+- A local build failed twice with next/font import-map errors while the dev server shared `.next`. Clean reruns pass.
+- Migration ran twice on throwaway PG16: idempotent, service_role insert ok, anon/authenticated denied.
+- Harness with the new default theme, all 9 blocks inserted via the editor API: Sora headings, `.bam-btn` `rgb(37,99,235)`, no fake names, 0 forms. Screenshots checked.
+- Local `/404` and `/privacy` render the new colours.
+
+**NEXT:** push → run the `ai_usage` migration → after a few real builds, run the margin query.
+**Follow-up (separate task):** a real form/lead backend for published sites, so a Contact *form* block can exist honestly.
+
 ## 2026-11-02 — Test plan reverted; limit enforced again
 
 Owner set `user_credits.plan` back to `starter` (the first revert attempt had left it unlimited). Verified live: the dashboard shows "5 of 1 project used" with the limit banner, and the wizard shows its at-limit banner. The test project "Wizard Test Cafe" (`dac2f652…`) still exists; delete or keep at the owner's call. Credits: 15 left after the 35-credit test build.

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Beyond A Medium',
+  title: 'Terms of Service',
   description: 'The terms and conditions that govern your use of Beyond A Medium.',
 }
 
@@ -12,7 +12,7 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[#06080d] text-white px-6 py-16">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="text-xs text-cyan-400/70 hover:text-cyan-300 font-mono">&larr; back home</Link>
+        <Link href="/" className="text-xs text-[#8ec5ff]/70 hover:text-[#b9dcff] font-mono">&larr; back home</Link>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-6 mb-2">Terms of Service</h1>
         <p className="text-xs text-white/40 mb-10">Effective date: {EFFECTIVE_DATE}</p>
 
@@ -23,7 +23,7 @@ export default function TermsPage() {
               These Terms of Service (&ldquo;<strong>Terms</strong>&rdquo;) are a binding agreement between you and Beyond A Medium
               (&ldquo;BAM,&rdquo; &ldquo;we,&rdquo; or &ldquo;us&rdquo;) governing your use of the Beyond A Medium platform, websites, and services
               (the &ldquo;Service&rdquo;). By creating an account or using the Service you agree to these Terms and to our
-              <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300"> Privacy Policy</Link>.
+              <Link href="/privacy" className="text-[#8ec5ff] hover:text-[#b9dcff]"> Privacy Policy</Link>.
             </p>
           </section>
 
@@ -161,7 +161,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">16. Contact</h2>
             <p>
-              Beyond A Medium &mdash; <a className="text-cyan-400 hover:text-cyan-300" href="mailto:legal@beyondamedium.io">legal@beyondamedium.io</a>
+              Beyond A Medium &mdash; <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:legal@beyondamedium.io">legal@beyondamedium.io</a>
             </p>
           </section>
         </div>

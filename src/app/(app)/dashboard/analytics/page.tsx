@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
   for (const tip of evergreen) { if (recommendations.length >= 4) break; recommendations.push(tip) }
 
   const statCards = [
-    { label: 'Total Projects', value: projects.length, icon: Globe, color: 'from-cyan-400 to-blue-500' },
+    { label: 'Total Projects', value: projects.length, icon: Globe, color: 'from-[#1570e0] to-[#0a5bd8]' },
     { label: 'Published Sites', value: publishedCount, icon: Eye, color: 'from-emerald-400 to-teal-500' },
     { label: 'Total Pages', value: totalPages, icon: FileText, color: 'from-violet-400 to-purple-500' },
     { label: 'AI Generations', value: aiGenerations, icon: Zap, color: 'from-amber-400 to-orange-500' },
@@ -138,15 +138,15 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Recommendations — derived from your actual project data */}
-      <div className="mt-6 bg-gradient-to-r from-cyan-500/[0.05] to-blue-500/[0.05] border border-cyan-500/10 rounded-2xl p-6">
+      <div className="mt-6 bg-gradient-to-r from-[#4aa8ff]/[0.05] to-blue-500/[0.05] border border-[#4aa8ff]/10 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-cyan-400" />
+          <TrendingUp className="w-4 h-4 text-[#8ec5ff]" />
           <span className="text-sm font-semibold text-white/60">Recommendations</span>
         </div>
         <div className="space-y-2">
           {recommendations.map((tip, i) => (
             <div key={i} className="flex items-start gap-2">
-              <Zap className="w-3 h-3 text-cyan-400/50 mt-0.5 shrink-0" />
+              <Zap className="w-3 h-3 text-[#8ec5ff]/50 mt-0.5 shrink-0" />
               <p className="text-xs text-white/40 leading-relaxed">{tip}</p>
             </div>
           ))}

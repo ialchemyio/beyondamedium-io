@@ -98,7 +98,7 @@ export default function ProjectSettingsPage() {
         {project.is_published && (
           <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
             <p className="text-xs text-emerald-400 font-medium mb-1">Live Site</p>
-            <a href={`/p/${project.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 font-mono underline">
+            <a href={`/p/${project.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#8ec5ff] hover:text-[#b9dcff] font-mono underline">
               beyondamedium.io/p/{project.slug}
             </a>
           </div>

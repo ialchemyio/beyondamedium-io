@@ -24,8 +24,8 @@ type Plan = {
 }
 
 const plans: Plan[] = [
-  { name: 'Builder', key: 'builder', price: 19, caption: '300 credits/mo', color: 'from-blue-500 to-cyan-500' },
-  { name: 'Pro', key: 'pro', price: 49, caption: '1,500 credits/mo', color: 'from-cyan-500 to-blue-500', popular: true },
+  { name: 'Builder', key: 'builder', price: 19, caption: '300 credits/mo', color: 'from-blue-500 to-[#4aa8ff]' },
+  { name: 'Pro', key: 'pro', price: 49, caption: '1,500 credits/mo', color: 'from-[#1570e0] to-[#0a5bd8]', popular: true },
   { name: 'BAM', price: 99, caption: 'BAM team builds for you', href: 'https://beyondamedium.com/contact', external: true, doneForYou: true, color: 'from-amber-500 to-orange-500' },
 ]
 
@@ -84,7 +84,7 @@ export default function UpgradeModal({ isOpen, onClose, reason = 'credits', need
           {plans.map(plan => {
             const inner = (
               <>
-                {plan.popular && <span className="text-[8px] text-cyan-400 font-bold tracking-wider">POPULAR</span>}
+                {plan.popular && <span className="text-[8px] text-[#8ec5ff] font-bold tracking-wider">POPULAR</span>}
                 {plan.doneForYou && <span className="text-[8px] text-amber-400 font-bold tracking-wider">DONE-FOR-YOU</span>}
                 <p className="text-sm font-bold text-white">{plan.doneForYou && <span className="text-[9px] text-white/40">from </span>}${plan.price}<span className="text-[10px] text-white/30">/mo</span></p>
                 <p className="text-[10px] text-white/50 font-medium">{plan.name}</p>
@@ -92,7 +92,7 @@ export default function UpgradeModal({ isOpen, onClose, reason = 'credits', need
               </>
             )
             const cls = `p-3 rounded-xl border text-center transition-all hover:scale-[1.02] ${
-              plan.popular ? 'border-cyan-500/30 bg-cyan-500/[0.05]'
+              plan.popular ? 'border-[#4aa8ff]/30 bg-[#1f8fff]/[0.05]'
               : plan.doneForYou ? 'border-amber-500/30 bg-amber-500/[0.05]'
               : 'border-white/[0.06] hover:border-white/[0.1]'}`
 
@@ -120,7 +120,7 @@ export default function UpgradeModal({ isOpen, onClose, reason = 'credits', need
                   {busy === `pack-${pk.pack}` ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (
                     <>
                       <p className="text-xs font-bold text-white">{pk.credits}</p>
-                      <p className="text-[10px] text-cyan-400 font-mono">{pk.price}</p>
+                      <p className="text-[10px] text-[#8ec5ff] font-mono">{pk.price}</p>
                     </>
                   )}
                 </button>

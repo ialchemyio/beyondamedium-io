@@ -11,6 +11,7 @@ import {
   ArrowRight, X, Check, Zap, Server, Plug, BarChart3,
 } from 'lucide-react'
 import UpgradeModal from '@/components/UpgradeModal'
+import { newProjectSettings } from '@/lib/theme'
 
 interface RevenueSystem {
   id: string
@@ -43,7 +44,7 @@ const FILTERS = [
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
-  leadgen: 'from-cyan-500 to-blue-500',
+  leadgen: 'from-[#1570e0] to-[#0a5bd8]',
   booking: 'from-emerald-500 to-teal-500',
   sales: 'from-violet-500 to-purple-500',
   digital: 'from-blue-500 to-indigo-500',
@@ -103,7 +104,7 @@ export default function RevenueSystemsPage() {
 
     const slug = system.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '-' + Date.now().toString(36)
     const { data: project, error: projError } = await supabase.from('projects').insert({
-      user_id: user.id, name: system.name, slug, description: system.description,
+      user_id: user.id, name: system.name, slug, description: system.description, settings: newProjectSettings(),
     }).select().single()
 
     if (projError || !project) {
@@ -135,7 +136,7 @@ export default function RevenueSystemsPage() {
           <div className="h-12 flex items-center justify-between px-6 shrink-0">
             <span className="text-sm font-medium text-white/70">{previewSystem.name}</span>
             <div className="flex items-center gap-3">
-              <button onClick={(e) => { e.stopPropagation(); launchSystem(previewSystem.id) }} className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 flex items-center gap-1.5">
+              <button onClick={(e) => { e.stopPropagation(); launchSystem(previewSystem.id) }} className="px-4 py-1.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-lg hover:brightness-110 flex items-center gap-1.5">
                 <Rocket className="w-3 h-3" /> Launch This System
               </button>
               <button onClick={() => setPreviewId(null)} className="text-xs text-white/40 hover:text-white/70">Close</button>
@@ -165,7 +166,7 @@ export default function RevenueSystemsPage() {
               <div className="grid grid-cols-4 gap-3">
                 {[
                   { icon: DollarSign, label: 'Revenue', value: detailSystem.revenue_potential, color: 'text-emerald-400' },
-                  { icon: Clock, label: 'Setup', value: detailSystem.setup_time, color: 'text-cyan-400' },
+                  { icon: Clock, label: 'Setup', value: detailSystem.setup_time, color: 'text-[#8ec5ff]' },
                   { icon: Users, label: 'Launched', value: `${detailSystem.launches}`, color: 'text-blue-400' },
                   { icon: BarChart3, label: 'Avg Conv.', value: `${detailSystem.avg_conversions}/day`, color: 'text-violet-400' },
                 ].map(m => (
@@ -196,7 +197,7 @@ export default function RevenueSystemsPage() {
                 <div className="grid grid-cols-2 gap-1.5">
                   {detailSystem.backend_features.map(f => (
                     <div key={f} className="flex items-center gap-2 text-[11px] text-white/40">
-                      <Check className="w-3 h-3 text-cyan-400/60 shrink-0" /> {f}
+                      <Check className="w-3 h-3 text-[#8ec5ff]/60 shrink-0" /> {f}
                     </div>
                   ))}
                 </div>
@@ -217,7 +218,7 @@ export default function RevenueSystemsPage() {
                 <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">API Endpoints</h3>
                 <div className="bg-[#0a0e16] rounded-xl p-3 space-y-1">
                   {detailSystem.api_endpoints.map(ep => (
-                    <p key={ep} className="text-[11px] text-cyan-400/60 font-mono">{ep}</p>
+                    <p key={ep} className="text-[11px] text-[#8ec5ff]/60 font-mono">{ep}</p>
                   ))}
                 </div>
               </div>
@@ -228,7 +229,7 @@ export default function RevenueSystemsPage() {
               </div>
 
               {/* Launch CTA */}
-              <button onClick={() => { setDetailId(null); launchSystem(detailSystem.id) }} className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center justify-center gap-2">
+              <button onClick={() => { setDetailId(null); launchSystem(detailSystem.id) }} className="w-full py-3.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-sm font-semibold rounded-xl hover:brightness-110 flex items-center justify-center gap-2">
                 <Rocket className="w-4 h-4" /> Launch This System
               </button>
             </div>
@@ -239,7 +240,7 @@ export default function RevenueSystemsPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1570e0] to-[#0a5bd8] flex items-center justify-center">
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -248,7 +249,7 @@ export default function RevenueSystemsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3 mt-4">
-          <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full font-mono">{systems.length} systems</span>
+          <span className="text-xs bg-[#1f8fff]/10 text-[#8ec5ff] px-2.5 py-1 rounded-full font-mono">{systems.length} systems</span>
           <span className="text-xs bg-white/[0.04] text-white/30 px-2.5 py-1 rounded-full">Pro / BAM plans</span>
         </div>
       </div>
@@ -256,7 +257,7 @@ export default function RevenueSystemsPage() {
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search revenue systems..." className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search revenue systems..." className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none" />
       </div>
 
       {/* Filters */}
@@ -265,7 +266,7 @@ export default function RevenueSystemsPage() {
           const Icon = f.icon
           const count = f.id === 'all' ? systems.length : systems.filter(s => s.category === f.id).length
           return (
-            <button key={f.id} onClick={() => setFilter(f.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${filter === f.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50'}`}>
+            <button key={f.id} onClick={() => setFilter(f.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${filter === f.id ? 'bg-[#1f8fff]/10 text-[#8ec5ff] border border-[#4aa8ff]/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50'}`}>
               <Icon className="w-3 h-3" /> {f.label} <span className="text-[9px] text-white/20">{count}</span>
             </button>
           )
@@ -340,7 +341,7 @@ export default function RevenueSystemsPage() {
                   <div className="flex flex-wrap gap-1">
                     {system.backend_features.slice(0, 3).map(f => (
                       <span key={f} className="text-[9px] text-white/20 bg-white/[0.03] px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Server className="w-2 h-2 text-cyan-400/40" /> {f}
+                        <Server className="w-2 h-2 text-[#8ec5ff]/40" /> {f}
                       </span>
                     ))}
                     {system.backend_features.length > 3 && (
@@ -355,7 +356,7 @@ export default function RevenueSystemsPage() {
                     className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                       userPlan === 'starter'
                         ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-500/40'
-                        : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'
+                        : 'bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white hover:brightness-110'
                     }`}
                   >
                     {userPlan === 'starter' ? (

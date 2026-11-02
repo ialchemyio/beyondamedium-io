@@ -32,7 +32,7 @@ interface FunnelData {
 
 // ─── Step Colors & Icons ─────────────────────────────────────
 const STEP_THEME: Record<string, { border: string; bg: string; text: string; glow: string }> = {
-  landing:  { border: 'border-cyan-500/50',    bg: 'bg-cyan-500/10',    text: 'text-cyan-400',    glow: 'shadow-cyan-500/10' },
+  landing:  { border: 'border-[#4aa8ff]/50',    bg: 'bg-[#1f8fff]/10',    text: 'text-[#8ec5ff]',    glow: 'shadow-[#1f8fff]/10' },
   optin:    { border: 'border-blue-500/50',    bg: 'bg-blue-500/10',    text: 'text-blue-400',    glow: 'shadow-blue-500/10' },
   offer:    { border: 'border-violet-500/50',  bg: 'bg-violet-500/10',  text: 'text-violet-400',  glow: 'shadow-violet-500/10' },
   webinar:  { border: 'border-indigo-500/50',  bg: 'bg-indigo-500/10',  text: 'text-indigo-400',  glow: 'shadow-indigo-500/10' },
@@ -49,7 +49,7 @@ const STEP_ICON: Record<string, typeof Layout> = {
 
 // ─── Step Actions ────────────────────────────────────────────
 const AVAILABLE_ACTIONS = [
-  { id: 'send_email', label: 'Send Email', icon: Mail, color: 'text-cyan-400', desc: 'Send confirmation or follow-up email' },
+  { id: 'send_email', label: 'Send Email', icon: Mail, color: 'text-[#8ec5ff]', desc: 'Send confirmation or follow-up email' },
   { id: 'add_to_db', label: 'Add to Database', icon: Database, color: 'text-blue-400', desc: 'Save lead or order data' },
   { id: 'ai_agent', label: 'Trigger AI Agent', icon: Bot, color: 'text-violet-400', desc: 'Run AI task on this event' },
   { id: 'show_upsell', label: 'Show Upsell', icon: Gift, color: 'text-amber-400', desc: 'Present upgrade offer' },
@@ -122,7 +122,7 @@ function FunnelNode({ data }: { data: Record<string, unknown> }) {
       {/* Actions indicator */}
       {actions.length > 0 && (
         <div className="px-4 pb-3 pt-1 border-t border-white/[0.04] flex items-center gap-1.5">
-          <Zap className="w-2.5 h-2.5 text-cyan-400/40" />
+          <Zap className="w-2.5 h-2.5 text-[#8ec5ff]/40" />
           <span className="text-[9px] text-white/25">{actions.length} action{actions.length > 1 ? 's' : ''} attached</span>
           <div className="flex -space-x-1 ml-auto">
             {actions.slice(0, 3).map(a => {
@@ -139,7 +139,7 @@ function FunnelNode({ data }: { data: Record<string, unknown> }) {
 const nodeTypes = { funnelStep: FunnelNode }
 
 // ─── Input styles ────────────────────────────────────────────
-const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none'
 const lbl = 'block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5'
 
 // ─── Main Component ──────────────────────────────────────────
@@ -243,7 +243,7 @@ export default function FunnelEditorPage() {
             {saved ? <><Check className="w-3 h-3" /> Saved</> : saving ? 'Saving...' : <><Save className="w-3 h-3" /> Save</>}
           </button>
 
-          <button onClick={handlePublish} className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${isActive ? 'bg-white/[0.06] text-white/50 hover:text-white/70' : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'}`}>
+          <button onClick={handlePublish} className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${isActive ? 'bg-white/[0.06] text-white/50 hover:text-white/70' : 'bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white hover:brightness-110'}`}>
             {isActive ? <><Pause className="w-3 h-3" /> Unpublish</> : <><Rocket className="w-3 h-3" /> Publish Funnel</>}
           </button>
         </div>
@@ -267,7 +267,7 @@ export default function FunnelEditorPage() {
             >
               <Background color="#ffffff05" gap={32} size={1} />
               <Controls className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl [&>button]:!bg-transparent [&>button]:!border-white/[0.06] [&>button]:!text-white/40" />
-              <MiniMap className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl" nodeColor="#22d3ee15" maskColor="#06080dee" />
+              <MiniMap className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl" nodeColor="#4aa8ff15" maskColor="#06080dee" />
             </ReactFlow>
           ) : (
             /* Empty state */
@@ -289,7 +289,7 @@ export default function FunnelEditorPage() {
                 </div>
                 <h3 className="text-lg font-bold text-white/40 mb-2">Map your revenue flow</h3>
                 <p className="text-xs text-white/20 mb-6">Add steps, connect them, attach actions. Each step is a page in your conversion funnel.</p>
-                <button onClick={() => setShowStepLib(true)} className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-xl hover:brightness-110 flex items-center gap-2 mx-auto">
+                <button onClick={() => setShowStepLib(true)} className="px-5 py-2.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-xl hover:brightness-110 flex items-center gap-2 mx-auto">
                   <Plus className="w-4 h-4" /> Add First Step
                 </button>
               </div>
@@ -300,7 +300,7 @@ export default function FunnelEditorPage() {
           {nodes.length > 0 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
               <div className="relative">
-                <button onClick={() => setShowStepLib(!showStepLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/50 font-medium hover:border-cyan-500/30 hover:text-cyan-400 transition-colors flex items-center gap-2 shadow-2xl">
+                <button onClick={() => setShowStepLib(!showStepLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/50 font-medium hover:border-[#4aa8ff]/30 hover:text-[#8ec5ff] transition-colors flex items-center gap-2 shadow-2xl">
                   <Plus className="w-4 h-4" /> Add Step
                 </button>
                 {showStepLib && (
@@ -357,7 +357,7 @@ export default function FunnelEditorPage() {
                   { id: 'abtest' as const, label: 'A/B Test', icon: FlaskConical },
                   { id: 'analytics' as const, label: 'Stats', icon: BarChart3 },
                 ]).map(tab => (
-                  <button key={tab.id} onClick={() => setConfigSection(tab.id)} className={`flex-1 py-2.5 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${configSection === tab.id ? 'text-cyan-400 border-b border-cyan-400' : 'text-white/30 hover:text-white/50'}`}>
+                  <button key={tab.id} onClick={() => setConfigSection(tab.id)} className={`flex-1 py-2.5 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${configSection === tab.id ? 'text-[#8ec5ff] border-b border-[#4aa8ff]' : 'text-white/30 hover:text-white/50'}`}>
                     <tab.icon className="w-3 h-3" /> {tab.label}
                   </button>
                 ))}
@@ -497,7 +497,7 @@ export default function FunnelEditorPage() {
                           <p className="text-[8px] text-white/20">Conversions</p>
                         </div>
                         <div className="bg-white/[0.02] rounded-lg p-2.5 text-center">
-                          <p className="text-lg font-bold text-cyan-400/50">—%</p>
+                          <p className="text-lg font-bold text-[#8ec5ff]/50">—%</p>
                           <p className="text-[8px] text-white/20">Conv. Rate</p>
                         </div>
                         <div className="bg-white/[0.02] rounded-lg p-2.5 text-center">

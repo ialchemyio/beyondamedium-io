@@ -19,7 +19,7 @@ interface Order {
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-white/[0.04] text-white/40',
-  confirmed: 'bg-cyan-500/10 text-cyan-400',
+  confirmed: 'bg-[#1f8fff]/10 text-[#8ec5ff]',
   preparing: 'bg-amber-500/10 text-amber-400',
   ready: 'bg-violet-500/10 text-violet-400',
   completed: 'bg-emerald-500/10 text-emerald-400',
@@ -70,7 +70,7 @@ export default function OrdersPage() {
       <div className="flex gap-1 mb-6 overflow-x-auto">
         {(['all', 'pending', 'confirmed', 'preparing', 'completed'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors capitalize ${
-            filter === f ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50'
+            filter === f ? 'bg-[#1f8fff]/10 text-[#8ec5ff] border border-[#4aa8ff]/20' : 'bg-white/[0.02] text-white/30 border border-transparent hover:text-white/50'
           }`}>
             {f} <span className="text-[9px] text-white/20 ml-0.5">{counts[f]}</span>
           </button>

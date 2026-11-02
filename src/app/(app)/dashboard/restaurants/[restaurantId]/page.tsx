@@ -35,7 +35,7 @@ interface MenuItem {
   sort_order: number
 }
 
-const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none'
 
 export default function RestaurantManagePage() {
   const params = useParams()
@@ -128,7 +128,7 @@ export default function RestaurantManagePage() {
         ) : (
           <span className="flex items-center gap-1 bg-amber-500/10 text-amber-400 text-xs font-medium px-3 py-1 rounded-full"><Clock className="w-3 h-3" /> Setup needed</span>
         )}
-        <a href={`/r/${restaurant.slug}`} target="_blank" className="px-4 py-2 bg-cyan-500/10 text-cyan-400 text-xs font-semibold rounded-xl hover:bg-cyan-500/20 flex items-center gap-1.5">
+        <a href={`/r/${restaurant.slug}`} target="_blank" className="px-4 py-2 bg-[#1f8fff]/10 text-[#8ec5ff] text-xs font-semibold rounded-xl hover:bg-[#1f8fff]/20 flex items-center gap-1.5">
           <ExternalLink className="w-3 h-3" /> View Site
         </a>
       </div>
@@ -191,7 +191,7 @@ export default function RestaurantManagePage() {
               <input type="color" value={restaurant.primary_color || '#dc2626'} onChange={e => setRestaurant({...restaurant, primary_color: e.target.value})} className="w-10 h-8 rounded cursor-pointer" />
               <span className="text-xs text-white/50 font-mono">{restaurant.primary_color}</span>
             </div>
-            <button onClick={saveRestaurant} disabled={saving} className="px-4 py-2 bg-cyan-500/10 text-cyan-400 text-xs font-semibold rounded-xl hover:bg-cyan-500/20 flex items-center gap-1.5">
+            <button onClick={saveRestaurant} disabled={saving} className="px-4 py-2 bg-[#1f8fff]/10 text-[#8ec5ff] text-xs font-semibold rounded-xl hover:bg-[#1f8fff]/20 flex items-center gap-1.5">
               <Save className="w-3 h-3" /> {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
@@ -203,7 +203,7 @@ export default function RestaurantManagePage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-white/50"><ChefHat className="w-3.5 h-3.5 inline mr-1" /> {menu.length} items</p>
-            <button onClick={addMenuItem} className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 text-xs font-medium rounded-lg hover:bg-cyan-500/20 flex items-center gap-1"><Plus className="w-3 h-3" /> Add Item</button>
+            <button onClick={addMenuItem} className="px-3 py-1.5 bg-[#1f8fff]/10 text-[#8ec5ff] text-xs font-medium rounded-lg hover:bg-[#1f8fff]/20 flex items-center gap-1"><Plus className="w-3 h-3" /> Add Item</button>
           </div>
 
           {menu.map(item => (
@@ -219,7 +219,7 @@ export default function RestaurantManagePage() {
                     {['Mains', 'Starters', 'Sides', 'Desserts', 'Drinks'].map(c => <option key={c}>{c}</option>)}
                   </select>
                   <div className="flex gap-2">
-                    <button onClick={() => saveMenuItem(item)} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 text-xs font-medium rounded-lg">Save</button>
+                    <button onClick={() => saveMenuItem(item)} className="px-3 py-1.5 bg-[#1f8fff]/20 text-[#8ec5ff] text-xs font-medium rounded-lg">Save</button>
                     <button onClick={() => { setEditingItem(null); load() }} className="px-3 py-1.5 text-xs text-white/40">Cancel</button>
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export default function RestaurantManagePage() {
                     <p className="text-xs text-white/40">{item.description}</p>
                   </div>
                   <span className="text-sm font-semibold text-emerald-400 mr-3">${item.price.toFixed(2)}</span>
-                  <button onClick={() => setEditingItem(item.id)} className="text-xs text-cyan-400 hover:underline mr-2">Edit</button>
+                  <button onClick={() => setEditingItem(item.id)} className="text-xs text-[#8ec5ff] hover:underline mr-2">Edit</button>
                   <button onClick={() => deleteMenuItem(item.id)} className="text-white/20 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               )}
@@ -240,7 +240,7 @@ export default function RestaurantManagePage() {
           {menu.length === 0 && (
             <div className="text-center py-12 bg-white/[0.02] border border-white/[0.05] rounded-2xl">
               <p className="text-sm text-white/30 mb-3">No menu items yet</p>
-              <button onClick={addMenuItem} className="px-4 py-2 bg-cyan-500/10 text-cyan-400 text-xs font-semibold rounded-xl">Add First Item</button>
+              <button onClick={addMenuItem} className="px-4 py-2 bg-[#1f8fff]/10 text-[#8ec5ff] text-xs font-semibold rounded-xl">Add First Item</button>
             </div>
           )}
         </div>
@@ -251,7 +251,7 @@ export default function RestaurantManagePage() {
         <div className="text-center py-12 bg-white/[0.02] border border-white/[0.05] rounded-2xl">
           <ShoppingBag className="w-10 h-10 text-white/10 mx-auto mb-3" />
           <p className="text-sm text-white/30 mb-1">View all orders</p>
-          <Link href="/dashboard/orders" className="text-xs text-cyan-400 hover:underline">Open Orders Dashboard →</Link>
+          <Link href="/dashboard/orders" className="text-xs text-[#8ec5ff] hover:underline">Open Orders Dashboard →</Link>
         </div>
       )}
     </div>

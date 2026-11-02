@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { AI_MODEL, responseText, aiErrorMessage } from '@/lib/ai'
+import { AI_MODEL, responseText, aiErrorMessage, logAiUsage } from '@/lib/ai'
 import { createClient } from '@/lib/supabase/server'
 import { checkCredits, deductCredits, refundCredits, getCostForMode } from '@/lib/credits'
 import { rateLimit } from '@/lib/rate-limit'
@@ -118,6 +118,7 @@ Make it a complete, beautiful, professional website page. Return only the HTML w
     })
 
     const text = responseText(message)
+    await logAiUsage({ route: mode || 'generate_page', userId: user.id, message, credits: creditCost, ok: !!text })
     if (!text) {
       if (refundCtx) { await refundCredits(refundCtx.userId, refundCtx.cost, refundCtx.mode); refundCtx = null }
       return NextResponse.json({ error: 'Unexpected response type' }, { status: 500 })

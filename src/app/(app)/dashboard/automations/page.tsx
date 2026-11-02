@@ -67,19 +67,19 @@ function ConditionNode({ data }: { data: { label: string; subtype: string } }) {
 
 function ActionNode({ data }: { data: { label: string; subtype: string } }) {
   return (
-    <div className="bg-[#0d1117] border-2 border-cyan-500/40 rounded-xl px-4 py-3 min-w-[180px] shadow-lg shadow-cyan-500/5">
-      <Handle type="target" position={Position.Top} className="!bg-cyan-500 !w-3 !h-3 !border-2 !border-[#0d1117]" />
-      <Handle type="source" position={Position.Bottom} className="!bg-cyan-500 !w-3 !h-3 !border-2 !border-[#0d1117]" />
+    <div className="bg-[#0d1117] border-2 border-[#4aa8ff]/40 rounded-xl px-4 py-3 min-w-[180px] shadow-lg shadow-[#1f8fff]/5">
+      <Handle type="target" position={Position.Top} className="!bg-[#1f8fff] !w-3 !h-3 !border-2 !border-[#0d1117]" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[#1f8fff] !w-3 !h-3 !border-2 !border-[#0d1117]" />
       <div className="flex items-center gap-2 mb-1">
-        <div className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-          {data.subtype === 'send_email' && <Mail className="w-3.5 h-3.5 text-cyan-400" />}
-          {data.subtype === 'add_to_db' && <Database className="w-3.5 h-3.5 text-cyan-400" />}
-          {data.subtype === 'ai_agent' && <Bot className="w-3.5 h-3.5 text-cyan-400" />}
-          {data.subtype === 'show_upsell' && <Gift className="w-3.5 h-3.5 text-cyan-400" />}
-          {data.subtype === 'webhook' && <Webhook className="w-3.5 h-3.5 text-cyan-400" />}
-          {!['send_email', 'add_to_db', 'ai_agent', 'show_upsell', 'webhook'].includes(data.subtype) && <Zap className="w-3.5 h-3.5 text-cyan-400" />}
+        <div className="w-6 h-6 rounded-lg bg-[#1f8fff]/20 flex items-center justify-center">
+          {data.subtype === 'send_email' && <Mail className="w-3.5 h-3.5 text-[#8ec5ff]" />}
+          {data.subtype === 'add_to_db' && <Database className="w-3.5 h-3.5 text-[#8ec5ff]" />}
+          {data.subtype === 'ai_agent' && <Bot className="w-3.5 h-3.5 text-[#8ec5ff]" />}
+          {data.subtype === 'show_upsell' && <Gift className="w-3.5 h-3.5 text-[#8ec5ff]" />}
+          {data.subtype === 'webhook' && <Webhook className="w-3.5 h-3.5 text-[#8ec5ff]" />}
+          {!['send_email', 'add_to_db', 'ai_agent', 'show_upsell', 'webhook'].includes(data.subtype) && <Zap className="w-3.5 h-3.5 text-[#8ec5ff]" />}
         </div>
-        <span className="text-[10px] text-cyan-400 font-semibold uppercase tracking-wider">Action</span>
+        <span className="text-[10px] text-[#8ec5ff] font-semibold uppercase tracking-wider">Action</span>
       </div>
       <p className="text-xs text-white/80 font-medium">{data.label}</p>
       <p className="text-[9px] text-white/30 mt-0.5">{data.subtype}</p>
@@ -152,7 +152,7 @@ const TEMPLATES = [
 ]
 
 // ─── Input styles ────────────────────────────────────────────
-const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none'
+const inp = 'w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none'
 const lbl = 'block text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5'
 
 // ─── Main Component ──────────────────────────────────────────
@@ -173,7 +173,7 @@ export default function AutomationsPage() {
   const totalRuns = automations.reduce((s, a) => s + a.runsThisMonth, 0)
 
   const onConnect = useCallback((connection: Connection) => {
-    setEdges(eds => addEdge({ ...connection, animated: true, style: { stroke: '#22d3ee', strokeWidth: 2 } }, eds))
+    setEdges(eds => addEdge({ ...connection, animated: true, style: { stroke: '#4aa8ff', strokeWidth: 2 } }, eds))
   }, [setEdges])
 
   function createAutomation() {
@@ -332,7 +332,7 @@ export default function AutomationsPage() {
         <div className="p-4 border-b border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-white/70">Automations</h2>
-            <button onClick={() => setShowCreate(true)} className="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg hover:bg-cyan-500/20 transition-colors">
+            <button onClick={() => setShowCreate(true)} className="p-1.5 bg-[#1f8fff]/10 text-[#8ec5ff] rounded-lg hover:bg-[#1f8fff]/20 transition-colors">
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -341,7 +341,7 @@ export default function AutomationsPage() {
           <div className="space-y-2">
             <div>
               <div className="flex justify-between text-[9px] text-white/30 mb-1"><span>{automations.length} / {maxAutomations} automations</span></div>
-              <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden"><div className="h-full bg-cyan-500/50 rounded-full transition-all" style={{ width: `${(automations.length / maxAutomations) * 100}%` }} /></div>
+              <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden"><div className="h-full bg-[#1f8fff]/50 rounded-full transition-all" style={{ width: `${(automations.length / maxAutomations) * 100}%` }} /></div>
             </div>
             <div>
               <div className="flex justify-between text-[9px] text-white/30 mb-1"><span>{totalRuns} / {maxRuns} runs</span></div>
@@ -355,7 +355,7 @@ export default function AutomationsPage() {
           <div className="p-3 border-b border-white/[0.06]">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Automation name" className={inp} autoFocus onKeyDown={e => e.key === 'Enter' && createAutomation()} />
             <div className="flex gap-1.5 mt-2">
-              <button onClick={createAutomation} className="flex-1 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-[10px] font-medium">Create</button>
+              <button onClick={createAutomation} className="flex-1 py-1.5 bg-[#1f8fff]/20 text-[#8ec5ff] rounded-lg text-[10px] font-medium">Create</button>
               <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-[10px] text-white/30">Cancel</button>
             </div>
           </div>
@@ -414,19 +414,19 @@ export default function AutomationsPage() {
               onNodeClick={(_, node) => setSelectedNode(node)}
               onPaneClick={() => setSelectedNode(null)}
               fitView
-              defaultEdgeOptions={{ animated: true, style: { stroke: '#22d3ee', strokeWidth: 2 } }}
+              defaultEdgeOptions={{ animated: true, style: { stroke: '#4aa8ff', strokeWidth: 2 } }}
               proOptions={{ hideAttribution: true }}
               style={{ background: '#0a0d12' }}
             >
               <Background color="#ffffff08" gap={24} />
               <Controls className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl [&>button]:!bg-transparent [&>button]:!border-white/[0.06] [&>button]:!text-white/40 [&>button:hover]:!text-white/70" />
-              <MiniMap className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl" nodeColor="#22d3ee20" maskColor="#06080dee" />
+              <MiniMap className="!bg-[#0d1117] !border-white/[0.08] !rounded-xl" nodeColor="#4aa8ff20" maskColor="#06080dee" />
             </ReactFlow>
 
             {/* Add Node Button */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
               <div className="relative">
-                <button onClick={() => setShowNodeLib(!showNodeLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/60 font-medium hover:border-cyan-500/30 hover:text-cyan-400 transition-colors flex items-center gap-2 shadow-xl">
+                <button onClick={() => setShowNodeLib(!showNodeLib)} className="px-5 py-2.5 bg-[#0d1117] border border-white/[0.1] rounded-xl text-xs text-white/60 font-medium hover:border-[#4aa8ff]/30 hover:text-[#8ec5ff] transition-colors flex items-center gap-2 shadow-xl">
                   <Plus className="w-4 h-4" /> Add Node
                 </button>
 
@@ -445,9 +445,9 @@ export default function AutomationsPage() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[9px] text-cyan-400/60 font-semibold uppercase tracking-wider mb-1.5 px-1">Actions</p>
+                      <p className="text-[9px] text-[#8ec5ff]/60 font-semibold uppercase tracking-wider mb-1.5 px-1">Actions</p>
                       <div className="grid grid-cols-2 gap-1">
-                        {ACTIONS.map(a => (<button key={a.subtype} onClick={() => addNode('action', a.subtype, a.label)} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-cyan-500/5 text-[10px] text-white/50 hover:text-cyan-400 transition-colors"><a.icon className="w-3 h-3" /> {a.label}</button>))}
+                        {ACTIONS.map(a => (<button key={a.subtype} onClick={() => addNode('action', a.subtype, a.label)} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1f8fff]/5 text-[10px] text-white/50 hover:text-[#8ec5ff] transition-colors"><a.icon className="w-3 h-3" /> {a.label}</button>))}
                       </div>
                     </div>
                   </div>
@@ -456,7 +456,7 @@ export default function AutomationsPage() {
             </div>
 
             {/* Save indicator */}
-            <button onClick={saveAutomation} className="absolute top-4 right-[280px] z-10 px-3 py-1.5 bg-[#0d1117] border border-white/[0.08] rounded-lg text-[10px] text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 transition-colors flex items-center gap-1.5">
+            <button onClick={saveAutomation} className="absolute top-4 right-[280px] z-10 px-3 py-1.5 bg-[#0d1117] border border-white/[0.08] rounded-lg text-[10px] text-white/40 hover:text-[#8ec5ff] hover:border-[#4aa8ff]/30 transition-colors flex items-center gap-1.5">
               <Check className="w-3 h-3" /> Save
             </button>
           </>
@@ -466,7 +466,7 @@ export default function AutomationsPage() {
               <Zap className="w-12 h-12 text-white/5 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white/30 mb-2">Automation Builder</h3>
               <p className="text-xs text-white/20 mb-6 max-w-xs">Create an automation or pick a quick-start template to get started.</p>
-              <button onClick={() => setShowCreate(true)} className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-xl hover:brightness-110 transition-all">
+              <button onClick={() => setShowCreate(true)} className="px-5 py-2.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-xl hover:brightness-110 transition-all">
                 Create Automation
               </button>
             </div>

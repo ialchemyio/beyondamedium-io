@@ -18,7 +18,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           </p>
           <button
             onClick={reset}
-            style={{ padding: '10px 24px', borderRadius: 12, border: 0, cursor: 'pointer', color: '#fff', fontSize: 14, fontWeight: 600, background: 'linear-gradient(90deg,#06b6d4,#3b82f6)' }}
+            style={{ padding: '10px 24px', borderRadius: 12, border: 0, cursor: 'pointer', color: '#fff', fontSize: 14, fontWeight: 600, background: 'linear-gradient(90deg,#1570e0,#0a5bd8)' }}
           >
             Try again
           </button>

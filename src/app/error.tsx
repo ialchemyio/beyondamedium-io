@@ -18,7 +18,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
           We hit a snag rendering this page. You can try again, or head back home.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <button onClick={reset} className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-semibold rounded-xl hover:brightness-110 transition-all">
+          <button onClick={reset} className="px-6 py-2.5 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-sm font-semibold rounded-xl hover:brightness-110 transition-all">
             Try again
           </button>
           <Link href="/" className="px-6 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-white/70 text-sm font-medium rounded-xl transition-colors">

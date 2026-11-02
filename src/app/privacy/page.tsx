@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Beyond A Medium',
+  title: 'Privacy Policy',
   description:
     'How Beyond A Medium collects, uses, shares, and protects your personal information, and your privacy rights under California and U.S. law.',
 }
@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
   return (
     <main className="min-h-screen bg-[#06080d] text-white px-6 py-16">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="text-xs text-cyan-400/70 hover:text-cyan-300 font-mono">&larr; back home</Link>
+        <Link href="/" className="text-xs text-[#8ec5ff]/70 hover:text-[#b9dcff] font-mono">&larr; back home</Link>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-6 mb-2">Privacy Policy</h1>
         <p className="text-xs text-white/40 mb-10">Effective date: {EFFECTIVE_DATE}</p>
 
@@ -35,7 +35,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Content you create.</strong> Prompts, projects, templates, pages, code, uploaded media, and configuration.</li>
               <li><strong>Billing information.</strong> Plan, subscription status, and limited transaction metadata. Card details are handled by our processor (Stripe) and not stored by us.</li>
               <li><strong>Usage data.</strong> Pages visited, features used, AI credit consumption, errors, device, browser, IP address, and approximate location derived from IP.</li>
-              <li><strong>Cookies and similar technologies.</strong> See our <Link href="/cookies" className="text-cyan-400 hover:text-cyan-300">Cookie Policy</Link>.</li>
+              <li><strong>Cookies and similar technologies.</strong> See our <Link href="/cookies" className="text-[#8ec5ff] hover:text-[#b9dcff]">Cookie Policy</Link>.</li>
               <li><strong>Communications.</strong> Messages you send to support and your responses to surveys or emails.</li>
             </ul>
           </section>
@@ -48,7 +48,7 @@ export default function PrivacyPolicyPage() {
               <li>Generate AI outputs you request (prompts are sent to AI providers solely to fulfill your request).</li>
               <li>Communicate service, security, and billing notices (these are not marketing and cannot be opted out of while you have an account).</li>
               <li>Send marketing communications only where you have opted in. You can unsubscribe at any time.</li>
-              <li>Comply with legal obligations and enforce our <Link href="/terms" className="text-cyan-400 hover:text-cyan-300">Terms</Link>.</li>
+              <li>Comply with legal obligations and enforce our <Link href="/terms" className="text-[#8ec5ff] hover:text-[#b9dcff]">Terms</Link>.</li>
             </ul>
           </section>
 
@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
               When you use AI features, prompts and necessary context are sent to our AI provider(s) to generate a response. We
               do not use your private project content to train third-party foundation models. AI outputs may be inaccurate; you
               are responsible for reviewing and validating outputs before relying on them. See our
-              <Link href="/terms" className="text-cyan-400 hover:text-cyan-300"> Terms of Service</Link> for the full AI disclaimer.
+              <Link href="/terms" className="text-[#8ec5ff] hover:text-[#b9dcff]"> Terms of Service</Link> for the full AI disclaimer.
             </p>
           </section>
 
@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
               <li>Opt out of marketing communications.</li>
               <li>Withdraw consent where processing is based on consent.</li>
             </ul>
-            <p>To exercise any of these rights, email <a className="text-cyan-400 hover:text-cyan-300" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a> from the address associated with your account. We will respond within 45 days.</p>
+            <p>To exercise any of these rights, email <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a> from the address associated with your account. We will respond within 45 days.</p>
           </section>
 
           <section>
@@ -124,7 +124,7 @@ export default function PrivacyPolicyPage() {
             <p>
               The Service is not directed to and is not intended for children under 14. We do not knowingly collect personal
               information from anyone under 14. If you believe a child has provided us information, contact
-              <a className="text-cyan-400 hover:text-cyan-300" href="mailto:privacy@beyondamedium.io"> privacy@beyondamedium.io</a> and we will delete it.
+              <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:privacy@beyondamedium.io"> privacy@beyondamedium.io</a> and we will delete it.
             </p>
           </section>
 
@@ -147,7 +147,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">13. Contact</h2>
             <p>
-              Beyond A Medium &mdash; <a className="text-cyan-400 hover:text-cyan-300" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a>
+              Beyond A Medium &mdash; <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a>
             </p>
           </section>
         </div>

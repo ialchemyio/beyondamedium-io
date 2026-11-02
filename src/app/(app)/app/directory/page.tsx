@@ -73,9 +73,9 @@ export default function DirectoryPage() {
       <div className="flex gap-3 mb-6">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search businesses..." className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search businesses..." className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:border-[#4aa8ff]/30 focus:outline-none" />
         </div>
-        <select value={city} onChange={e => setCity(e.target.value)} className="px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:border-cyan-500/30 focus:outline-none">
+        <select value={city} onChange={e => setCity(e.target.value)} className="px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:border-[#4aa8ff]/30 focus:outline-none">
           <option value="all">All cities</option>
           {cities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
@@ -95,7 +95,7 @@ export default function DirectoryPage() {
           {filtered.map(entry => (
             <div key={entry.id} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold opacity-60">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1570e0] to-[#0a5bd8] flex items-center justify-center text-white font-bold opacity-60">
                   {entry.name.charAt(0)}
                 </div>
                 {entry.is_claimed && (
@@ -111,11 +111,11 @@ export default function DirectoryPage() {
 
               <div className="mt-4 flex gap-2">
                 {entry.is_claimed ? (
-                  <a href={`/r/${entry.slug}`} target="_blank" className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-cyan-500/10 text-cyan-400 text-xs font-medium rounded-lg hover:bg-cyan-500/20">
+                  <a href={`/r/${entry.slug}`} target="_blank" className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#1f8fff]/10 text-[#8ec5ff] text-xs font-medium rounded-lg hover:bg-[#1f8fff]/20">
                     <ExternalLink className="w-3 h-3" /> Order Online
                   </a>
                 ) : (
-                  <button onClick={() => claimBusiness(entry.id)} disabled={claiming === entry.id} className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 disabled:opacity-50">
+                  <button onClick={() => claimBusiness(entry.id)} disabled={claiming === entry.id} className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[#1570e0] to-[#0a5bd8] text-white text-xs font-semibold rounded-lg hover:brightness-110 disabled:opacity-50">
                     {claiming === entry.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                     {claiming === entry.id ? 'Claiming...' : 'Claim This Page'}
                   </button>

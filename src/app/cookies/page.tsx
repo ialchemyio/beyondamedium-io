@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy — Beyond A Medium',
+  title: 'Cookie Policy',
   description: 'How Beyond A Medium uses cookies and similar tracking technologies, and how you can control them.',
 }
 
@@ -12,7 +12,7 @@ export default function CookiePolicyPage() {
   return (
     <main className="min-h-screen bg-[#06080d] text-white px-6 py-16">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="text-xs text-cyan-400/70 hover:text-cyan-300 font-mono">&larr; back home</Link>
+        <Link href="/" className="text-xs text-[#8ec5ff]/70 hover:text-[#b9dcff] font-mono">&larr; back home</Link>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-6 mb-2">Cookie Policy</h1>
         <p className="text-xs text-white/40 mb-10">Effective date: {EFFECTIVE_DATE}</p>
 
@@ -74,14 +74,14 @@ export default function CookiePolicyPage() {
             <h2 className="text-lg font-semibold text-white">Do Not Sell or Share</h2>
             <p>
               We do not sell your personal information and we do not share it for cross-context behavioral advertising. See our
-              <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300"> Privacy Policy</Link> for details.
+              <Link href="/privacy" className="text-[#8ec5ff] hover:text-[#b9dcff]"> Privacy Policy</Link> for details.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-white">Contact</h2>
             <p>
-              Questions? Email <a className="text-cyan-400 hover:text-cyan-300" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a>.
+              Questions? Email <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:privacy@beyondamedium.io">privacy@beyondamedium.io</a>.
             </p>
           </section>
         </div>

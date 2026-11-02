@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Plus, Globe, Settings, ExternalLink, Layout, Wand2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { isProjectLimitError, parseQuota, quotaReached, quotaLabel, type ProjectQuota } from '@/lib/project-limits'
+import { newProjectSettings } from '@/lib/theme'
 
 interface Project {
   id: string
@@ -62,7 +63,7 @@ export default function DashboardPage() {
 
     const { data, error } = await supabase
       .from('projects')
-      .insert({ user_id: user.id, name: newName.trim(), slug, description: '' })
+      .insert({ user_id: user.id, name: newName.trim(), slug, description: '', settings: newProjectSettings() })
       .select()
       .single()
 

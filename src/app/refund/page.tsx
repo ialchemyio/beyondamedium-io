@@ -12,7 +12,7 @@ export default function RefundPolicyPage() {
   return (
     <main className="min-h-screen bg-[#06080d] text-white px-6 py-16">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="text-xs text-cyan-400/70 hover:text-cyan-300 font-mono">&larr; back home</Link>
+        <Link href="/" className="text-xs text-[#8ec5ff]/70 hover:text-[#b9dcff] font-mono">&larr; back home</Link>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-6 mb-2">Refund &amp; Cancellation Policy</h1>
         <p className="text-xs text-white/40 mb-10">Effective date: {EFFECTIVE_DATE}</p>
 
@@ -28,7 +28,7 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">Cancelling</h2>
             <p>
-              You can cancel any time from <Link href="/dashboard/billing" className="text-cyan-400 hover:text-cyan-300">Dashboard → Billing → Manage subscription</Link>,
+              You can cancel any time from <Link href="/dashboard/billing" className="text-[#8ec5ff] hover:text-[#b9dcff]">Dashboard → Billing → Manage subscription</Link>,
               which opens the Stripe customer portal. Cancellation takes effect at the end of your current billing period —
               you keep access and your remaining monthly credits until then. We do not prorate partial months.
             </p>
@@ -62,8 +62,8 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">Contact</h2>
             <p>
-              Billing questions: <a className="text-cyan-400 hover:text-cyan-300" href="mailto:billing@beyondamedium.io">billing@beyondamedium.io</a>.
-              See also our <Link href="/terms" className="text-cyan-400 hover:text-cyan-300">Terms of Service</Link>.
+              Billing questions: <a className="text-[#8ec5ff] hover:text-[#b9dcff]" href="mailto:billing@beyondamedium.io">billing@beyondamedium.io</a>.
+              See also our <Link href="/terms" className="text-[#8ec5ff] hover:text-[#b9dcff]">Terms of Service</Link>.
             </p>
           </section>
         </div>
