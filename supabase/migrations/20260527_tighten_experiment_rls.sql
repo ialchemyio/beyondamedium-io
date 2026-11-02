@@ -13,10 +13,13 @@
 drop policy if exists "Experiments insertable" on public.experiments;
 drop policy if exists "Experiments updatable" on public.experiments;
 drop policy if exists "Experiments deletable" on public.experiments;
+drop policy if exists "Experiments insertable (auth)" on public.experiments;
 create policy "Experiments insertable (auth)" on public.experiments
   for insert to authenticated with check (true);
+drop policy if exists "Experiments updatable (auth)" on public.experiments;
 create policy "Experiments updatable (auth)" on public.experiments
   for update to authenticated using (true);
+drop policy if exists "Experiments deletable (auth)" on public.experiments;
 create policy "Experiments deletable (auth)" on public.experiments
   for delete to authenticated using (true);
 
@@ -24,10 +27,13 @@ create policy "Experiments deletable (auth)" on public.experiments
 drop policy if exists "Variants insertable" on public.variants;
 drop policy if exists "Variants updatable" on public.variants;
 drop policy if exists "Variants deletable" on public.variants;
+drop policy if exists "Variants insertable (auth)" on public.variants;
 create policy "Variants insertable (auth)" on public.variants
   for insert to authenticated with check (true);
+drop policy if exists "Variants updatable (auth)" on public.variants;
 create policy "Variants updatable (auth)" on public.variants
   for update to authenticated using (true);
+drop policy if exists "Variants deletable (auth)" on public.variants;
 create policy "Variants deletable (auth)" on public.variants
   for delete to authenticated using (true);
 
