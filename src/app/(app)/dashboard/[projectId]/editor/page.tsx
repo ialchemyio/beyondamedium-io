@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Save, Monitor, Tablet, Smartphone, Code2,
   Eye, Undo2, Redo2, Check, Sparkles, Plus, FileText,
-  ChevronDown, Trash2, Cpu, Send, Bot, Loader2, Wand2,
+  ChevronDown, Trash2, Send, Bot, Loader2, Wand2,
   X as XIcon, Rocket, Palette, Search, ArrowUp, ArrowDown, ImageIcon, PenLine,
 } from 'lucide-react'
 import { DEFAULT_THEME, THEME_PRESETS, FONT_OPTIONS, normalizeTheme, themeCss, themeFontUrl, type SiteTheme } from '@/lib/theme'
@@ -124,6 +124,10 @@ export default function EditorPage() {
 
     const page = pages.find(p => p.id === activePage)
     if (!page) return
+    // The init is async: if this effect is torn down first (StrictMode, fast
+    // page switch) the cleanup below finds no editor, so bail out here instead
+    // of mounting a second GrapesJS into the same panels.
+    let cancelled = false
 
     async function initEditor() {
       const grapesjs = (await import('grapesjs')).default
@@ -133,6 +137,7 @@ export default function EditorPage() {
       const customCode = (await import('grapesjs-custom-code')).default
       const tabs = (await import('grapesjs-tabs')).default
       const navbar = (await import('grapesjs-navbar')).default
+      if (cancelled || !containerRef.current) return
 
       // Import GrapeJS CSS
       if (!document.getElementById('gjs-css')) {
@@ -276,6 +281,7 @@ export default function EditorPage() {
     initEditor()
 
     return () => {
+      cancelled = true
       if (editorRef.current) {
         editorRef.current.destroy()
         editorRef.current = null
@@ -677,74 +683,77 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
     router.push('/dashboard')
   }
 
+  const [leftTab, setLeftTab] = useState<'blocks' | 'layers'>('blocks')
+  const [rightTab, setRightTab] = useState<'styles' | 'traits'>('styles')
+
   if (!project) {
     return (
-      <div className="fixed inset-0 bg-[#0d1117] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+      <div className="fixed inset-0 bg-[#0b0d14] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#1f8fff]/25 border-t-[#4aa8ff] rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-[#0d1117] flex flex-col" style={{ zIndex: 9999 }}>
+    <div className="fixed inset-0 bg-[#0b0d14] flex flex-col" style={{ zIndex: 9999 }}>
       {/* ─── Top Bar ──────────────────── */}
-      <div className="h-11 border-b border-white/[0.06] flex items-center justify-between px-3 shrink-0 bg-[#0d1117]">
+      <div className="h-[52px] border-b border-white/[0.07] flex items-center justify-between px-3 shrink-0 bg-[#0b0d14]/95 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <button onClick={handleExit} className="p-1.5 text-white/40 hover:text-white/70 rounded-lg hover:bg-white/5 transition-colors">
+          <button onClick={handleExit} aria-label="Back to dashboard" title="Back to dashboard" className={toolBtn(false)}>
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <div className="w-px h-4 bg-white/[0.06]" />
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-              <Cpu className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-xs font-medium text-white/70 truncate max-w-[150px]">{project.name}</span>
+          <div className="w-px h-5 bg-white/[0.08]" />
+          <div className="flex items-center gap-2 pl-1">
+            <span className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center shrink-0">
+              <span className="font-display text-[12px] font-extrabold text-white">B</span>
+            </span>
+            <span className="font-display text-[14px] font-semibold text-white truncate max-w-[180px]">{project.name}</span>
           </div>
 
           {/* Page switcher */}
-          <div className="relative ml-2">
-            <button onClick={() => setShowPages(!showPages)} className="flex items-center gap-1 px-2 py-1 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[11px] text-white/50 hover:text-white/70 transition-colors">
-              <FileText className="w-3 h-3" />
+          <div className="relative ml-1">
+            <button onClick={() => setShowPages(!showPages)} aria-expanded={showPages} className="flex items-center gap-1.5 h-8 pl-2.5 pr-2 bg-white/[0.04] border border-white/[0.08] rounded-full text-[12px] text-white/80 hover:text-white hover:border-white/[0.16] transition-colors">
+              <FileText className="w-3.5 h-3.5 text-[#8ec5ff]" />
               {pages.find(p => p.id === activePage)?.title ?? 'Page'}
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-transform ${showPages ? 'rotate-180' : ''}`} />
             </button>
             {showPages && (
-              <div className="absolute top-full left-0 mt-1 w-56 bg-[#161b22] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-50">
+              <div className="absolute top-full left-0 mt-2 w-60 bam-glass bg-[#0b0d14]/95 border border-white/[0.1] rounded-2xl shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)] p-1.5 z-50">
                 {pages.map((p, pi) => (
                   <div key={p.id} className="flex items-center group">
                     <button
                       onClick={() => { switchPage(p.id); setShowPages(false) }}
-                      className={`flex-1 text-left px-3 py-1.5 text-xs transition-colors ${p.id === activePage ? 'text-cyan-400 bg-cyan-500/5' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]'}`}
+                      className={`flex-1 text-left px-3 py-2 rounded-lg text-[13px] transition-colors ${p.id === activePage ? 'text-white bg-[#1f8fff]/15' : 'text-white/70 hover:text-white hover:bg-white/[0.05]'}`}
                     >
-                      {p.title} {p.is_home && <span className="text-[9px] text-white/20 ml-1">(home)</span>}
+                      {p.title} {p.is_home && <span className="text-[11px] text-white/45 ml-1">(home)</span>}
                     </button>
                     <button
                       onClick={() => movePage(p.id, -1)} disabled={pi === 0} title="Move up"
-                      className="p-1 opacity-0 group-hover:opacity-100 text-white/20 hover:text-cyan-400 transition-all disabled:opacity-0"
+                      className="p-1 opacity-0 group-hover:opacity-100 text-white/45 hover:text-[#8ec5ff] transition-all disabled:opacity-0"
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => movePage(p.id, 1)} disabled={pi === pages.length - 1} title="Move down"
-                      className="p-1 opacity-0 group-hover:opacity-100 text-white/20 hover:text-cyan-400 transition-all disabled:opacity-0"
+                      className="p-1 opacity-0 group-hover:opacity-100 text-white/45 hover:text-[#8ec5ff] transition-all disabled:opacity-0"
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     {!p.is_home && (
-                      <button onClick={() => deletePage(p.id)} title="Delete page" className="p-1 mr-1 opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">
+                      <button onClick={() => deletePage(p.id)} title="Delete page" className="p-1 mr-1 opacity-0 group-hover:opacity-100 text-white/45 hover:text-red-400 transition-all">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 ))}
-                <div className="border-t border-white/[0.04] mt-1 pt-1">
+                <div className="border-t border-white/[0.06] mt-1 pt-1">
                   {showNewPage ? (
                     <div className="px-2 py-1 flex gap-1">
                       <input value={newPageTitle} onChange={e => setNewPageTitle(e.target.value)} placeholder="Page name" className="flex-1 px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-white focus:outline-none" autoFocus onKeyDown={e => e.key === 'Enter' && createPage()} />
-                      <button onClick={createPage} className="px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded text-[10px] font-medium">Add</button>
+                      <button onClick={createPage} className="bam-pill px-3 py-1 text-[12px]">Add</button>
                     </div>
                   ) : (
-                    <button onClick={() => setShowNewPage(true)} className="w-full text-left px-3 py-1.5 text-xs text-white/30 hover:text-white/50 flex items-center gap-1.5">
+                    <button onClick={() => setShowNewPage(true)} className="w-full text-left px-3 py-1.5 text-xs text-white/55 hover:text-white/50 flex items-center gap-1.5">
                       <Plus className="w-3 h-3" /> New Page
                     </button>
                   )}
@@ -756,102 +765,103 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
         <div className="flex items-center gap-1">
           {/* Undo/Redo */}
-          <button onClick={() => editorRef.current?.UndoManager.undo()} className="p-1.5 text-white/30 hover:text-white/60 rounded-lg hover:bg-white/5 transition-colors">
-            <Undo2 className="w-3.5 h-3.5" />
+          <button onClick={() => editorRef.current?.UndoManager.undo()} aria-label="Undo" title="Undo" className={toolBtn(false)}>
+            <Undo2 className="w-4 h-4" />
           </button>
-          <button onClick={() => editorRef.current?.UndoManager.redo()} className="p-1.5 text-white/30 hover:text-white/60 rounded-lg hover:bg-white/5 transition-colors">
-            <Redo2 className="w-3.5 h-3.5" />
+          <button onClick={() => editorRef.current?.UndoManager.redo()} aria-label="Redo" title="Redo" className={toolBtn(false)}>
+            <Redo2 className="w-4 h-4" />
           </button>
-          <div className="w-px h-4 bg-white/[0.06] mx-1" />
+          <div className="w-px h-5 bg-white/[0.08] mx-1.5" />
 
           {/* Devices */}
-          {([
-            { mode: 'desktop' as const, icon: Monitor },
-            { mode: 'tablet' as const, icon: Tablet },
-            { mode: 'mobile' as const, icon: Smartphone },
-          ]).map(({ mode, icon: Icon }) => (
-            <button key={mode} onClick={() => setDevice(mode)} className={`p-1.5 rounded-lg transition-colors ${device === mode ? 'bg-white/[0.08] text-cyan-400' : 'text-white/25 hover:text-white/50'}`}>
-              <Icon className="w-3.5 h-3.5" />
-            </button>
-          ))}
-          <div className="w-px h-4 bg-white/[0.06] mx-1" />
+          <div className="flex items-center p-0.5 rounded-[10px] bg-white/[0.04] border border-white/[0.07]">
+            {([
+              { mode: 'desktop' as const, icon: Monitor },
+              { mode: 'tablet' as const, icon: Tablet },
+              { mode: 'mobile' as const, icon: Smartphone },
+            ]).map(({ mode, icon: Icon }) => (
+              <button
+                key={mode} onClick={() => setDevice(mode)} aria-label={`${mode} view`} aria-pressed={device === mode} title={`${mode[0].toUpperCase()}${mode.slice(1)} view`}
+                className={`w-8 h-7 flex items-center justify-center rounded-lg transition-colors ${device === mode ? 'bg-white/[0.1] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-white/55 hover:text-white'}`}
+              >
+                <Icon className="w-4 h-4" />
+              </button>
+            ))}
+          </div>
+          <div className="w-px h-5 bg-white/[0.08] mx-1.5" />
 
           {/* SEO */}
-          <button onClick={() => { setShowSeo(!showSeo); setShowTheme(false) }} title="SEO for every page" className={`p-1.5 rounded-lg transition-colors ${showSeo ? 'bg-[#1f8fff]/15 text-[#6db8ff]' : 'text-white/25 hover:text-white/50'}`}>
-            <Search className="w-3.5 h-3.5" />
+          <button onClick={() => { setShowSeo(!showSeo); setShowTheme(false) }} title="SEO for every page" aria-label="SEO" aria-pressed={showSeo} className={toolBtn(showSeo)}>
+            <Search className="w-4 h-4" />
           </button>
 
           {/* Theme */}
-          <button onClick={() => { setShowTheme(!showTheme); setShowSeo(false) }} title="Site theme" className={`p-1.5 rounded-lg transition-colors ${showTheme ? 'bg-violet-500/10 text-violet-400' : 'text-white/25 hover:text-white/50'}`}>
-            <Palette className="w-3.5 h-3.5" />
+          <button onClick={() => { setShowTheme(!showTheme); setShowSeo(false) }} title="Site theme" aria-label="Site theme" aria-pressed={showTheme} className={toolBtn(showTheme)}>
+            <Palette className="w-4 h-4" />
           </button>
 
           {/* Upload image */}
-          <button onClick={() => fileInputRef.current?.click()} title="Upload images" disabled={uploading} className="p-1.5 text-white/25 hover:text-white/50 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50">
-            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+          <button onClick={() => fileInputRef.current?.click()} title="Upload images" aria-label="Upload images" disabled={uploading} className={`${toolBtn(false)} disabled:opacity-50`}>
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFilePick} className="hidden" />
 
           {/* Polish */}
-          <button onClick={handlePolish} title="Polish this page with BEYOND DESIGN" disabled={aiLoading} className="p-1.5 rounded-lg transition-colors text-white/25 hover:text-violet-300 disabled:opacity-50">
-            <Wand2 className="w-3.5 h-3.5" />
+          <button onClick={handlePolish} title="Polish this page with BEYOND DESIGN" aria-label="Polish page" disabled={aiLoading} className={`${toolBtn(false)} disabled:opacity-50`}>
+            <Wand2 className="w-4 h-4" />
           </button>
 
           {/* Code view */}
-          <button onClick={toggleCodeView} className={`p-1.5 rounded-lg transition-colors ${showCode ? 'bg-cyan-500/10 text-cyan-400' : 'text-white/25 hover:text-white/50'}`}>
-            <Code2 className="w-3.5 h-3.5" />
+          <button onClick={toggleCodeView} title="Edit code" aria-label="Edit code" aria-pressed={showCode} className={toolBtn(showCode)}>
+            <Code2 className="w-4 h-4" />
           </button>
 
           {/* AI */}
-          <button onClick={() => setShowAI(!showAI)} className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${showAI ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400' : 'text-white/25 hover:text-white/50'}`}>
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-semibold">AI</span>
+          <button onClick={() => setShowAI(!showAI)} title="AI assistant" aria-pressed={showAI} className={`h-8 px-2.5 rounded-lg transition-colors flex items-center gap-1.5 ${showAI ? 'bg-gradient-to-r from-[#1f8fff]/25 to-[#8b5cf6]/25 text-white ring-1 ring-inset ring-[#4aa8ff]/40' : 'text-white/70 hover:text-white hover:bg-white/[0.06]'}`}>
+            <Sparkles className="w-4 h-4" />
+            <span className="text-[12px] font-semibold">AI</span>
           </button>
 
           {/* Preview */}
-          <button onClick={() => editorRef.current?.runCommand('preview')} className="p-1.5 text-white/25 hover:text-white/50 rounded-lg hover:bg-white/5 transition-colors">
-            <Eye className="w-3.5 h-3.5" />
+          <button onClick={() => editorRef.current?.runCommand('preview')} title="Preview" aria-label="Preview" className={toolBtn(false)}>
+            <Eye className="w-4 h-4" />
           </button>
 
-          <div className="w-px h-4 bg-white/[0.06] mx-1" />
+          <div className="w-px h-5 bg-white/[0.08] mx-1.5" />
 
           {/* Save */}
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-              saved ? 'bg-emerald-500/20 text-emerald-400' :
-              hasChanges ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110' :
-              'bg-white/[0.06] text-white/40'
-            }`}
+            className={`bam-pill-ghost h-8 px-3.5 text-[12px] disabled:opacity-60 ${saved ? '!text-emerald-300 !border-emerald-400/30' : hasChanges ? '' : 'text-white/70'}`}
           >
-            {saved ? <><Check className="w-3 h-3" /> Saved</> :
-             saving ? 'Saving...' :
-             <><Save className="w-3 h-3" /> Save</>}
-            {hasChanges && !saving && !saved && <span className="w-1.5 h-1.5 bg-orange-400 rounded-full" />}
+            {saved ? <><Check className="w-3.5 h-3.5" /> Saved</> :
+             saving ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</> :
+             <><Save className="w-3.5 h-3.5" /> Save</>}
+            {hasChanges && !saving && !saved && <span aria-label="Unsaved changes" className="w-1.5 h-1.5 bg-amber-300 rounded-full" />}
           </button>
 
           {/* Publish */}
           <button
             onClick={handlePublish}
             disabled={publishing}
-            className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border border-emerald-500/20"
+            className="bam-pill h-8 px-4 ml-1 text-[12px] disabled:opacity-60"
           >
-            <Rocket className="w-3 h-3" />
-            {publishing ? 'Publishing...' : 'Publish'}
+            {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />}
+            {publishing ? 'Publishing…' : 'Publish'}
           </button>
         </div>
       </div>
 
       {/* Published URL toast */}
       {publishedUrl && (
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-4 flex flex-col items-center gap-2 backdrop-blur-xl">
+        <div role="status" className="absolute top-[64px] left-1/2 -translate-x-1/2 z-50 bg-[#0b0d14]/95 border border-emerald-400/25 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 backdrop-blur-xl shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-emerald-400" />
             <span className="text-sm text-emerald-300 font-medium">Site published!</span>
           </div>
-          <p className="text-[10px] text-white/40">Your site is live at:</p>
-          <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono bg-[#0a0e16] px-3 py-1.5 rounded-lg border border-white/[0.06]">
+          <p className="text-[11px] text-white/60">Your site is live at:</p>
+          <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#8ec5ff] hover:text-[#8ec5ff] font-mono bg-[#05060a] px-3 py-1.5 rounded-lg border border-white/[0.07]">
             beyondamedium.io{publishedUrl}
           </a>
         </div>
@@ -861,10 +871,10 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
       <div className="flex-1 flex overflow-hidden">
         {/* Code Editor Overlay */}
         {showCode && (
-          <div className="absolute inset-0 z-50 bg-[#0d1117]/95 backdrop-blur-sm flex flex-col" style={{ top: '44px' }}>
+          <div className="absolute inset-0 z-50 bg-[#0b0d14]/95 backdrop-blur-sm flex flex-col" style={{ top: '52px' }}>
             <div className="flex-1 flex gap-0">
-              <div className="flex-1 flex flex-col border-r border-white/[0.06]">
-                <div className="px-4 py-2 border-b border-white/[0.06] text-[11px] text-white/40 font-mono">HTML</div>
+              <div className="flex-1 flex flex-col border-r border-white/[0.07]">
+                <div className="px-4 py-2 border-b border-white/[0.07] text-[11px] text-white/60 font-mono">HTML</div>
                 <textarea
                   value={codeHtml}
                   onChange={e => setCodeHtml(e.target.value)}
@@ -873,7 +883,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                 />
               </div>
               <div className="flex-1 flex flex-col">
-                <div className="px-4 py-2 border-b border-white/[0.06] text-[11px] text-white/40 font-mono">CSS</div>
+                <div className="px-4 py-2 border-b border-white/[0.07] text-[11px] text-white/60 font-mono">CSS</div>
                 <textarea
                   value={codeCss}
                   onChange={e => setCodeCss(e.target.value)}
@@ -882,9 +892,9 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/[0.06]">
-              <button onClick={() => setShowCode(false)} className="px-4 py-2 text-xs text-white/40 hover:text-white/60 transition-colors">Cancel</button>
-              <button onClick={applyCodeChanges} className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 transition-all">
+            <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/[0.07]">
+              <button onClick={() => setShowCode(false)} className="px-4 py-2 text-xs text-white/60 hover:text-white/60 transition-colors">Cancel</button>
+              <button onClick={applyCodeChanges} className="bam-pill px-5 py-2 text-[12px]">
                 Apply Changes
               </button>
             </div>
@@ -892,39 +902,41 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
         )}
 
         {/* Left Panel — Blocks */}
-        <div className="w-[240px] border-r border-white/[0.06] bg-[#0d1117] flex flex-col overflow-hidden shrink-0">
-          <div className="flex border-b border-white/[0.06]">
-            <PanelTab id="blocks" label="Blocks" />
-            <PanelTab id="layers" label="Layers" />
+        <div className="w-[240px] border-r border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-hidden shrink-0">
+          <div className="p-2 border-b border-white/[0.07]">
+            <div className="flex p-0.5 rounded-[10px] bg-white/[0.04] border border-white/[0.07]">
+              <PanelTab label="Blocks" active={leftTab === 'blocks'} onClick={() => setLeftTab('blocks')} />
+              <PanelTab label="Layers" active={leftTab === 'layers'} onClick={() => setLeftTab('layers')} />
+            </div>
           </div>
           {/* Block search */}
-          <div className="px-2 py-2 border-b border-white/[0.04]">
+          <div className={`px-2 py-2 border-b border-white/[0.07] ${leftTab === 'blocks' ? '' : 'hidden'}`}>
             <div className="relative">
-              <Search className="w-3 h-3 text-white/25 absolute left-2 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-white/45 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 value={blockSearch}
                 onChange={e => setBlockSearch(e.target.value)}
                 placeholder="Search blocks"
-                className="w-full pl-7 pr-6 py-1.5 bg-white/[0.03] border border-white/[0.06] rounded-lg text-[11px] text-white/70 placeholder:text-white/25 focus:outline-none focus:border-cyan-500/30"
+                className="w-full pl-8 pr-7 py-2 bg-white/[0.03] border border-white/[0.08] rounded-lg text-[12px] text-white/85 placeholder:text-white/45 focus:outline-none focus:border-[#4aa8ff]/50"
               />
               {blockSearch && (
-                <button onClick={() => setBlockSearch('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-white/25 hover:text-white/60">
+                <button onClick={() => setBlockSearch('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-white/50 hover:text-white/60">
                   <XIcon className="w-3 h-3" />
                 </button>
               )}
             </div>
           </div>
-          <div id="blocks-panel" className="flex-1 overflow-y-auto gjs-blocks-panel" />
-          <div id="layers-panel" className="flex-1 overflow-y-auto hidden" />
+          <div id="blocks-panel" className={`flex-1 overflow-y-auto gjs-blocks-panel ${leftTab === 'blocks' ? '' : 'hidden'}`} />
+          <div id="layers-panel" className={`flex-1 overflow-y-auto gjs-styles-panel ${leftTab === 'layers' ? '' : 'hidden'}`} />
         </div>
 
         {/* Center — Canvas */}
-        <div className="flex-1 overflow-hidden bg-[#161b22] relative">
+        <div className="flex-1 overflow-hidden bg-[#05060a] relative">
           {!editorReady && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="text-center">
-                <div className="w-10 h-10 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-xs text-white/30">Loading editor...</p>
+                <div className="w-10 h-10 border-2 border-[#1f8fff]/25 border-t-[#4aa8ff] rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-[13px] text-white/60">Loading editor…</p>
               </div>
             </div>
           )}
@@ -933,18 +945,18 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
         {/* SEO Panel */}
         {showSeo && (
-          <div className="w-[320px] border-l border-white/[0.06] bg-[#0d1117] flex flex-col overflow-y-auto shrink-0">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] sticky top-0 bg-[#0d1117] z-10">
+          <div className="w-[320px] border-l border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-y-auto shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07] sticky top-0 bg-[#0b0d14] z-10">
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-[#6db8ff]" />
                 <span className="text-xs font-semibold text-white/80">SEO</span>
               </div>
-              <button onClick={() => setShowSeo(false)} aria-label="Close SEO panel" className="p-1 text-white/40 hover:text-white/70 rounded">
+              <button onClick={() => setShowSeo(false)} aria-label="Close SEO panel" className="p-1 text-white/60 hover:text-white/70 rounded">
                 <XIcon className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="p-4 space-y-3 border-b border-white/[0.06]">
+            <div className="p-4 space-y-3 border-b border-white/[0.07]">
               <p className="text-[12px] text-white/60 leading-relaxed">
                 Search titles and descriptions for every page. Generate them with AI, then edit anything before saving.
               </p>
@@ -973,7 +985,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                         value={entry.title}
                         onChange={e => editSeo(p.slug, 'title', e.target.value)}
                         placeholder={p.title}
-                        className="w-full mt-1 px-2.5 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-lg text-[12px] text-white/85 placeholder:text-white/30 focus:outline-none focus:border-[#4aa8ff]/50"
+                        className="w-full mt-1 px-2.5 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-lg text-[12px] text-white/85 placeholder:text-white/55 focus:outline-none focus:border-[#4aa8ff]/50"
                       />
                     </label>
                     <label className="block">
@@ -996,7 +1008,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
               })}
             </div>
 
-            <div className="p-4 border-t border-white/[0.06] sticky bottom-0 bg-[#0d1117]">
+            <div className="p-4 border-t border-white/[0.07] sticky bottom-0 bg-[#0b0d14]">
               <button onClick={saveSeo} disabled={!!seoBusy} className="bam-pill-ghost w-full py-2 text-[12px] disabled:opacity-50">
                 {seoBusy === 'save' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save SEO
               </button>
@@ -1006,37 +1018,37 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
         {/* Theme Panel */}
         {showTheme && (
-          <div className="w-[280px] border-l border-white/[0.06] bg-[#0d1117] flex flex-col overflow-y-auto shrink-0">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] sticky top-0 bg-[#0d1117] z-10">
+          <div className="w-[280px] border-l border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-y-auto shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07] sticky top-0 bg-[#0b0d14] z-10">
               <div className="flex items-center gap-2">
-                <Palette className="w-3.5 h-3.5 text-violet-400" />
+                <Palette className="w-3.5 h-3.5 text-[#8ec5ff]" />
                 <span className="text-xs font-semibold text-white/70">Site Theme</span>
               </div>
-              <button onClick={() => setShowTheme(false)} className="p-1 text-white/30 hover:text-white/60 rounded">
+              <button onClick={() => setShowTheme(false)} className="p-1 text-white/55 hover:text-white/60 rounded">
                 <XIcon className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <p className="px-4 pt-3 text-[10px] text-white/30 leading-relaxed">
+            <p className="px-4 pt-3 text-[11px] text-white/55 leading-relaxed">
               Applies to every page of this site — in the editor and when published.
             </p>
 
             {/* Presets */}
             <div className="p-3">
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-2">Presets</p>
+              <p className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-2">Presets</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {THEME_PRESETS.map(p => (
                   <button
                     key={p.name}
                     onClick={() => saveTheme(p.theme)}
-                    className="p-2 rounded-lg border border-white/[0.06] hover:border-white/[0.14] transition-colors text-left"
+                    className="p-2 rounded-lg border border-white/[0.07] hover:border-white/[0.14] transition-colors text-left"
                   >
                     <div className="flex gap-1 mb-1.5">
                       {[p.theme.colorBg, p.theme.colorPrimary, p.theme.colorText].map((c, i) => (
                         <span key={i} className="w-3 h-3 rounded-full border border-white/10" style={{ background: c }} />
                       ))}
                     </div>
-                    <span className="text-[10px] text-white/50">{p.name}</span>
+                    <span className="text-[11px] text-white/50">{p.name}</span>
                   </button>
                 ))}
               </div>
@@ -1044,16 +1056,16 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
             {/* Fonts */}
             <div className="px-3 pb-3 space-y-2">
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Typography</p>
+              <p className="text-[11px] font-semibold text-white/60 uppercase tracking-wider">Typography</p>
               {([['fontHeading', 'Headings'], ['fontBody', 'Body']] as const).map(([key, label]) => (
                 <label key={key} className="block">
-                  <span className="text-[10px] text-white/35">{label}</span>
+                  <span className="text-[11px] text-white/55">{label}</span>
                   <select
                     value={theme[key]}
                     onChange={e => saveTheme({ ...theme, [key]: e.target.value })}
-                    className="w-full mt-1 px-2 py-1.5 bg-white/[0.03] border border-white/[0.06] rounded-lg text-[11px] text-white/70 focus:outline-none focus:border-violet-500/30"
+                    className="w-full mt-1 px-2 py-1.5 bg-white/[0.03] border border-white/[0.07] rounded-lg text-[11px] text-white/70 focus:outline-none focus:border-[#4aa8ff]/30"
                   >
-                    {FONT_OPTIONS.map(f => <option key={f} value={f} className="bg-[#161b22]">{f}</option>)}
+                    {FONT_OPTIONS.map(f => <option key={f} value={f} className="bg-[#12151f]">{f}</option>)}
                   </select>
                 </label>
               ))}
@@ -1061,13 +1073,13 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
             {/* Colors */}
             <div className="px-3 pb-3 space-y-2">
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Colors</p>
+              <p className="text-[11px] font-semibold text-white/60 uppercase tracking-wider">Colors</p>
               {([
                 ['colorPrimary', 'Primary'], ['colorBg', 'Background'], ['colorSurface', 'Surface'],
                 ['colorText', 'Text'], ['colorMuted', 'Muted'],
               ] as const).map(([key, label]) => (
                 <div key={key} className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-white/35">{label}</span>
+                  <span className="text-[11px] text-white/55">{label}</span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="color"
@@ -1076,7 +1088,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                       onBlur={e => saveTheme({ ...theme, [key]: e.target.value })}
                       className="w-6 h-6 rounded cursor-pointer bg-transparent border border-white/10"
                     />
-                    <span className="text-[9px] font-mono text-white/30 w-14">{theme[key]}</span>
+                    <span className="text-[11px] font-mono text-white/55 w-14">{theme[key]}</span>
                   </div>
                 </div>
               ))}
@@ -1084,62 +1096,64 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
             {/* Shape */}
             <div className="px-3 pb-6 space-y-3">
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Shape</p>
+              <p className="text-[11px] font-semibold text-white/60 uppercase tracking-wider">Shape</p>
               <label className="block">
-                <span className="text-[10px] text-white/35">Corner radius — {theme.radius}px</span>
+                <span className="text-[11px] text-white/55">Corner radius — {theme.radius}px</span>
                 <input
                   type="range" min={0} max={40} value={theme.radius}
                   onChange={e => setTheme({ ...theme, radius: Number(e.target.value) })}
                   onMouseUp={e => saveTheme({ ...theme, radius: Number((e.target as HTMLInputElement).value) })}
-                  className="w-full mt-1 accent-violet-500"
+                  className="w-full mt-1 accent-[#1f8fff]"
                 />
               </label>
               <label className="block">
-                <span className="text-[10px] text-white/35">Content width — {theme.maxWidth}px</span>
+                <span className="text-[11px] text-white/55">Content width — {theme.maxWidth}px</span>
                 <input
                   type="range" min={800} max={1440} step={20} value={theme.maxWidth}
                   onChange={e => setTheme({ ...theme, maxWidth: Number(e.target.value) })}
                   onMouseUp={e => saveTheme({ ...theme, maxWidth: Number((e.target as HTMLInputElement).value) })}
-                  className="w-full mt-1 accent-violet-500"
+                  className="w-full mt-1 accent-[#1f8fff]"
                 />
               </label>
-              <p className="text-[9px] text-white/25 leading-relaxed pt-1">
-                Use <code className="text-violet-300/60">var(--bam-primary)</code>, <code className="text-violet-300/60">.bam-btn</code>,
-                {' '}<code className="text-violet-300/60">.bam-card</code> in your HTML to follow the theme automatically.
+              <p className="text-[11px] text-white/50 leading-relaxed pt-1">
+                Use <code className="text-[#8ec5ff]/60">var(--bam-primary)</code>, <code className="text-[#8ec5ff]/60">.bam-btn</code>,
+                {' '}<code className="text-[#8ec5ff]/60">.bam-card</code> in your HTML to follow the theme automatically.
               </p>
             </div>
           </div>
         )}
 
         {/* Right Panel — Styles + Traits */}
-        <div className="w-[260px] border-l border-white/[0.06] bg-[#0d1117] flex flex-col overflow-hidden shrink-0">
-          <div className="flex border-b border-white/[0.06]">
-            <PanelTab id="styles" label="Style" />
-            <PanelTab id="traits" label="Settings" />
+        <div className="w-[260px] border-l border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-hidden shrink-0">
+          <div className="p-2 border-b border-white/[0.07]">
+            <div className="flex p-0.5 rounded-[10px] bg-white/[0.04] border border-white/[0.07]">
+              <PanelTab label="Style" active={rightTab === 'styles'} onClick={() => setRightTab('styles')} />
+              <PanelTab label="Settings" active={rightTab === 'traits'} onClick={() => setRightTab('traits')} />
+            </div>
           </div>
-          <div id="selectors-panel" className="border-b border-white/[0.06]" />
-          <div id="styles-panel" className="flex-1 overflow-y-auto gjs-styles-panel" />
-          <div id="traits-panel" className="flex-1 overflow-y-auto hidden" />
+          <div id="selectors-panel" className={`border-b border-white/[0.07] ${rightTab === 'styles' ? '' : 'hidden'}`} />
+          <div id="styles-panel" className={`flex-1 overflow-y-auto gjs-styles-panel ${rightTab === 'styles' ? '' : 'hidden'}`} />
+          <div id="traits-panel" className={`flex-1 overflow-y-auto gjs-styles-panel ${rightTab === 'traits' ? '' : 'hidden'}`} />
         </div>
 
         {/* AI Sidebar */}
         {showAI && (
-          <div className="w-[320px] border-l border-white/[0.06] bg-[#0d1117] flex flex-col overflow-hidden shrink-0">
+          <div className="w-[320px] border-l border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-hidden shrink-0">
             {/* AI Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                  <Bot className="w-3.5 h-3.5 text-white" />
+                <div className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-white/70">AI Assistant</span>
+                <span className="font-display text-[14px] font-semibold text-white">AI Assistant</span>
               </div>
-              <button onClick={() => setShowAI(false)} className="p-1 text-white/30 hover:text-white/60 rounded transition-colors">
+              <button onClick={() => setShowAI(false)} className="p-1 text-white/55 hover:text-white/60 rounded transition-colors">
                 <XIcon className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* Mode Selector */}
-            <div className="flex gap-1 p-2 border-b border-white/[0.04]">
+            <div className="flex gap-1 p-2 border-b border-white/[0.06]">
               {([
                 { mode: 'page' as const, label: 'Full Page', icon: FileText },
                 { mode: 'section' as const, label: 'Section', icon: Plus },
@@ -1161,17 +1175,17 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
             </div>
 
             {/* BEYOND DESIGN — style direction picker */}
-            <div className="border-b border-white/[0.04]">
+            <div className="border-b border-white/[0.06]">
               <button
                 onClick={() => setShowStyles(!showStyles)}
                 className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-white/[0.02] transition-colors"
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[9px] font-bold tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-400">BEYOND DESIGN</span>
+                  <span className="text-[11px] font-bold tracking-[0.14em] bam-grad-text">BEYOND DESIGN</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white/50">{designDirections.find(d => d.key === aiStyle)?.name}</span>
-                  <ChevronDown className={`w-3 h-3 text-white/30 transition-transform ${showStyles ? 'rotate-180' : ''}`} />
+                  <span className="text-[11px] text-white/50">{designDirections.find(d => d.key === aiStyle)?.name}</span>
+                  <ChevronDown className={`w-3 h-3 text-white/55 transition-transform ${showStyles ? 'rotate-180' : ''}`} />
                 </span>
               </button>
               {showStyles && (
@@ -1183,12 +1197,12 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                       title={d.desc}
                       className={`px-1.5 py-2 rounded-lg border text-center transition-all ${
                         aiStyle === d.key
-                          ? 'border-cyan-500/40 bg-cyan-500/[0.08] text-cyan-300'
-                          : 'border-white/[0.05] text-white/40 hover:text-white/70 hover:border-white/[0.12]'
+                          ? 'border-[#4aa8ff]/60 bg-[#1f8fff]/[0.12] text-white'
+                          : 'border-white/[0.08] text-white/70 hover:text-white hover:border-white/[0.18]'
                       }`}
                     >
-                      <span className="block text-[9px] font-semibold leading-tight">{d.name}</span>
-                      <span className="block text-[8px] text-white/25 leading-tight mt-0.5">{d.desc}</span>
+                      <span className="block text-[11px] font-semibold leading-tight">{d.name}</span>
+                      <span className="block text-[10px] text-white/50 leading-tight mt-0.5">{d.desc}</span>
                     </button>
                   ))}
                 </div>
@@ -1199,8 +1213,8 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
             <div ref={aiScrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
               {aiMessages.length === 0 && (
                 <div className="text-center py-8">
-                  <Sparkles className="w-8 h-8 text-cyan-500/20 mx-auto mb-3" />
-                  <p className="text-xs text-white/30 mb-4">Tell me what to build</p>
+                  <Sparkles className="w-8 h-8 text-[#4aa8ff]/60 mx-auto mb-3" />
+                  <p className="font-display text-[15px] font-semibold text-white/85 mb-4">Tell me what to build</p>
                   <div className="space-y-2">
                     {[
                       'Create a landing page for a coffee shop',
@@ -1210,7 +1224,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                       <button
                         key={suggestion}
                         onClick={() => { setAiPrompt(suggestion); setAiMode(suggestion.startsWith('Add') ? 'section' : suggestion.startsWith('Make') ? 'edit' : 'page') }}
-                        className="w-full text-left px-3 py-2 bg-white/[0.02] border border-white/[0.06] rounded-lg text-[11px] text-white/40 hover:text-white/60 hover:border-white/[0.1] transition-colors"
+                        className="w-full text-left px-3 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-[12px] text-white/70 hover:text-white hover:border-[#4aa8ff]/40 hover:bg-[#1f8fff]/[0.06] transition-colors"
                       >
                         {suggestion}
                       </button>
@@ -1222,10 +1236,10 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[90%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-cyan-500/10 text-cyan-300'
+                      ? 'bg-[#1f8fff]/15 text-[#e3f0ff]'
                       : msg.type === 'error'
-                      ? 'bg-red-500/10 text-red-400'
-                      : 'bg-white/[0.04] text-white/60'
+                      ? 'bg-red-500/10 text-red-300'
+                      : 'bg-white/[0.05] text-white/80'
                   }`}>
                     {msg.text}
                   </div>
@@ -1234,8 +1248,8 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
               {aiLoading && (
                 <div className="flex justify-start">
                   <div className="bg-white/[0.04] px-3 py-2 rounded-xl flex items-center gap-2">
-                    <Loader2 className="w-3 h-3 text-cyan-400 animate-spin" />
-                    <span className="text-xs text-white/40">
+                    <Loader2 className="w-3 h-3 text-[#8ec5ff] animate-spin" />
+                    <span className="text-xs text-white/60">
                       {aiMode === 'page' ? 'Generating page...' : aiMode === 'section' ? 'Creating section...' : aiMode === 'copy' ? 'Rewriting copy...' : 'Editing element...'}
                     </span>
                   </div>
@@ -1245,7 +1259,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
             {/* AI copywriting quick actions */}
             {aiMode === 'copy' && (
-              <div className="px-3 pt-3 border-t border-white/[0.06]">
+              <div className="px-3 pt-3 border-t border-white/[0.07]">
                 <p className="text-[11px] text-white/55 mb-2">Select text on the canvas, then pick a rewrite · {CREDIT_COSTS.edit_element} credits</p>
                 <div className="flex flex-wrap gap-1.5">
                   {([
@@ -1270,9 +1284,9 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
             )}
 
             {/* Input */}
-            <div className="p-3 border-t border-white/[0.06]">
+            <div className="p-3 border-t border-white/[0.07]">
               <div className="flex items-end gap-2">
-                <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden focus-within:border-cyan-500/30 transition-colors">
+                <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden focus-within:border-[#4aa8ff]/30 transition-colors">
                   <textarea
                     value={aiPrompt}
                     onChange={e => setAiPrompt(e.target.value)}
@@ -1284,14 +1298,14 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                       'Describe the change to make...'
                     }
                     rows={2}
-                    className="w-full px-3 py-2 bg-transparent text-xs text-white/70 placeholder:text-white/20 focus:outline-none resize-none"
+                    className="w-full px-3 py-2.5 bg-transparent text-[13px] text-white/90 placeholder:text-white/45 focus:outline-none resize-none"
                   />
                 </div>
                 <button
                   onClick={() => handleAiGenerate()}
                   disabled={aiLoading || !aiPrompt.trim()}
                   aria-label="Send"
-                  className="p-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:brightness-110 disabled:opacity-30 transition-all shrink-0"
+                  className="bam-pill w-10 h-10 shrink-0 disabled:opacity-40"
                 >
                   {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
@@ -1306,83 +1320,104 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
       {/* Dark theme styles */}
       <style jsx global>{`
-        /* GrapeJS Dark Theme Override */
-        .gjs-one-bg { background-color: #0d1117 !important; }
-        .gjs-two-color { color: rgba(255,255,255,0.6) !important; }
-        .gjs-three-bg { background-color: #161b22 !important; }
-        .gjs-four-color, .gjs-four-color-h:hover { color: #22d3ee !important; }
+        /* GrapesJS → BAM theme */
+        .gjs-one-bg { background-color: #0b0d14 !important; }
+        .gjs-two-color { color: rgba(255,255,255,0.72) !important; }
+        .gjs-three-bg { background-color: #12151f !important; }
+        .gjs-four-color, .gjs-four-color-h:hover { color: #8ec5ff !important; }
+        .gjs-editor, .gjs-cv-canvas { font-family: var(--font-geist-sans), system-ui, sans-serif; }
 
         .gjs-block {
           background: rgba(255,255,255,0.03) !important;
-          border: 1px solid rgba(255,255,255,0.06) !important;
-          border-radius: 8px !important;
-          color: rgba(255,255,255,0.5) !important;
-          padding: 8px !important;
-          margin: 3px !important;
+          border: 1px solid rgba(255,255,255,0.08) !important;
+          border-radius: 12px !important;
+          color: rgba(255,255,255,0.72) !important;
+          padding: 10px 6px !important;
+          margin: 4px !important;
           min-height: auto !important;
-          transition: all 0.15s !important;
+          box-shadow: none !important;
+          transition: border-color 0.15s, background 0.15s, transform 0.15s !important;
         }
         .gjs-block:hover {
-          border-color: rgba(34,211,238,0.3) !important;
-          background: rgba(34,211,238,0.05) !important;
+          border-color: rgba(74,168,255,0.5) !important;
+          background: rgba(31,143,255,0.08) !important;
+          color: #fff !important;
+          transform: translateY(-1px);
         }
-        .gjs-block svg { fill: rgba(255,255,255,0.3) !important; }
-        .gjs-block__media { margin-bottom: 4px !important; }
-        .gjs-block-label { font-size: 10px !important; }
+        .gjs-block svg { fill: rgba(255,255,255,0.6) !important; }
+        .gjs-block:hover svg { fill: #8ec5ff !important; }
+        .gjs-block__media { margin-bottom: 6px !important; }
+        .gjs-block-label { font-size: 11px !important; font-weight: 500 !important; }
 
         .gjs-category-title, .gjs-layer-title, .gjs-sm-sector-title {
           background: transparent !important;
-          border-bottom: 1px solid rgba(255,255,255,0.04) !important;
-          color: rgba(255,255,255,0.4) !important;
+          border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+          color: rgba(255,255,255,0.62) !important;
           font-size: 11px !important;
           font-weight: 600 !important;
           text-transform: uppercase !important;
-          letter-spacing: 0.05em !important;
-          padding: 10px 12px !important;
+          letter-spacing: 0.08em !important;
+          padding: 11px 12px !important;
         }
+        .gjs-category-title:hover, .gjs-sm-sector-title:hover { color: #fff !important; }
+        .gjs-sm-sector.gjs-sm-open > .gjs-sm-sector-title, .gjs-block-category.gjs-open > .gjs-category-title { color: #8ec5ff !important; }
 
         .gjs-field {
           background: rgba(255,255,255,0.04) !important;
-          border: 1px solid rgba(255,255,255,0.08) !important;
-          border-radius: 6px !important;
-          color: rgba(255,255,255,0.7) !important;
+          border: 1px solid rgba(255,255,255,0.09) !important;
+          border-radius: 8px !important;
+          color: rgba(255,255,255,0.85) !important;
         }
-        .gjs-field:focus-within {
-          border-color: rgba(34,211,238,0.4) !important;
+        .gjs-field:focus-within { border-color: rgba(74,168,255,0.6) !important; box-shadow: 0 0 0 3px rgba(31,143,255,0.15); }
+        .gjs-field input, .gjs-field select, .gjs-field textarea { color: rgba(255,255,255,0.88) !important; }
+        .gjs-field select option { background: #12151f; }
+        .gjs-input-unit, .gjs-field-units select { color: rgba(255,255,255,0.6) !important; }
+
+        .gjs-sm-property { padding: 5px 10px !important; }
+        .gjs-sm-label, .gjs-trt-trait .gjs-label { color: rgba(255,255,255,0.68) !important; font-size: 11px !important; }
+        .gjs-sm-clear { color: #8ec5ff !important; }
+        .gjs-radio-item input:checked + .gjs-radio-item-label { background: rgba(31,143,255,0.2) !important; color: #fff !important; }
+
+        .gjs-layer { background: transparent !important; color: rgba(255,255,255,0.72) !important; }
+        .gjs-layer:hover { background: rgba(255,255,255,0.04) !important; }
+        .gjs-layer.gjs-selected { background: rgba(31,143,255,0.14) !important; color: #fff !important; }
+
+        .gjs-pn-panel { background: #0b0d14 !important; }
+        .gjs-pn-btn { color: rgba(255,255,255,0.6) !important; }
+        .gjs-pn-btn:hover { color: #fff !important; }
+        .gjs-pn-btn.gjs-pn-active { color: #8ec5ff !important; }
+
+        /* Stage: dotted ground, the page floats as a card */
+        .gjs-cv-canvas {
+          background-color: #05060a !important;
+          background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px) !important;
+          background-size: 22px 22px !important;
         }
-        .gjs-field input, .gjs-field select, .gjs-field textarea {
-          color: rgba(255,255,255,0.7) !important;
+        .gjs-frame-wrapper {
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 40px 90px -30px rgba(0,0,0,0.9), 0 0 120px -40px rgba(31,143,255,0.25);
         }
 
-        .gjs-sm-property { padding: 4px 10px !important; }
-        .gjs-sm-label { color: rgba(255,255,255,0.35) !important; font-size: 10px !important; }
+        .gjs-toolbar { background: #1268da !important; border: 0 !important; border-radius: 8px !important; box-shadow: 0 8px 24px -8px rgba(31,143,255,0.6) !important; }
+        .gjs-toolbar-item { color: #fff !important; }
+        .gjs-badge { background: #1268da !important; border-radius: 6px !important; font-family: var(--font-geist-sans), system-ui, sans-serif !important; font-size: 11px !important; padding: 2px 7px !important; }
+        .gjs-highlighter, .gjs-hovered { outline: 1px solid #4aa8ff !important; outline-offset: -1px !important; }
+        .gjs-placeholder { border-color: #1f8fff !important; }
+        .gjs-placeholder-int { background-color: #1f8fff !important; }
+        .gjs-resizer-h { border-color: #1f8fff !important; background: #fff !important; }
 
-        .gjs-layer {
-          background: transparent !important;
-          color: rgba(255,255,255,0.5) !important;
-        }
-        .gjs-layer:hover { background: rgba(255,255,255,0.03) !important; }
-        .gjs-layer.gjs-selected { background: rgba(34,211,238,0.08) !important; color: #22d3ee !important; }
+        .gjs-clm-tags { padding: 8px 10px !important; }
+        /* GrapesJS renders the selector manager into #selectors-panel twice; show one */
+        #selectors-panel > .gjs-clm-tags ~ .gjs-clm-tags { display: none !important; }
+        .gjs-clm-tag { background: rgba(31,143,255,0.16) !important; color: #cfe6ff !important; border-radius: 999px !important; padding: 3px 9px !important; }
+        .gjs-clm-label, .gjs-clm-sels-info { color: rgba(255,255,255,0.6) !important; font-size: 11px !important; }
 
-        .gjs-pn-panel { background: #0d1117 !important; }
-        .gjs-pn-btn { color: rgba(255,255,255,0.4) !important; }
-        .gjs-pn-btn:hover { color: rgba(255,255,255,0.7) !important; }
-        .gjs-pn-btn.gjs-pn-active { color: #22d3ee !important; }
-
-        .gjs-cv-canvas { background: #161b22 !important; }
-        .gjs-frame-wrapper { border-radius: 8px; overflow: hidden; }
-
-        .gjs-toolbar { background: #0d1117 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; }
-        .gjs-toolbar-item { color: rgba(255,255,255,0.5) !important; }
-
-        .gjs-badge { background: #0891b2 !important; }
-        .gjs-highlighter, .gjs-hovered { outline-color: #22d3ee !important; }
-
-        .gjs-clm-tags { padding: 8px !important; }
-        .gjs-clm-tag { background: rgba(34,211,238,0.1) !important; color: #22d3ee !important; border-radius: 4px !important; }
-
-        .gjs-mdl-dialog { background: #161b22 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px !important; }
-        .gjs-mdl-title { color: white !important; }
+        .gjs-mdl-container { background: rgba(5,6,10,0.7) !important; backdrop-filter: blur(6px); }
+        .gjs-mdl-dialog { background: #0b0d14 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 16px !important; box-shadow: 0 40px 100px -30px rgba(0,0,0,0.9) !important; }
+        .gjs-mdl-header { border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
+        .gjs-mdl-title { color: #fff !important; font-family: var(--font-display) !important; font-weight: 600 !important; }
+        .gjs-am-assets-cont, .gjs-am-file-uploader > form { background: #12151f !important; border-radius: 12px !important; }
 
         .gjs-blocks-panel .gjs-blocks-cs { padding: 8px !important; }
 
@@ -1390,38 +1425,30 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
         .gjs-pn-panels { display: none !important; }
 
         /* Scrollbar */
-        .gjs-blocks-panel::-webkit-scrollbar, .gjs-styles-panel::-webkit-scrollbar { width: 4px; }
-        .gjs-blocks-panel::-webkit-scrollbar-thumb, .gjs-styles-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .gjs-blocks-panel::-webkit-scrollbar, .gjs-styles-panel::-webkit-scrollbar { width: 6px; }
+        .gjs-blocks-panel::-webkit-scrollbar-thumb, .gjs-styles-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .gjs-blocks-panel::-webkit-scrollbar-thumb:hover, .gjs-styles-panel::-webkit-scrollbar-thumb:hover { background: rgba(74,168,255,0.4); }
       `}</style>
     </div>
   )
 }
 
 // ─── Panel Tab Component ─────────────────────────────────────
-function PanelTab({ id, label }: { id: string; label: string }) {
-  const [active, setActive] = useState(id === 'blocks' || id === 'styles')
-
-  function toggle() {
-    setActive(true)
-    // Show/hide panels by toggling CSS
-    const panels = document.querySelectorAll(`#${id}-panel`)
-    panels.forEach(p => (p as HTMLElement).classList.remove('hidden'))
-
-    // Hide sibling panels
-    const siblings = id === 'blocks' ? ['layers'] : id === 'layers' ? ['blocks'] : id === 'styles' ? ['traits'] : ['styles']
-    siblings.forEach(s => {
-      document.querySelectorAll(`#${s}-panel`).forEach(p => (p as HTMLElement).classList.add('hidden'))
-    })
-  }
-
+function PanelTab({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
-      onClick={toggle}
-      className={`flex-1 py-2.5 text-[11px] font-medium transition-colors ${active ? 'text-cyan-400 border-b border-cyan-400' : 'text-white/30 hover:text-white/50'}`}
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex-1 h-7 rounded-lg text-[12px] font-medium transition-colors ${active ? 'bg-white/[0.1] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-white/55 hover:text-white/85'}`}
     >
       {label}
     </button>
   )
+}
+
+/** Top-bar icon button: 32px target, readable at rest, BAM blue when on. */
+function toolBtn(active: boolean) {
+  return `w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${active ? 'bg-[#1f8fff]/15 text-[#8ec5ff]' : 'text-white/60 hover:text-white hover:bg-white/[0.06]'}`
 }
 
 // ─── Custom Blocks ───────────────────────────────────────────
@@ -1670,8 +1697,8 @@ function applyDarkTheme() {
   // Additional runtime dark theme fixes
   const style = document.createElement('style')
   style.textContent = `
-    .gjs-editor { background: #0d1117 !important; }
-    .gjs-cv-canvas { background: #161b22 !important; }
+    .gjs-editor { background: #0b0d14 !important; }
+    .gjs-cv-canvas { background-color: #05060a !important; }
   `
   document.head.appendChild(style)
 }

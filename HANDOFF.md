@@ -1,5 +1,31 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Editor UI restyled to the BAM look
+
+**Goal:** Owner: "upscale the editor UI to match the new look" (landing/wizard are BAM blue + Inter Tight; the editor was still cyan on GitHub-dark).
+
+**WHAT changed:** `src/app/(app)/dashboard/[projectId]/editor/page.tsx` only.
+- Top bar 52px glass `#0b0d14`: BAM gradient "B" mark, Inter Tight project name, pill page switcher with glass dropdown, segmented device control, 32px icon buttons (`toolBtn()`) with aria-labels/titles, ghost Save (amber unsaved dot, spinner), `bam-pill` Publish.
+- Panels: `#0b0d14` surfaces, segmented Blocks/Layers and Style/Settings tabs, labels ≥11px at white/55–70, every cyan/violet accent → BAM blue (`#1f8fff` / `#4aa8ff` / `#8ec5ff`). AI sidebar, Theme and SEO panels unified; send/apply buttons use `bam-pill`.
+- GrapesJS override CSS rewritten to BAM tokens: dotted `#05060a` stage, page frame floats as a card, blue toolbar/badge/highlighter, pill class tags, restyled modal.
+- **Bug fix:** `PanelTab` kept independent state per tab and flipped panels via DOM `classList`, so tabs never deactivated (both looked selected). State is now lifted (`leftTab`/`rightTab`) and panels toggle `hidden` via React.
+- **Bug fix:** GrapesJS renders the selector manager twice into `#selectors-panel` (duplicate "Classes" block). The duplicate is hidden with CSS.
+- Defensive: the async init effect now has a `cancelled` flag, so a teardown before init finishes (StrictMode, fast page switch) can't mount a second editor.
+
+**VERIFIED:**
+- Temporary harness route with stubbed fetch, 1440×900, screenshots before and after. Clicking Layers hides blocks, `aria-pressed` Blocks:false/Layers:true; the Settings tab switches; selecting an element shows the blue toolbar; the AI panel renders.
+- `npx tsc --noEmit` passes.
+- `npm test` → 46 pass, 0 fail.
+- `npm run build` succeeds.
+- impeccable detector: 2 findings → 1. The remaining one is the Inter font loaded into the user's canvas iframe (site content, pre-existing).
+- Harness deleted before commit.
+
+**UNVERIFIED:** the real logged-in editor on prod (the harness stubs Supabase); GrapesJS modals (asset manager, import) were not opened.
+
+**NEXT:** Owner opens a real project in the editor after deploy: check the asset manager modal and the Theme/SEO panels with real data.
+
+**CONFLICTS:** none.
+
 ## 2026-11-02 — Bespoke premium previews for every BEYOND DESIGN direction
 
 **Goal:** Owner: each design direction preview must have its own premium look, not one template recolored.
