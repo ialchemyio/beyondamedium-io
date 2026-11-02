@@ -4,7 +4,7 @@
 
 **Goal:** Bring BAM builder to the look and feature set of snapps.ai (owner request: "FULL UPGRADE … similar build and premium look").
 
-### WHAT changed (4 commits, NOT pushed)
+### WHAT changed (4 commits, pushed + deployed 2026-11-02 as 37ee606)
 - `369c3a3` brand — `src/app/globals.css` design tokens (near-black, BAM Blue `#1f8fff`, violet, Inter Tight via `layout.tsx`) + `.bam-pill/.bam-glow-card/.bam-glass/.bam-selected/.bam-tilt` utilities; `src/app/page.tsx` landing rebuilt (3D CSS editor mockup, feature cards, how-it-works, direction previews, pricing, FAQ + FAQPage JSON-LD); `src/lib/credit-costs.ts` (client-safe `CREDIT_COSTS`, re-exported from `lib/stripe.ts`); cookie banner + footer contrast fixes.
 - `e14f9ef` wizard — `src/app/(app)/dashboard/new/page.tsx` (5-step AI Site Wizard), `src/lib/site-brief.ts` (+7 tests), `src/lib/direction-previews.ts`; dashboard restyled, old fake-progress agent box removed; app header restyled with "Build with AI".
 - `e280d15` SEO — `POST /api/ai/seo` (`src/app/api/ai/seo/route.ts`), `src/lib/seo.ts` (+9 tests), editor SEO panel, published `/p/[slug]` `generateMetadata` uses per-page SEO from `projects.settings.seo`.
@@ -30,8 +30,14 @@ Wizard success screen, live SEO generation, live copy rewrite: all need an authe
 - **Stale domains page:** `dashboard/domains` tells users to CNAME to `cname.vercel-dns.com`, wrong since the Coolify move. Landing page no longer advertises self-serve custom domains.
 - No AI image generator (snapps has one); not built because no image provider key exists. Do not fake it.
 
+### DEPLOYED (verified 2026-11-02)
+- Pushed `c9c6afa..37ee606` (includes `53ec569`). New landing live ~120s after push.
+- Prod: `/`, `/login`, `/signup`, `/privacy`, `/terms`, `/refund`, `/cookies` → 200; `/dashboard`, `/dashboard/new` → 307 to login; bad `/p/` slug → 404.
+- `POST /api/ai/seo`: `{}` → 400, valid id with no session → 401 on 5 consecutive requests (during the rolling update one request briefly hit the old container and got a 404; it settled).
+- Live HTML carries the Inter Tight font variable and `bam-pill`; browser screenshot of prod hero; no console errors.
+
 ### NEXT
-Push `main` (Coolify auto-deploys; also ships `53ec569`), then on prod: run the wizard once, generate SEO on the result, view `/p/<slug>` source for the new `<title>`/meta, and `curl -sI https://beyondamedium.io`.
+Logged in on prod: run the wizard once, generate SEO on the result, and view `/p/<slug>` source for the new `<title>`/meta. Then fix the `maxProjects` revenue leak.
 
 ### CONFLICTS
 Root CLAUDE.md §10 / impeccable flags gradient text + glow as AI tells; owner explicitly requested the snapps look, which is built on them. Followed the owner; contrast/size rules still enforced.
