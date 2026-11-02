@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import { normalizeTheme, themeHead } from '@/lib/theme'
+import { seoForPage } from '@/lib/seo'
 
 // Paid plans get the watermark removed. Read the owner's plan with the service
 // role (RLS blocks anonymous visitors from reading another user's credits).
@@ -27,21 +28,39 @@ interface PageProps {
   searchParams: Promise<{ page?: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  const { page: pageSlug } = await searchParams
   const supabase = await createClient()
   const { data: project } = await supabase
     .from('projects')
-    .select('name, description')
+    .select('id, name, description, settings')
     .eq('slug', slug)
     .eq('is_published', true)
     .single()
 
   if (!project) return { title: 'Not Found' }
 
+  // Which page is being viewed: ?page=<slug>, else the home page.
+  const currentSlug: string = pageSlug || await (async () => {
+    const { data: home } = await supabase
+      .from('pages').select('slug').eq('project_id', project.id).eq('is_home', true).maybeSingle()
+    return (home?.slug as string | undefined) ?? 'index'
+  })()
+
+  // Per-page SEO written by One-click AI SEO (or edited by the owner).
+  const seo = seoForPage(project.settings, currentSlug)
+  const title = seo?.title || project.name
+  const description = seo?.description || project.description || `${project.name} — Built with Beyond A Medium`
+  const canonical = pageSlug ? `/p/${slug}?page=${encodeURIComponent(pageSlug)}` : `/p/${slug}`
+
   return {
-    title: project.name,
-    description: project.description || `${project.name} — Built with Beyond A Medium`,
+    // absolute: owner-written titles already include the brand; skip the root "%s — Beyond A Medium" template.
+    title: { absolute: title },
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, siteName: project.name, type: 'website' },
+    twitter: { card: 'summary', title, description },
   }
 }
 

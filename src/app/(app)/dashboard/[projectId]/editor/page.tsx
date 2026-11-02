@@ -10,6 +10,8 @@ import {
   X as XIcon, Rocket, Palette, Search, ArrowUp, ArrowDown, ImageIcon,
 } from 'lucide-react'
 import { DEFAULT_THEME, THEME_PRESETS, FONT_OPTIONS, normalizeTheme, themeCss, themeFontUrl, type SiteTheme } from '@/lib/theme'
+import { SEO_TITLE_MAX, SEO_DESC_MAX, type SeoMap } from '@/lib/seo'
+import { CREDIT_COSTS } from '@/lib/credit-costs'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GjsEditor = any
 
@@ -72,6 +74,10 @@ export default function EditorPage() {
   // Theme + blocks + assets
   const [theme, setTheme] = useState<SiteTheme>(DEFAULT_THEME)
   const [showTheme, setShowTheme] = useState(false)
+  const [showSeo, setShowSeo] = useState(false)
+  const [seoDraft, setSeoDraft] = useState<SeoMap>({})
+  const [seoBusy, setSeoBusy] = useState<'' | 'generate' | 'save'>('')
+  const [seoMsg, setSeoMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
   const [blockSearch, setBlockSearch] = useState('')
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -98,6 +104,8 @@ export default function EditorPage() {
       if (proj) {
         setProject(proj)
         setTheme(normalizeTheme((proj.settings as Record<string, unknown> | null)?.theme))
+        const savedSeo = (proj.settings as Record<string, unknown> | null)?.seo
+        if (savedSeo && typeof savedSeo === 'object') setSeoDraft(savedSeo as SeoMap)
       }
 
       const { data: pgs } = await supabase
@@ -353,6 +361,50 @@ export default function EditorPage() {
       style.textContent = themeCss(theme)
     } catch { /* canvas not ready */ }
   }, [theme, editorReady])
+
+  // ─── One-click AI SEO ─────────────────────────────────────
+  async function generateSeo() {
+    if (seoBusy) return
+    if (hasChanges) await handleSaveRef.current?.()
+    setSeoBusy('generate'); setSeoMsg(null)
+    try {
+      const res = await fetch('/api/ai/seo', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 402 || data.upgrade) {
+        window.dispatchEvent(new CustomEvent('bam:show-upgrade', { detail: { reason: 'credits', needed: data.needed } }))
+        throw new Error(`AI SEO needs ${CREDIT_COSTS.seo_all_pages} credits.`)
+      }
+      if (!res.ok || data.error) throw new Error(data.error || `SEO failed (${res.status})`)
+      if (data.credits) window.dispatchEvent(new CustomEvent('bam:credits-updated', { detail: data.credits }))
+      setSeoDraft(data.seo)
+      setProject(p => p ? { ...p, settings: { ...(p.settings ?? {}), seo: data.seo } } : p)
+      setSeoMsg({ type: 'ok', text: `Wrote SEO for ${data.generated} page${data.generated === 1 ? '' : 's'}. Review and edit below.` })
+    } catch (e) {
+      setSeoMsg({ type: 'err', text: e instanceof Error ? e.message : 'SEO failed' })
+    } finally {
+      setSeoBusy('')
+    }
+  }
+
+  async function saveSeo() {
+    setSeoBusy('save'); setSeoMsg(null)
+    const supabase = createClient()
+    // Re-read settings so we never clobber a theme saved in another tab.
+    const { data: fresh } = await supabase.from('projects').select('settings').eq('id', projectId).single()
+    const settings = { ...((fresh?.settings as Record<string, unknown>) ?? project?.settings ?? {}), seo: seoDraft }
+    const { error } = await supabase.from('projects').update({ settings, updated_at: new Date().toISOString() }).eq('id', projectId)
+    setSeoBusy('')
+    if (error) { setSeoMsg({ type: 'err', text: error.message }); return }
+    setProject(p => p ? { ...p, settings } : p)
+    setSeoMsg({ type: 'ok', text: 'SEO saved. It goes live the next time visitors load your published site.' })
+  }
+
+  function editSeo(slug: string, field: 'title' | 'description', value: string) {
+    setSeoDraft(d => ({ ...d, [slug]: { title: d[slug]?.title ?? '', description: d[slug]?.description ?? '', [field]: value } }))
+  }
 
   async function saveTheme(next: SiteTheme) {
     setTheme(next)
@@ -716,8 +768,13 @@ export default function EditorPage() {
           ))}
           <div className="w-px h-4 bg-white/[0.06] mx-1" />
 
+          {/* SEO */}
+          <button onClick={() => { setShowSeo(!showSeo); setShowTheme(false) }} title="SEO for every page" className={`p-1.5 rounded-lg transition-colors ${showSeo ? 'bg-[#1f8fff]/15 text-[#6db8ff]' : 'text-white/25 hover:text-white/50'}`}>
+            <Search className="w-3.5 h-3.5" />
+          </button>
+
           {/* Theme */}
-          <button onClick={() => setShowTheme(!showTheme)} title="Site theme" className={`p-1.5 rounded-lg transition-colors ${showTheme ? 'bg-violet-500/10 text-violet-400' : 'text-white/25 hover:text-white/50'}`}>
+          <button onClick={() => { setShowTheme(!showTheme); setShowSeo(false) }} title="Site theme" className={`p-1.5 rounded-lg transition-colors ${showTheme ? 'bg-violet-500/10 text-violet-400' : 'text-white/25 hover:text-white/50'}`}>
             <Palette className="w-3.5 h-3.5" />
           </button>
 
@@ -865,6 +922,79 @@ export default function EditorPage() {
           )}
           <div ref={containerRef} className="h-full" />
         </div>
+
+        {/* SEO Panel */}
+        {showSeo && (
+          <div className="w-[320px] border-l border-white/[0.06] bg-[#0d1117] flex flex-col overflow-y-auto shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] sticky top-0 bg-[#0d1117] z-10">
+              <div className="flex items-center gap-2">
+                <Search className="w-3.5 h-3.5 text-[#6db8ff]" />
+                <span className="text-xs font-semibold text-white/80">SEO</span>
+              </div>
+              <button onClick={() => setShowSeo(false)} aria-label="Close SEO panel" className="p-1 text-white/40 hover:text-white/70 rounded">
+                <XIcon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3 border-b border-white/[0.06]">
+              <p className="text-[12px] text-white/60 leading-relaxed">
+                Search titles and descriptions for every page. Generate them with AI, then edit anything before saving.
+              </p>
+              <button
+                onClick={generateSeo}
+                disabled={!!seoBusy}
+                className="bam-pill w-full py-2 text-[12px] disabled:opacity-50"
+              >
+                {seoBusy === 'generate' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {seoBusy === 'generate' ? 'Writing SEO…' : `Generate for all pages · ${CREDIT_COSTS.seo_all_pages} credits`}
+              </button>
+              {seoMsg && (
+                <p role="status" className={`text-[12px] leading-relaxed ${seoMsg.type === 'ok' ? 'text-emerald-300' : 'text-red-300'}`}>{seoMsg.text}</p>
+              )}
+            </div>
+
+            <div className="p-4 space-y-5 flex-1">
+              {pages.map(p => {
+                const entry = seoDraft[p.slug] ?? { title: '', description: '' }
+                return (
+                  <div key={p.id} className="space-y-2">
+                    <p className="text-[12px] font-semibold text-white/80">{p.title}{p.is_home && <span className="text-white/45 font-normal"> · home</span>}</p>
+                    <label className="block">
+                      <span className="flex justify-between text-[11px] text-white/50"><span>Title</span><span className={entry.title.length > SEO_TITLE_MAX ? 'text-amber-300' : ''}>{entry.title.length}/{SEO_TITLE_MAX}</span></span>
+                      <input
+                        value={entry.title}
+                        onChange={e => editSeo(p.slug, 'title', e.target.value)}
+                        placeholder={p.title}
+                        className="w-full mt-1 px-2.5 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-lg text-[12px] text-white/85 placeholder:text-white/30 focus:outline-none focus:border-[#4aa8ff]/50"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex justify-between text-[11px] text-white/50"><span>Description</span><span className={entry.description.length > SEO_DESC_MAX ? 'text-amber-300' : ''}>{entry.description.length}/{SEO_DESC_MAX}</span></span>
+                      <textarea
+                        value={entry.description}
+                        onChange={e => editSeo(p.slug, 'description', e.target.value)}
+                        rows={3}
+                        className="w-full mt-1 px-2.5 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-lg text-[12px] text-white/85 resize-y focus:outline-none focus:border-[#4aa8ff]/50"
+                      />
+                    </label>
+                    {entry.title && (
+                      <div className="rounded-lg bg-white px-2.5 py-2">
+                        <p className="text-[11px] text-[#1a0dab] leading-tight truncate">{entry.title}</p>
+                        <p className="text-[11px] text-[#4d5156] leading-snug line-clamp-2">{entry.description}</p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="p-4 border-t border-white/[0.06] sticky bottom-0 bg-[#0d1117]">
+              <button onClick={saveSeo} disabled={!!seoBusy} className="bam-pill-ghost w-full py-2 text-[12px] disabled:opacity-50">
+                {seoBusy === 'save' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save SEO
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Theme Panel */}
         {showTheme && (
