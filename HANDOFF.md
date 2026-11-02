@@ -1,5 +1,22 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Prod migrations complete + verified (owner ran RUN_ON_PROD_2026-11-02.sql)
+
+### VERIFIED on prod (anon-key REST probes from the browser pane, read-only)
+- `provision_plan`, `add_purchased_credits`, `deduct_credits`: exist, anon → `401 42501 permission denied` (was PGRST202 missing). AI generation + billing provisioning functions now present; public-execute hole closed.
+- `my_project_quota`, `plan_project_limit`: anon → 42501 (PUBLIC grant revoked).
+- `project-assets` bucket exists (probe → "Object not found", was "Bucket not found").
+- `custom_domains`: anon → `[]`.
+- Routes: `/`, `/login`, `/signup` 200 (~0.2s); `/dashboard*` 307; bad `/p/` 404 (0.7s); `/api/ai/seo` + `/api/ai/agent` 401. The earlier 524 is gone.
+
+### UNVERIFIED (needs a signed-in session; browser pane is logged out and agents may not enter passwords)
+- A real AI build / SEO generation / credit deduction end-to-end; quota chip + upgrade modal at the limit; Domains page with real rows; public `/p/<real-slug>` for a logged-out visitor.
+
+### STATE
+Local commits `44135a5`, `db6430e`, `9b09120` (+ this note) are SQL/docs only and unpushed, to avoid a redeploy. Push once Coolify Watch Paths are set (or with the next code change) so GitHub has them.
+
+---
+
 ## 2026-11-02 — Post-migration prod test: credit migration never ran; PUBLIC-execute hole fixed (commit 44135a5, not pushed)
 
 **Goal:** Test prod after the owner ran the two 2026-11-02 migrations.
