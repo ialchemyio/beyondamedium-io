@@ -1,5 +1,35 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Live editor test fixes (Save honesty, unsaved state, layout)
+
+**Goal:** Owner asked to test the restyled editor live while logged in (Chrome). I only exercised the UI on project `2f766a27…` (Elev8D): no Save, Publish or AI sends.
+
+**Live findings (prod build d5kY7zJy):** the new look renders: 52px bar, one Classes block, a single editor frame, 32 blocks. Layers shows 249 rows, Settings switches, the Theme panel has 6 presets, SEO lists 3 pages, the AI panel renders. Problems found:
+1. A long page title wrapped to 4 lines inside the page switcher.
+2. Save showed "unsaved" on a fresh load.
+3. At ~1085px wide, opening AI/SEO/Theme squeezed the canvas to ~200px.
+4. (code read) `handleSave` ignored the Supabase update error → showed "Saved" even when the write failed (fake success).
+
+**WHAT changed:** `src/app/(app)/dashboard/[projectId]/editor/page.tsx`
+- Page switcher: `max-w-[220px]`, title truncates (full title in `title=`); dropdown rows truncate too.
+- Unsaved tracking is now a snapshot comparison (`savedSnapshotRef` = HTML+CSS at ready/after save). GrapesJS's `changesCount` can't be used: it bumps while booting and resets itself ~15ms after every change, even with storage disabled. Undo back to the saved state clears the dot.
+- `handleSave` checks `error`: alerts and keeps the dirty state instead of claiming "Saved".
+- `switchPage` saves the outgoing page first when it has unsaved changes (Save only writes the active page; switching rebuilds the editor). If that save fails it stays on the page.
+- Right Style panel is `hidden 2xl:flex` while AI/SEO/Theme is open.
+
+**VERIFIED (temporary harness, stubbed Supabase, deleted afterwards):**
+- Load → no dot. Delete an element → dot. Cmd+Z → no dot.
+- Edit + switch page → one `PATCH pages`, dot cleared, the edit persisted when switching back.
+- Simulated 500 on PATCH → alert "Save failed: simulated outage…", button stays "Save", dot stays.
+- At 1085px with AI open: style panel 0px, canvas 446px. At 1600px: style panel 260px.
+- `npx tsc --noEmit` passes; `npm test` 46/46; `npm run build` compiles.
+
+**UNVERIFIED:** these fixes on prod (not pushed yet); a real Save round-trip against Supabase.
+
+**NEXT:** After push, open a project, edit, Save → reload and confirm the edit persisted.
+
+**CONFLICTS:** none.
+
 ## 2026-11-02 — Editor UI restyled to the BAM look
 
 **Goal:** Owner: "upscale the editor UI to match the new look" (landing/wizard are BAM blue + Inter Tight; the editor was still cyan on GitHub-dark).

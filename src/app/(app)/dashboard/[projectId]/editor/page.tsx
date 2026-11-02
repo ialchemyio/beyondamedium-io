@@ -50,6 +50,8 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  // HTML+CSS as last loaded/saved; "unsaved" means the canvas differs from it.
+  const savedSnapshotRef = useRef<string | null>(null)
   const [publishing, setPublishing] = useState(false)
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
@@ -268,8 +270,14 @@ export default function EditorPage() {
         if (page!.css) editor.setStyle(page!.css)
       }
 
-      // Track changes
-      editor.on('change:changesCount', () => setHasChanges(true))
+      // Track changes against a snapshot. GrapesJS's own dirty count can't be
+      // used: it bumps while booting and resets itself after every change.
+      const snapshot = () => `${editor.getHtml()}\u0000${editor.getCss()}`
+      savedSnapshotRef.current = null
+      editor.onReady(() => { savedSnapshotRef.current = snapshot() })
+      editor.on('change:changesCount', () => {
+        if (savedSnapshotRef.current !== null) setHasChanges(snapshot() !== savedSnapshotRef.current)
+      })
 
       // Dark theme overrides
       applyDarkTheme()
@@ -328,10 +336,16 @@ export default function EditorPage() {
     const gjsData = editor.getProjectData()
 
     const supabase = createClient()
-    await supabase.from('pages').update({
+    const { error } = await supabase.from('pages').update({
       html, css, gjs_data: gjsData, updated_at: new Date().toISOString(),
     }).eq('id', activePage)
+    if (error) {
+      setSaving(false)
+      alert(`Save failed: ${error.message}. Your changes are still in the editor — try again.`)
+      return
+    }
 
+    savedSnapshotRef.current = `${html}\u0000${css}`
     setSaving(false)
     setSaved(true)
     setHasChanges(false)
@@ -660,7 +674,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
     if (activePage === pageId) switchPage(remaining[0].id)
   }
 
-  function switchPage(pageId: string) {
+  async function switchPage(pageId: string) {
     if (editorRef.current) {
       // Save current page state first
       const editor = editorRef.current
@@ -670,6 +684,17 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
         const html = editor.getHtml()
         const css = editor.getCss()
         setPages(prev => prev.map(p => p.id === activePage ? { ...p, html: html ?? '', css: css ?? '', gjs_data: gjsData } : p))
+        // Save only writes the active page, so persist edits before leaving it.
+        if (hasChanges) {
+          const { error } = await createClient().from('pages').update({
+            html, css, gjs_data: gjsData, updated_at: new Date().toISOString(),
+          }).eq('id', currentPage.id)
+          if (error) {
+            alert(`Couldn't save "${currentPage.title}": ${error.message}. Staying on this page — try Save again.`)
+            return
+          }
+          setHasChanges(false)
+        }
       }
       editor.destroy()
       editorRef.current = null
@@ -712,10 +737,10 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
 
           {/* Page switcher */}
           <div className="relative ml-1">
-            <button onClick={() => setShowPages(!showPages)} aria-expanded={showPages} className="flex items-center gap-1.5 h-8 pl-2.5 pr-2 bg-white/[0.04] border border-white/[0.08] rounded-full text-[12px] text-white/80 hover:text-white hover:border-white/[0.16] transition-colors">
-              <FileText className="w-3.5 h-3.5 text-[#8ec5ff]" />
-              {pages.find(p => p.id === activePage)?.title ?? 'Page'}
-              <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-transform ${showPages ? 'rotate-180' : ''}`} />
+            <button onClick={() => setShowPages(!showPages)} aria-expanded={showPages} title={pages.find(p => p.id === activePage)?.title} className="flex items-center gap-1.5 h-8 max-w-[220px] pl-2.5 pr-2 bg-white/[0.04] border border-white/[0.08] rounded-full text-[12px] text-white/80 hover:text-white hover:border-white/[0.16] transition-colors">
+              <FileText className="w-3.5 h-3.5 shrink-0 text-[#8ec5ff]" />
+              <span className="truncate">{pages.find(p => p.id === activePage)?.title ?? 'Page'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 shrink-0 text-white/50 transition-transform ${showPages ? 'rotate-180' : ''}`} />
             </button>
             {showPages && (
               <div className="absolute top-full left-0 mt-2 w-60 bam-glass bg-[#0b0d14]/95 border border-white/[0.1] rounded-2xl shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)] p-1.5 z-50">
@@ -723,7 +748,7 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
                   <div key={p.id} className="flex items-center group">
                     <button
                       onClick={() => { switchPage(p.id); setShowPages(false) }}
-                      className={`flex-1 text-left px-3 py-2 rounded-lg text-[13px] transition-colors ${p.id === activePage ? 'text-white bg-[#1f8fff]/15' : 'text-white/70 hover:text-white hover:bg-white/[0.05]'}`}
+                      className={`flex-1 min-w-0 truncate text-left px-3 py-2 rounded-lg text-[13px] transition-colors ${p.id === activePage ? 'text-white bg-[#1f8fff]/15' : 'text-white/70 hover:text-white hover:bg-white/[0.05]'}`}
                     >
                       {p.title} {p.is_home && <span className="text-[11px] text-white/45 ml-1">(home)</span>}
                     </button>
@@ -1123,8 +1148,9 @@ Do not add facts, prices, names, numbers, or claims that are not already in the 
           </div>
         )}
 
-        {/* Right Panel — Styles + Traits */}
-        <div className="w-[260px] border-l border-white/[0.07] bg-[#0b0d14] flex flex-col overflow-hidden shrink-0">
+        {/* Right Panel — Styles + Traits. Steps aside for the AI/SEO/Theme panel
+            below 2xl so the canvas isn't squeezed on laptop screens. */}
+        <div className={`w-[260px] border-l border-white/[0.07] bg-[#0b0d14] flex-col overflow-hidden shrink-0 ${showAI || showSeo || showTheme ? 'hidden 2xl:flex' : 'flex'}`}>
           <div className="p-2 border-b border-white/[0.07]">
             <div className="flex p-0.5 rounded-[10px] bg-white/[0.04] border border-white/[0.07]">
               <PanelTab label="Style" active={rightTab === 'styles'} onClick={() => setRightTab('styles')} />
