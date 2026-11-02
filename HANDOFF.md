@@ -1,5 +1,43 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-01 — Snapps-grade upgrade: premium redesign, AI Site Wizard, one-click AI SEO, AI copywriting
+
+**Goal:** Bring BAM builder to the look and feature set of snapps.ai (owner request: "FULL UPGRADE … similar build and premium look").
+
+### WHAT changed (4 commits, NOT pushed)
+- `369c3a3` brand — `src/app/globals.css` design tokens (near-black, BAM Blue `#1f8fff`, violet, Inter Tight via `layout.tsx`) + `.bam-pill/.bam-glow-card/.bam-glass/.bam-selected/.bam-tilt` utilities; `src/app/page.tsx` landing rebuilt (3D CSS editor mockup, feature cards, how-it-works, direction previews, pricing, FAQ + FAQPage JSON-LD); `src/lib/credit-costs.ts` (client-safe `CREDIT_COSTS`, re-exported from `lib/stripe.ts`); cookie banner + footer contrast fixes.
+- `e14f9ef` wizard — `src/app/(app)/dashboard/new/page.tsx` (5-step AI Site Wizard), `src/lib/site-brief.ts` (+7 tests), `src/lib/direction-previews.ts`; dashboard restyled, old fake-progress agent box removed; app header restyled with "Build with AI".
+- `e280d15` SEO — `POST /api/ai/seo` (`src/app/api/ai/seo/route.ts`), `src/lib/seo.ts` (+9 tests), editor SEO panel, published `/p/[slug]` `generateMetadata` uses per-page SEO from `projects.settings.seo`.
+- `05b8c3c` copy — editor "Copy" AI mode (6 one-click rewrites + free-form); fixed Edit mode charging credits with nothing selected.
+
+### WHY
+Snapps' pitch is AI site generation wizard + AI copywriting + one-click AI SEO + premium dark/electric-blue look. BAM had the generation engine but no guided flow, no SEO, a dated landing page, and a fake progress list.
+
+### VERIFIED
+- `npm test` → 36 pass / 0 fail. `npx tsc --noEmit` clean. `npm run build` → compiled; `/`, `/dashboard/new`, `/api/ai/seo` in route table.
+- Landing rendered in browser at 1440 and 375 px; mobile overflow bug found and fixed (0 text nodes overflow at 375).
+- `impeccable detect` on rendered landing (1280 + 390 px): 0 contrast / undersized-text findings (was 41). Remaining findings are deliberate snapps signature (glow, gradient text, spotlight cards, blue/violet) + pre-existing Geist body font.
+- Wizard walked end-to-end via a temporary harness route (deleted, never committed): empty-name validation, 2-page cap, direction select, review, real `POST /api/ai/agent` → 401 → error screen.
+- `curl` `/api/ai/seo`: no body / bad type → 400, no session → 401, GET → 405.
+- Editor detector findings unchanged vs. before the session.
+- `curl -sI https://beyondamedium.io` → 200 (pre-push baseline).
+
+### UNVERIFIED
+Wizard success screen, live SEO generation, live copy rewrite: all need an authenticated Supabase session, and this machine cannot reach `*.supabase.co` (DNS). Test on prod after deploy.
+
+### STATE / KNOWN ISSUES (found, not fixed)
+- **Revenue leak:** `PLANS[*].maxProjects` is never enforced anywhere; Starter users can create unlimited projects. Needs a server-side check (DB trigger or API).
+- **Stale domains page:** `dashboard/domains` tells users to CNAME to `cname.vercel-dns.com`, wrong since the Coolify move. Landing page no longer advertises self-serve custom domains.
+- No AI image generator (snapps has one); not built because no image provider key exists. Do not fake it.
+
+### NEXT
+Push `main` (Coolify auto-deploys; also ships `53ec569`), then on prod: run the wizard once, generate SEO on the result, view `/p/<slug>` source for the new `<title>`/meta, and `curl -sI https://beyondamedium.io`.
+
+### CONFLICTS
+Root CLAUDE.md §10 / impeccable flags gradient text + glow as AI tells; owner explicitly requested the snapps look, which is built on them. Followed the owner; contrast/size rules still enforced.
+
+---
+
 ## 2026-10-30 — BEYOND DESIGN no longer tells the model to invent social proof
 
 **Goal:** Stop every AI-generated customer site shipping fabricated testimonials, names, and prices (root CLAUDE.md §5b item 6).
