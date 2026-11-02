@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Analytics from "@/components/Analytics";
@@ -12,6 +12,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const SITE_URL = "https://beyondamedium.io";
@@ -61,7 +67,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      className={`${geistSans.variable} ${geistMono.variable} ${interTight.variable} dark`}
     >
       <body className="min-h-screen bg-[#06080d] text-white antialiased">
         {children}

@@ -130,7 +130,7 @@ export default function CookieBanner() {
               <button
                 type="button"
                 onClick={acceptAll}
-                className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:brightness-110"
+                className="bam-pill px-4 py-2 text-xs"
               >
                 Accept all
               </button>
@@ -211,7 +211,7 @@ export default function CookieBanner() {
               <button
                 type="button"
                 onClick={acceptAll}
-                className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:brightness-110"
+                className="bam-pill px-4 py-2 text-xs"
               >
                 Accept all
               </button>

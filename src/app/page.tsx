@@ -1,50 +1,92 @@
 import {
-  Sparkles, Layout, Code2, Terminal, Globe, Users,
-  ArrowRight, Check, Zap, MousePointerClick, Rocket,
-  Bot, Cpu, Layers, Wand2, Database, Shield,
+  Sparkles, Wand2, MousePointerClick, PenLine, Search, Palette, ArrowRight, Check,
+  Code2, ImageIcon, Monitor, Tablet, Smartphone, Layers, Rocket, Type, Square,
+  LayoutGrid, FormInput, ChevronDown,
 } from 'lucide-react'
 import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
-
-const features = [
-  { icon: Wand2, title: 'AI Generation', desc: 'Prompt-to-website in seconds. Describe any page and watch AI build it live with production-ready code.' },
-  { icon: MousePointerClick, title: 'Visual Canvas', desc: 'Drag-and-drop editor with 50+ components. Move, resize, style — pixel-perfect control.' },
-  { icon: Terminal, title: 'Code Editor', desc: 'Full HTML/CSS/JS access. Import existing code, paste SQL schemas, switch between visual and code.' },
-  { icon: Bot, title: 'AI Agents', desc: 'Builder, Designer, SEO, and Copy agents work together to optimize every aspect of your site.' },
-  { icon: Database, title: 'Backend Built-In', desc: 'Auth, database, storage, and APIs auto-configured. No separate backend needed.' },
-  { icon: Globe, title: 'Instant Deploy', desc: 'One click to production. Custom domains, SSL, global edge network. Zero config.' },
-]
-
-const steps = [
-  { num: '01', icon: Terminal, title: 'Prompt', desc: 'Tell the AI what you need. A landing page, a full app, an e-commerce store — anything.', color: 'from-cyan-400 to-blue-500' },
-  { num: '02', icon: Layers, title: 'Build', desc: 'AI generates the structure. You refine with drag-and-drop or edit the code directly.', color: 'from-blue-500 to-violet-500' },
-  { num: '03', icon: Rocket, title: 'Ship', desc: 'Deploy to your domain with one click. SSL, CDN, and monitoring included.', color: 'from-violet-500 to-pink-500' },
-]
+import { DESIGN_DIRECTIONS } from '@/lib/beyond-design'
+import { CREDIT_COSTS } from '@/lib/credit-costs'
 
 const plans = [
   {
-    name: 'Starter', price: 0, desc: 'Try the magic, free', highlighted: false, cta: 'Start Building Free', badge: null, color: 'border-white/[0.05]',
-    features: ['1 project', '50 AI credits / month', '1 free AI Agent build', 'Core components', 'Hosted BAM site (beyondamedium.io/sites/you)', 'Watermark on published sites', 'Community support'],
+    name: 'Starter', price: 0, desc: 'Try it free', highlighted: false, cta: 'Start free',
+    features: ['1 project', '50 AI credits / month', '1 full AI site build', 'Every builder feature, including AI SEO', 'Publish to beyondamedium.io/p/your-site', 'BAM badge on published sites'],
   },
   {
-    name: 'Builder', price: 19, desc: 'For creators getting started', highlighted: false, cta: 'Upgrade to Builder', badge: null, color: 'border-blue-500/20',
-    features: ['5 projects', '300 AI credits / month', '8+ AI Agent builds', 'All components', 'Templates marketplace', 'Code export', 'Basic analytics'],
+    name: 'Builder', price: 19, desc: 'For creators getting started', highlighted: false, cta: 'Choose Builder',
+    features: ['5 projects', '300 AI credits / month', '8 full AI site builds', 'BAM badge removed', 'Credit packs for extra AI'],
   },
   {
-    name: 'Pro', price: 49, desc: 'For builders who ship', highlighted: true, cta: 'Go Pro', badge: 'Most Popular', color: 'border-cyan-500/30',
-    features: ['Unlimited projects', '1,500 AI credits / month', '40+ AI Agent builds', 'AI agents (full power)', 'Save & reuse templates', 'Advanced analytics', 'Priority AI processing'],
+    name: 'Pro', price: 49, desc: 'For builders who ship', highlighted: true, badge: 'Most popular', cta: 'Go Pro',
+    features: ['Unlimited projects', '1,500 AI credits / month', '42 full AI site builds', 'BAM badge removed', 'Credit packs for extra AI'],
   },
   {
-    name: 'BAM', price: 99, desc: 'We build it for you', highlighted: false, cta: 'Let\u2019s Build Together', badge: 'Done-for-you', color: 'border-amber-500/30', startingAt: true,
+    name: 'BAM', price: 99, desc: 'We build it for you', highlighted: false, badge: 'Done for you', cta: 'Talk to the team', startingAt: true,
     href: 'https://beyondamedium.com/contact',
-    features: ['Done-for-you site by BAM team', 'Custom domain + hosting', 'Website launch & maintenance', 'Paid ads management', 'AI marketing & content', 'SEO & website ranking', 'Dedicated account manager', 'Priority support'],
+    features: ['Site designed by the BAM team', 'Launch + ongoing maintenance', 'Custom domain setup', 'SEO and content support', 'A person to call'],
   },
 ]
 
 const creditPacks = [
-  { credits: 100, price: '$10' },
-  { credits: 350, price: '$25' },
+  { credits: '100', price: '$10' },
+  { credits: '350', price: '$25' },
   { credits: '1,000', price: '$60' },
+]
+
+// Preview swatches for each BEYOND DESIGN direction, mirroring its brief in
+// src/lib/beyond-design.ts. Illustrative styling, not customer sites.
+const DIRECTION_PREVIEW: Record<string, { bg: string; fg: string; accent: string; font: string; line?: string }> = {
+  editorial: { bg: '#FAF7F2', fg: '#1A1815', accent: '#C2532F', font: 'Georgia, "Times New Roman", serif', line: '#E5DFD5' },
+  'luxe-dark': { bg: '#0A0A0B', fg: '#F5F5F4', accent: '#C9A96A', font: '"Inter Tight", system-ui, sans-serif' },
+  brutalist: { bg: '#F2F2F2', fg: '#000000', accent: '#FF3B00', font: 'ui-monospace, "SF Mono", Menlo, monospace' },
+  'soft-organic': { bg: '#FDF9F3', fg: '#3D3A36', accent: '#D08C60', font: '"Nunito Sans", system-ui, sans-serif' },
+  'glass-tech': { bg: '#06080D', fg: '#F8FAFC', accent: '#22D3EE', font: '"Inter Tight", system-ui, sans-serif' },
+  swiss: { bg: '#FFFFFF', fg: '#000000', accent: '#E30613', font: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  'retro-print': { bg: '#F4E9D8', fg: '#2B2118', accent: '#D9480F', font: 'Georgia, serif' },
+  'minimal-mono': { bg: '#FFFFFF', fg: '#111111', accent: '#111111', font: 'ui-monospace, Menlo, monospace' },
+}
+
+// WCAG contrast, used to pick legible button text on each preview accent.
+function luminance(hex: string): number {
+  const h = hex.replace('#', '')
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+    .map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+function readableOn(bg: string): string {
+  return contrast('#ffffff', bg) >= contrast('#000000', bg) ? '#ffffff' : '#000000'
+}
+
+const faqs = [
+  {
+    q: 'What does a credit buy?',
+    a: `Credits pay for AI work. Editing a selected element costs ${CREDIT_COSTS.edit_element}, a new section ${CREDIT_COSTS.generate_section}, a full page ${CREDIT_COSTS.generate_page}, and a complete multi-page site from the wizard ${CREDIT_COSTS.agent_build}. If a generation fails, the credits go back to your balance.`,
+  },
+  {
+    q: 'Will the AI make up reviews, prices, or stats about my business?',
+    a: 'No. BEYOND DESIGN is told to use only the facts you give it. Where a testimonial, price, or award belongs and you have not supplied one, it leaves a clearly marked placeholder for you to fill in.',
+  },
+  {
+    q: 'Can I edit the code?',
+    a: 'Yes. Switch the editor to code view to edit the HTML and CSS directly, then switch back to the visual canvas.',
+  },
+  {
+    q: 'Where does my site live?',
+    a: 'Publishing puts your site at beyondamedium.io/p/your-site instantly. If you want it on your own domain, the BAM team sets that up for you.',
+  },
+  {
+    q: 'Can I cancel anytime?',
+    a: 'Yes. Plans renew monthly until you cancel, and you can cancel or change plans yourself from Billing in your dashboard.',
+  },
+  {
+    q: 'Who owns what I build?',
+    a: 'You do. Your content and your sites are yours, as set out in our Terms of Service.',
+  },
 ]
 
 const jsonLd = {
@@ -55,7 +97,7 @@ const jsonLd = {
       '@id': 'https://beyondamedium.io/#org',
       name: 'Beyond A Medium',
       url: 'https://beyondamedium.io',
-      description: 'AI-powered website builder — prompt to generate, design, and deploy websites.',
+      description: 'AI website builder: answer a few questions, get a studio-grade multi-page site, edit visually, publish.',
     },
     {
       '@type': 'WebSite',
@@ -67,7 +109,7 @@ const jsonLd = {
     {
       '@type': 'SoftwareApplication',
       name: 'Beyond A Medium',
-      applicationCategory: 'DeveloperApplication',
+      applicationCategory: 'DesignApplication',
       operatingSystem: 'Web',
       offers: [
         { '@type': 'Offer', name: 'Starter', price: '0', priceCurrency: 'USD' },
@@ -76,231 +118,489 @@ const jsonLd = {
         { '@type': 'Offer', name: 'BAM', price: '99', priceCurrency: 'USD' },
       ],
     },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    },
   ],
 }
 
-export default function LandingPage() {
+function Logo() {
   return (
-    <div className="min-h-screen bg-[#06080d] text-white selection:bg-cyan-500/20">
+    <Link href="/" className="flex items-center gap-2.5" aria-label="Beyond A Medium home">
+      <span className="relative w-8 h-8 rounded-[10px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center shadow-[0_6px_20px_-6px_rgba(31,143,255,0.8)]">
+        <span className="font-display text-[13px] font-extrabold text-white">B</span>
+      </span>
+      <span className="font-display text-[17px] font-bold tracking-tight">bam<span className="text-[#4aa8ff]">.</span></span>
+    </Link>
+  )
+}
+
+/** Decorative 3D editor mockup for the hero. Pure HTML/CSS, hidden from assistive tech. */
+function EditorMockup() {
+  const blocks = [
+    { icon: Type, label: 'Text' }, { icon: ImageIcon, label: 'Image' }, { icon: Square, label: 'Button' },
+    { icon: Layers, label: 'Section' }, { icon: LayoutGrid, label: 'Grid' }, { icon: FormInput, label: 'Form' },
+  ]
+  return (
+    <div aria-hidden="true" className="relative w-full max-w-[760px] mx-auto lg:mx-0">
+      <div className="absolute -inset-10 bg-[radial-gradient(closest-side,rgba(31,143,255,0.35),transparent)] blur-2xl" />
+      <div className="bam-tilt relative rounded-2xl border border-white/10 bg-[#0b0e16] shadow-[0_40px_120px_-30px_rgba(31,143,255,0.55)] overflow-hidden">
+        {/* toolbar */}
+        <div className="flex items-center justify-between px-4 h-11 border-b border-white/[0.07] bg-[#0e121b]">
+          <div className="flex items-center gap-3">
+            <span className="flex gap-1.5"><i className="w-2.5 h-2.5 rounded-full bg-white/15" /><i className="w-2.5 h-2.5 rounded-full bg-white/15" /><i className="w-2.5 h-2.5 rounded-full bg-white/15" /></span>
+            <span className="text-[11px] text-white/60 font-medium">Home</span>
+          </div>
+          <div className="flex items-center gap-1 text-white/50">
+            <Monitor className="w-3.5 h-3.5 text-[#4aa8ff]" /><Tablet className="w-3.5 h-3.5" /><Smartphone className="w-3.5 h-3.5" />
+          </div>
+          <span className="bam-pill text-[11px] px-3 py-1">Publish</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_130px] min-h-[300px] sm:min-h-[340px]">
+          {/* blocks */}
+          <div className="hidden sm:block border-r border-white/[0.07] p-2.5 space-y-2">
+            <div className="h-6 rounded-md bg-white/[0.04] border border-white/[0.06] flex items-center px-2 text-[10px] text-white/60">Search blocks</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {blocks.map(b => (
+                <div key={b.label} className="rounded-md border border-white/[0.07] bg-white/[0.03] py-2 flex flex-col items-center gap-1">
+                  <b.icon className="w-3.5 h-3.5 text-white/55" />
+                  <span className="text-[9px] text-white/50">{b.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* canvas */}
+          <div className="p-4 bg-[#f6f2ec]">
+            <div className="rounded-lg bg-[#faf7f2] h-full p-4 border border-[#e7dfd3]">
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-serif text-[12px] text-[#1a1815] font-semibold">Harbor &amp; Vine</span>
+                <span className="flex gap-2 text-[8px] text-[#7a736a]"><span>Menu</span><span>Visit</span><span>Book</span></span>
+              </div>
+              <p className="text-[8px] tracking-[0.18em] uppercase text-[#a8431f] mb-2">Seasonal kitchen</p>
+              <p className="font-serif text-[22px] leading-[1.05] text-[#1a1815] mb-3">
+                Dinners that follow <span className="bam-selected px-0.5">the harvest</span>.
+              </p>
+              <div className="space-y-1.5 mb-4">
+                <div className="h-1.5 w-[85%] rounded bg-[#1a1815]/15" />
+                <div className="h-1.5 w-[70%] rounded bg-[#1a1815]/15" />
+              </div>
+              <span className="inline-block text-[8px] text-white bg-[#c2532f] rounded px-2.5 py-1.5">Reserve a table</span>
+              <div className="grid grid-cols-3 gap-2 mt-5">
+                {[0, 1, 2].map(i => <div key={i} className="aspect-[4/3] rounded bg-gradient-to-br from-[#e9dfd0] to-[#d9cbb6]" />)}
+              </div>
+            </div>
+          </div>
+          {/* styles */}
+          <div className="hidden sm:block border-l border-white/[0.07] p-2.5 space-y-3">
+            <p className="text-[9px] uppercase tracking-wider text-white/45">Typography</p>
+            <div className="h-6 rounded-md bg-white/[0.04] border border-white/[0.06] flex items-center px-2 text-[10px] text-white/60">Playfair Display</div>
+            <p className="text-[9px] uppercase tracking-wider text-white/45">Colors</p>
+            <div className="flex gap-1.5">
+              {['#faf7f2', '#c2532f', '#1a1815', '#5b5b3f'].map(c => <i key={c} className="w-4 h-4 rounded-full border border-white/15" style={{ background: c }} />)}
+            </div>
+            <p className="text-[9px] uppercase tracking-wider text-white/45">Radius</p>
+            <div className="h-1 rounded bg-white/10"><div className="h-1 w-1/4 rounded bg-[#4aa8ff]" /></div>
+          </div>
+        </div>
+      </div>
+      {/* floating AI chip */}
+      <div className="bam-float absolute -bottom-4 left-4 sm:left-10 bam-glass rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-xl">
+        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#4aa8ff] to-[#8b5cf6] flex items-center justify-center"><Sparkles className="w-3 h-3 text-white" /></span>
+        <span className="text-[11px] text-white/80">BEYOND DESIGN is writing your About page</span>
+      </div>
+    </div>
+  )
+}
+
+/** Small UI vignettes that sit at the top of each feature card. Decorative. */
+function FeatureArt({ kind }: { kind: string }) {
+  if (kind === 'wizard') {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5">
+          {[1, 2, 3, 4, 5].map(n => <span key={n} className={`h-1.5 flex-1 rounded-full ${n <= 3 ? 'bg-[#4aa8ff]' : 'bg-white/10'}`} />)}
+        </div>
+        <p className="text-[12px] text-white/80">What kind of business is it?</p>
+        <div className="flex flex-wrap gap-1.5">
+          {['Restaurant', 'Salon', 'Studio', 'Contractor'].map((t, i) => (
+            <span key={t} className={`text-[11px] px-2.5 py-1 rounded-full border ${i === 0 ? 'border-[#4aa8ff] bg-[#1f8fff]/15 text-white' : 'border-white/10 text-white/55'}`}>{t}</span>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  if (kind === 'canvas') {
+    return (
+      <div className="relative h-[88px]">
+        <div className="absolute left-2 top-2 w-24 h-16 rounded-lg border border-white/10 bg-white/[0.04] flex flex-col items-center justify-center gap-1">
+          <Type className="w-5 h-5 text-white/70" /><span className="text-[11px] text-white/60">Text</span>
+        </div>
+        <div className="absolute right-4 bottom-1 w-36 h-14 rounded-lg border-2 border-dashed border-[#4aa8ff]/70 bg-[#1f8fff]/10" />
+        <MousePointerClick className="absolute left-[118px] top-[44px] w-5 h-5 text-[#4aa8ff] drop-shadow" />
+      </div>
+    )
+  }
+  if (kind === 'copy') {
+    return (
+      <div className="space-y-2">
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[12px] text-white/75 leading-snug">
+          We make really good bread every single day for everyone.
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {['Shorter', 'Persuasive', 'Friendlier'].map((t, i) => (
+            <span key={t} className={`text-[11px] px-2.5 py-1 rounded-full ${i === 1 ? 'bam-pill' : 'border border-white/10 text-white/55'}`}>{t}</span>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  if (kind === 'seo') {
+    return (
+      <div className="rounded-lg bg-white px-3 py-2.5 shadow-lg">
+        <p className="text-[12px] text-[#4d5156]">beyondamedium.io › p › harbor-vine</p>
+        <p className="text-[14px] text-[#1a0dab] leading-tight">Harbor &amp; Vine | Seasonal Dinners in Ventura</p>
+        <p className="text-[12px] text-[#4d5156] leading-snug mt-0.5">A seasonal kitchen serving dinners built around what the harvest brings in…</p>
+      </div>
+    )
+  }
+  if (kind === 'directions') {
+    return (
+      <div className="relative h-[88px]">
+        {[
+          { bg: '#FAF7F2', fg: '#1A1815', f: 'Georgia, serif', rot: '-8deg', x: '0px' },
+          { bg: '#0A0A0B', fg: '#C9A96A', f: 'system-ui', rot: '0deg', x: '70px' },
+          { bg: '#F2F2F2', fg: '#000', f: 'ui-monospace, monospace', rot: '8deg', x: '140px' },
+        ].map((c, i) => (
+          <div key={i} className="absolute top-2 w-24 h-[72px] rounded-lg border border-white/10 shadow-xl flex items-center justify-center" style={{ background: c.bg, transform: `rotate(${c.rot})`, left: c.x }}>
+            <span style={{ color: c.fg, fontFamily: c.f }} className="text-[20px] font-bold">Aa</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  // theme
+  return (
+    <div className="flex items-center gap-4">
+      <span className="font-display text-[44px] leading-none font-bold text-white">Aa</span>
+      <div className="space-y-2">
+        <div className="flex gap-1.5">{['#1f8fff', '#8b5cf6', '#f5f5f4', '#0b0d14'].map(c => <i key={c} className="w-5 h-5 rounded-full border border-white/15" style={{ background: c }} />)}</div>
+        <div className="h-1.5 w-28 rounded bg-white/10"><div className="h-1.5 w-2/3 rounded bg-[#4aa8ff]" /></div>
+      </div>
+    </div>
+  )
+}
+
+const features = [
+  { kind: 'wizard', icon: Wand2, title: 'AI site wizard', desc: 'Answer a few questions about your business. BEYOND DESIGN plans and writes every page from your real details.' },
+  { kind: 'canvas', icon: MousePointerClick, title: 'Drag & drop canvas', desc: 'Move, resize, and restyle anything on a visual canvas, with desktop, tablet, and mobile previews.' },
+  { kind: 'copy', icon: PenLine, title: 'AI copywriting', desc: 'Select any text and make it shorter, more persuasive, or friendlier in one click.' },
+  { kind: 'seo', icon: Search, title: 'One-click AI SEO', desc: 'Write titles and meta descriptions for every page at once. Edit any of them before you publish.' },
+  { kind: 'directions', icon: Sparkles, title: 'BEYOND DESIGN directions', desc: 'Eight distinct design directions, from magazine editorial to luxe dark. Pick one, or let the AI choose.' },
+  { kind: 'theme', icon: Palette, title: 'Site-wide themes', desc: 'Change fonts, colors, and corner radius once, and every page of your site follows.' },
+]
+
+const extras = [
+  { icon: ImageIcon, label: 'Image uploads & asset library' },
+  { icon: Code2, label: 'HTML & CSS code view' },
+  { icon: Wand2, label: 'Polish any page with AI' },
+  { icon: Layers, label: 'Multi-page manager' },
+  { icon: Rocket, label: 'Instant publishing' },
+  { icon: Check, label: 'Autosave' },
+]
+
+const steps = [
+  { n: '1', title: 'Tell us about the business', desc: 'Name, what you offer, who it is for, and the pages you need. Real details in, so no made-up facts come out.' },
+  { n: '2', title: 'Pick a design direction', desc: 'Choose one of eight BEYOND DESIGN directions, or let the AI pick the one that fits.' },
+  { n: '3', title: 'BEYOND DESIGN builds the site', desc: 'Every page is designed, written, and laid out in about a minute, with the same look across all of them.' },
+  { n: '4', title: 'Refine and publish', desc: 'Edit on the canvas, rewrite copy with AI, generate SEO for every page, and publish.' },
+]
+
+const replaces = [
+  { role: 'Designer', does: 'Eight studio-grade design directions and a site-wide theme editor' },
+  { role: 'Developer', does: 'Responsive pages, hosting, and instant publishing, with code access when you want it' },
+  { role: 'Copywriter', does: 'Page copy written from your details, plus one-click rewrites' },
+  { role: 'SEO tool', does: 'Titles and meta descriptions generated for every page at once' },
+]
+
+export default function LandingPage() {
+  const directions = DESIGN_DIRECTIONS.filter(d => d.key !== 'auto')
+
+  return (
+    <div className="min-h-screen bg-[#05060a] text-white selection:bg-[#1f8fff]/30 overflow-x-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      {/* Grid overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
 
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] bg-[#06080d]/80 backdrop-blur-2xl">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-              <Cpu className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-sm tracking-tight">Beyond A Medium</span>
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.06] bg-[#05060a]/75 backdrop-blur-2xl">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+          <Logo />
+          <div className="hidden md:flex items-center gap-7 text-[14px] text-white/65">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#how" className="hover:text-white transition-colors">How it works</a>
+            <a href="#directions" className="hover:text-white transition-colors">Designs</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </div>
-          <div className="flex items-center gap-6">
-            <a href="#features" className="text-xs text-white/40 hover:text-white/70 hidden md:inline transition-colors">Features</a>
-            <a href="#pricing" className="text-xs text-white/40 hover:text-white/70 hidden md:inline transition-colors">Pricing</a>
-            <Link href="/login" className="text-xs text-white/50 hover:text-white transition-colors">Log in</Link>
-            <Link href="/signup" className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-medium rounded-lg hover:brightness-110 transition-all">
-              Start Building
-            </Link>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <Link href="/login" className="text-[14px] text-white/70 hover:text-white transition-colors">Log in</Link>
+            <Link href="/signup" className="bam-pill text-[14px] px-4 sm:px-5 py-2">Get started</Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="pt-28 pb-24 px-6 relative overflow-hidden">
-        {/* Glow effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-cyan-500/[0.07] via-blue-500/[0.03] to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-40 left-1/4 w-[300px] h-[300px] bg-cyan-500/[0.04] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-60 right-1/4 w-[200px] h-[200px] bg-blue-500/[0.04] rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-3xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/[0.06] text-cyan-300 text-[11px] font-medium mb-8 tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            AI-POWERED WEB BUILDER
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.08] mb-6">
-            <span className="text-white/90">Describe it.</span>
-            <br />
-            <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent">Build it. Ship it.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-white/35 max-w-xl mx-auto mb-10 leading-relaxed font-light">
-            The AI operating system for building websites. Prompt to generate. Canvas to design. One click to deploy.
-          </p>
-
-          {/* Terminal-style prompt */}
-          <div className="max-w-2xl mx-auto mb-6">
-            <div className="bg-[#0c1018] border border-white/[0.06] rounded-xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.04]">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                </div>
-                <span className="text-[10px] text-white/20 ml-2 font-mono">bam generate</span>
-              </div>
-              <div className="flex items-stretch sm:items-center flex-col sm:flex-row p-3 gap-2 sm:gap-3">
-                <div className="flex items-center flex-1 min-w-0">
-                  <span className="text-cyan-400/60 text-sm font-mono mr-2 shrink-0">$</span>
-                  <input
-                    type="text"
-                    placeholder="Create a landing page for a SaaS product..."
-                    className="w-full min-w-0 bg-transparent text-sm text-white/70 placeholder:text-white/20 focus:outline-none font-mono truncate"
-                    readOnly
-                  />
-                </div>
-                <Link href="/signup" className="px-5 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-1.5 shrink-0">
-                  <Sparkles className="w-3.5 h-3.5" /> Run
-                </Link>
-              </div>
+      <section className="relative pt-32 sm:pt-40 pb-24 sm:pb-32 px-5 sm:px-8">
+        <div className="absolute inset-0 bam-grid-bg [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)] pointer-events-none" />
+        <div className="absolute -top-40 right-[-10%] w-[900px] h-[700px] bg-[radial-gradient(closest-side,rgba(31,143,255,0.22),transparent)] pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-16 lg:gap-10 items-center">
+          <div>
+            <p className="text-[15px] text-white/65 mb-5">Describe it. Design it. Ship it.</p>
+            <h1 className="font-display text-[44px] sm:text-[60px] lg:text-[68px] leading-[1.04] font-bold">
+              Websites that look like a{' '}
+              <span className="bam-selected bam-grad-text px-1">studio</span>{' '}
+              built them.
+            </h1>
+            <p className="mt-6 text-[17px] sm:text-[19px] leading-relaxed text-white/70 max-w-xl">
+              Answer a few questions about your business. BEYOND DESIGN writes and designs every page,
+              then you refine it on a drag-and-drop canvas and publish.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Link href="/signup" className="bam-pill text-[15px] px-7 py-3.5">
+                Build my site free <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a href="#how" className="bam-pill-ghost text-[15px] px-6 py-3.5">See how it works</a>
             </div>
+            <p className="mt-5 text-[13px] text-white/60">Free plan · No credit card · Publish in minutes</p>
           </div>
-
-          <p className="text-[11px] text-white/20 font-mono">free to start &middot; no credit card</p>
+          <EditorMockup />
         </div>
       </section>
+
+      {/* Pillar strip */}
+      <div className="relative border-y border-white/[0.06] bg-[#080a10]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5 flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 font-display text-[13px] sm:text-[14px] font-semibold tracking-[0.12em] uppercase text-white/75">
+          {['Drag & Drop', 'No-Code', 'AI-Designed', 'Hosted'].map((p, i) => (
+            <span key={p} className="flex items-center gap-6">
+              {i > 0 && <Sparkles className="w-3.5 h-3.5 text-[#4aa8ff]" aria-hidden="true" />}
+              {p}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* Features */}
-      <section id="features" className="py-24 px-6 relative">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-[11px] text-cyan-400/60 font-mono tracking-widest uppercase mb-3 block">Capabilities</span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Everything. One platform.</h2>
+      <section id="features" className="py-24 sm:py-32 px-5 sm:px-8 scroll-mt-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-3xl mb-14">
+            <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold">
+              <span className="bam-grad-text">One builder.</span> Designer, writer, and SEO included.
+            </h2>
+            <p className="mt-5 text-[17px] text-white/65 leading-relaxed">
+              Everything you need to go from an idea to a live, good-looking site, without hiring four people to do it.
+            </p>
           </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map(f => (
+              <article key={f.title} className="bam-glow-card p-6 sm:p-7 flex flex-col">
+                <div className="min-h-[104px] mb-6"><FeatureArt kind={f.kind} /></div>
+                <div className="mt-auto">
+                  <h3 className="font-display text-[20px] font-semibold flex items-center gap-2">
+                    <f.icon className="w-4.5 h-4.5 text-[#4aa8ff]" aria-hidden="true" /> {f.title}
+                  </h3>
+                  <p className="mt-2 text-[15px] text-white/62 leading-relaxed">{f.desc}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {extras.map(e => (
+              <div key={e.label} className="bam-glass rounded-xl px-4 py-3 flex items-center gap-2.5">
+                <e.icon className="w-4 h-4 text-[#4aa8ff] shrink-0" aria-hidden="true" />
+                <span className="text-[13px] text-white/75">{e.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 flex justify-center">
+            <Link href="/signup" className="bam-pill text-[15px] px-7 py-3">Start building <ArrowRight className="w-4 h-4" /></Link>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.04] rounded-2xl overflow-hidden">
-            {features.map((f) => (
-              <div key={f.title} className="bg-[#06080d] p-6 hover:bg-[#0a0e16] transition-colors group">
-                <f.icon className="w-5 h-5 text-cyan-400/70 mb-4 group-hover:text-cyan-300 transition-colors" />
-                <h3 className="font-semibold text-white/90 text-sm mb-2">{f.title}</h3>
-                <p className="text-xs text-white/30 leading-relaxed">{f.desc}</p>
+      {/* Replace the stack */}
+      <section className="relative py-24 sm:py-32 px-5 sm:px-8 bg-gradient-to-b from-[#05060a] via-[#06112a] to-[#05060a]">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold">
+              Stop stitching together a website <span className="bam-grad-text">from four freelancers.</span>
+            </h2>
+            <p className="mt-5 text-[17px] text-white/68 leading-relaxed max-w-lg">
+              Most small businesses put off a website because it means finding a designer, a developer,
+              a copywriter, and someone for SEO, then managing all of them. BAM does those jobs in one place.
+            </p>
+            <Link href="/signup" className="bam-pill mt-8 text-[15px] px-7 py-3">Build my site <ArrowRight className="w-4 h-4" /></Link>
+          </div>
+          <div className="bam-glass rounded-3xl p-3 sm:p-4">
+            {replaces.map((r, i) => (
+              <div key={r.role} className={`flex items-start gap-4 p-4 sm:p-5 rounded-2xl ${i === 0 ? 'bg-white/[0.04]' : ''}`}>
+                <span className="mt-0.5 w-8 h-8 rounded-full bg-[#1f8fff]/15 border border-[#1f8fff]/40 flex items-center justify-center shrink-0">
+                  <Check className="w-4 h-4 text-[#6db8ff]" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-[13px] uppercase tracking-[0.12em] text-white/50">Instead of a {r.role.toLowerCase()}</p>
+                  <p className="text-[16px] text-white/90 mt-1">{r.does}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-[11px] text-cyan-400/60 font-mono tracking-widest uppercase mb-3 block">Workflow</span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Idea to production in minutes</h2>
+      {/* How it works */}
+      <section id="how" className="py-24 sm:py-32 px-5 sm:px-8 scroll-mt-16">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-14">
+          <div className="lg:sticky lg:top-28 self-start">
+            <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold">
+              From a few answers <span className="bam-grad-text">to a live site.</span>
+            </h2>
+            <p className="mt-5 text-[17px] text-white/65 leading-relaxed max-w-md">
+              No blank page and no template hunting. The wizard asks what it needs, then gets out of the way.
+            </p>
           </div>
-
-          <div className="space-y-6">
-            {steps.map((s) => (
-              <div key={s.num} className="flex items-start gap-6 bg-white/[0.02] border border-white/[0.04] rounded-2xl p-6 hover:border-white/[0.08] transition-colors">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center shrink-0 opacity-80`}>
-                  <s.icon className="w-6 h-6 text-white" />
-                </div>
+          <ol className="space-y-3">
+            {steps.map(s => (
+              <li key={s.n} className="flex gap-6 p-6 sm:p-7 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+                <span className="font-display text-[48px] leading-none font-bold bam-grad-text w-10 shrink-0">{s.n}</span>
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="text-[10px] font-mono text-white/20">{s.num}</span>
-                    <h3 className="text-lg font-semibold text-white/90">{s.title}</h3>
-                  </div>
-                  <p className="text-sm text-white/30 leading-relaxed">{s.desc}</p>
+                  <h3 className="font-display text-[20px] font-semibold">{s.title}</h3>
+                  <p className="mt-2 text-[15px] text-white/62 leading-relaxed">{s.desc}</p>
                 </div>
-              </div>
+              </li>
             ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Design directions */}
+      <section id="directions" className="relative py-24 sm:py-32 px-5 sm:px-8 scroll-mt-16 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#05060a] via-[#0a3a8a] to-[#05060a] opacity-70 pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-6 items-end mb-14">
+            <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold">
+              {directions.length} directions. None of them look like a template.
+            </h2>
+            <p className="text-[17px] text-white/75 leading-relaxed lg:max-w-md lg:justify-self-end">
+              Each BEYOND DESIGN direction is a full design brief: type pairing, color system, spacing, and detail.
+              These are previews of each direction&rsquo;s look.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {directions.map(d => {
+              const p = DIRECTION_PREVIEW[d.key] ?? DIRECTION_PREVIEW.swiss
+              return (
+                <div key={d.key} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#0b0d14] transition-transform duration-300 hover:-translate-y-1">
+                  <div className="aspect-[4/3] p-4 flex flex-col justify-between" style={{ background: p.bg, color: p.fg }}>
+                    <div className="flex items-center justify-between" style={{ fontFamily: p.font }}>
+                      <span className="text-[12px] font-bold">Studio</span>
+                      <span className="flex gap-2 text-[11px]"><span>Work</span><span>About</span></span>
+                    </div>
+                    <div style={{ fontFamily: p.font }}>
+                      <p className="text-[22px] sm:text-[26px] leading-[1.02] font-semibold">Made with<br />intent.</p>
+                      <span className="mt-3 inline-block text-[11px] px-2.5 py-1 rounded-sm" style={{ background: p.accent, color: readableOn(p.accent) }}>Get in touch</span>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 border-t border-white/[0.06]">
+                    <p className="font-display text-[15px] font-semibold">{d.name}</p>
+                    <p className="text-[13px] text-white/55">{d.tagline}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-[11px] text-cyan-400/60 font-mono tracking-widest uppercase mb-3 block">Pricing</span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Build. Launch. Get Paid.</h2>
-            <p className="text-white/30 mt-3 max-w-lg mx-auto text-sm">Everything you need to turn ideas into live, revenue-generating websites.</p>
+      <section id="pricing" className="py-24 sm:py-32 px-5 sm:px-8 scroll-mt-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold">Simple plans. <span className="bam-grad-text">Start free.</span></h2>
+            <p className="mt-4 text-[17px] text-white/65">Upgrade when you need more sites or more AI. Cancel anytime.</p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {plans.map((plan) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {plans.map(plan => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-6 flex flex-col relative ${
-                  plan.name === 'BAM'
-                    ? 'bg-gradient-to-b from-amber-500/[0.08] to-orange-500/[0.03] border ' + plan.color
-                    : plan.highlighted
-                    ? 'bg-gradient-to-b from-cyan-500/[0.08] to-blue-500/[0.03] border ' + plan.color
-                    : 'bg-white/[0.02] border ' + plan.color
-                }`}
+                className={`relative rounded-3xl p-7 flex flex-col ${plan.highlighted ? 'bam-glow-card border-[#1f8fff]/45' : 'border border-white/[0.07] bg-white/[0.02]'}`}
               >
                 {plan.badge && (
-                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 text-white text-[9px] font-bold rounded-full tracking-wide whitespace-nowrap ${
-                    plan.name === 'BAM' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'
-                  }`}>
-                    {plan.badge}
-                  </span>
+                  <span className={`absolute top-5 right-5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${plan.highlighted ? 'bg-[#0a5bd8] text-white' : 'bg-white/10 text-white/80'}`}>{plan.badge}</span>
                 )}
-                <h3 className={`text-sm font-semibold ${plan.name === 'BAM' ? 'text-amber-300/80' : 'text-white/70'}`}>{plan.name}</h3>
-                <div className="mt-2 mb-1">
-                  {'startingAt' in plan && plan.startingAt && <span className="text-[10px] text-amber-400/60 font-medium block mb-0.5">Starting at</span>}
-                  <span className="text-3xl font-bold text-white">${plan.price}</span>
-                  <span className="text-white/25 text-xs">/mo</span>
+                <h3 className="font-display text-[18px] font-semibold">{plan.name}</h3>
+                <p className="text-[14px] text-white/55 mt-1">{plan.desc}</p>
+                <div className="mt-6 mb-6">
+                  {plan.startingAt && <span className="block text-[12px] text-white/55">Starting at</span>}
+                  <span className="font-display text-[44px] font-bold leading-none">${plan.price}</span>
+                  <span className="text-[14px] text-white/60">/mo</span>
                 </div>
-                <p className="text-[11px] text-white/25 mb-5">{plan.desc}</p>
-                <ul className="space-y-2 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-[11px]">
-                      <Check className={`w-3 h-3 mt-0.5 shrink-0 ${plan.name === 'BAM' ? 'text-amber-400/70' : 'text-cyan-400/70'}`} />
-                      <span className="text-white/40">{f}</span>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-start gap-2.5 text-[14px] text-white/75">
+                      <Check className="w-4 h-4 mt-0.5 shrink-0 text-[#4aa8ff]" aria-hidden="true" /> {f}
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={'href' in plan && plan.href ? plan.href as string : '/signup'}
-                  target={'href' in plan && plan.href ? '_blank' : undefined}
-                  rel={'href' in plan && plan.href ? 'noopener noreferrer' : undefined}
-                  className={`w-full text-center py-2.5 rounded-xl text-xs font-semibold transition-all block ${
-                    plan.name === 'BAM'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:brightness-110'
-                      : plan.highlighted
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:brightness-110'
-                      : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/50'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.href ? (
+                  <a href={plan.href} target="_blank" rel="noopener noreferrer" className="bam-pill-ghost w-full text-[14px] py-3">{plan.cta}</a>
+                ) : (
+                  <Link href="/signup" className={`w-full text-[14px] py-3 ${plan.highlighted ? 'bam-pill' : 'bam-pill-ghost'}`}>{plan.cta}</Link>
+                )}
               </div>
             ))}
           </div>
-
-          {/* Credit Packs */}
           <div className="mt-10 text-center">
-            <p className="text-xs text-white/30 mb-4">Need more AI? Buy credits anytime.</p>
-            <div className="flex items-center justify-center gap-3">
-              {creditPacks.map((pack) => (
-                <div key={pack.credits} className="bg-white/[0.02] border border-white/[0.06] rounded-xl px-5 py-3 text-center hover:border-white/[0.1] transition-colors">
-                  <p className="text-sm font-bold text-white">{pack.credits} credits</p>
-                  <p className="text-[11px] text-cyan-400 font-mono">{pack.price}</p>
+            <p className="text-[15px] text-white/65 mb-4">Need more AI? Top up with a credit pack anytime.</p>
+            <div className="inline-flex flex-wrap justify-center gap-3">
+              {creditPacks.map(p => (
+                <div key={p.credits} className="bam-glass rounded-2xl px-6 py-3.5 text-center">
+                  <p className="font-display text-[17px] font-bold">{p.credits} credits</p>
+                  <p className="text-[14px] text-[#6db8ff]">{p.price}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-white/15 mt-4 font-mono">AI credits power generation, editing, and automation. No hidden limits.</p>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 px-6">
-        <div className="max-w-xl mx-auto text-center relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.05] via-blue-500/[0.05] to-violet-500/[0.05] rounded-3xl blur-2xl pointer-events-none" />
-          <div className="relative bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12">
-            <Shield className="w-8 h-8 text-cyan-400/50 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-3">Start building now</h2>
-            <p className="text-sm text-white/30 mb-8">Free forever. No credit card. Deploy in minutes.</p>
-            <Link href="/signup" className="inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:brightness-110 transition-all">
-              Get Started <ArrowRight className="w-4 h-4" />
-            </Link>
+      {/* FAQ */}
+      <section id="faq" className="py-24 sm:py-32 px-5 sm:px-8 scroll-mt-16 border-t border-white/[0.05]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-[34px] sm:text-[48px] leading-[1.08] font-bold text-center mb-12">Questions, answered.</h2>
+          <div className="space-y-3">
+            {faqs.map(f => (
+              <details key={f.q} className="group rounded-2xl border border-white/[0.07] bg-white/[0.02] open:bg-white/[0.04] transition-colors">
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-6 py-5 text-[16px] font-medium text-white/90 [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8ec5ff] rounded-2xl">
+                  {f.q}
+                  <ChevronDown className="w-4 h-4 text-white/50 shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <p className="px-6 pb-5 text-[15px] text-white/65 leading-relaxed">{f.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Final CTA */}
+      <section className="px-5 sm:px-8 pb-28">
+        <div className="relative max-w-5xl mx-auto rounded-[2rem] overflow-hidden border border-[#1f8fff]/30 bg-gradient-to-br from-[#0a2a6b] via-[#081a40] to-[#0b0d14] px-8 py-16 sm:py-20 text-center">
+          <div className="absolute inset-0 bam-grid-bg opacity-60 pointer-events-none" />
+          <div className="relative">
+            <h2 className="font-display text-[34px] sm:text-[52px] leading-[1.05] font-bold">Your site is a few answers away.</h2>
+            <p className="mt-5 text-[17px] text-white/75 max-w-xl mx-auto">Start free. No credit card. Publish your first site today.</p>
+            <Link href="/signup" className="bam-pill mt-9 text-[16px] px-8 py-4">Build my site free <ArrowRight className="w-4 h-4" /></Link>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   )

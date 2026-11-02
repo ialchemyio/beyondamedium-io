@@ -79,14 +79,8 @@ export function planKeyFromPriceId(priceId: string | undefined | null): PlanKey 
   return undefined
 }
 
-// Credit costs — Starter gets 1 Agent build to fall in love, then hits
-// the upgrade wall fast.
-export const CREDIT_COSTS = {
-  edit_element: 3,
-  generate_section: 5,
-  generate_page: 10,
-  agent_build: 35,     // The magic — full autonomous multi-page site build
-} as const
+// Credit costs live in a client-safe module; re-exported here for existing imports.
+export { CREDIT_COSTS } from './credit-costs'
 
 // BAM takes 14% of every restaurant transaction
 export const PLATFORM_FEE_PERCENT = 14

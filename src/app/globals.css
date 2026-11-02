@@ -1,19 +1,163 @@
 @import "tailwindcss";
 
+/* ── BAM design tokens ─────────────────────────────────────────────
+   Near-black base, electric BAM Blue, violet second accent. Shared by the
+   marketing site, dashboard, and builder chrome. */
 :root {
-  --background: #06080d;
+  --background: #05060a;
   --foreground: #ffffff;
+  --bam-surface: #0b0d14;
+  --bam-surface-2: #10131c;
+  --bam-line: rgba(255, 255, 255, 0.07);
+  --bam-blue: #1f8fff;
+  --bam-blue-deep: #0a5bd8;
+  --bam-violet: #8b5cf6;
+  --bam-text-2: rgba(255, 255, 255, 0.68);
+  --bam-text-3: rgba(255, 255, 255, 0.5);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-bam-blue: #1f8fff;
+  --color-bam-violet: #8b5cf6;
+  --color-bam-surface: #0b0d14;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-inter-tight);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Display type: Inter Tight, tight tracking. */
+.font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* Blue → violet gradient text for the accent half of a headline. */
+.bam-grad-text {
+  background: linear-gradient(92deg, #4aa8ff 0%, #6f8cff 45%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Primary pill CTA — electric blue with an inner highlight. */
+.bam-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  /* Stops chosen so white text stays >= 4.5:1 (WCAG AA) everywhere. */
+  background: linear-gradient(180deg, #1570e0 0%, #1268da 55%, #0a5bd8 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset -18px 18px 24px -14px rgba(255, 255, 255, 0.25),
+    0 8px 30px -8px rgba(31, 143, 255, 0.65);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.bam-pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset -18px 18px 24px -14px rgba(255, 255, 255, 0.3),
+    0 12px 40px -8px rgba(31, 143, 255, 0.8);
+}
+.bam-pill:active { transform: translateY(0); }
+.bam-pill:focus-visible { outline: 2px solid #8ec5ff; outline-offset: 3px; }
+
+/* Secondary ghost pill. */
+.bam-pill-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.bam-pill-ghost:hover { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.24); }
+.bam-pill-ghost:focus-visible { outline: 2px solid #8ec5ff; outline-offset: 3px; }
+
+/* Dark card with an electric-blue corner glow (snapps-style feature card). */
+.bam-glow-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid var(--bam-line);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(31, 143, 255, 0.28) 0%, rgba(31, 143, 255, 0.06) 35%, transparent 60%),
+    linear-gradient(180deg, #0d1018 0%, #090b11 100%);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.bam-glow-card:hover { border-color: rgba(31, 143, 255, 0.35); transform: translateY(-2px); }
+
+/* Plain glass panel. */
+.bam-glass {
+  border: 1px solid var(--bam-line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  backdrop-filter: blur(14px);
+}
+
+/* Selection box with corner handles — the "being edited" motif. */
+.bam-selected {
+  position: relative;
+  outline: 1.5px dashed rgba(74, 168, 255, 0.9);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.bam-selected::before,
+.bam-selected::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #4aa8ff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #05060a;
+}
+.bam-selected::before { top: -10px; left: -10px; }
+.bam-selected::after { bottom: -10px; right: -10px; }
+
+/* Faint grid backdrop. */
+.bam-grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* 3D tilted product mockup. */
+.bam-tilt {
+  transform: perspective(1800px) rotateX(18deg) rotateY(-14deg) rotateZ(6deg);
+  transform-origin: 50% 40%;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bam-tilt:hover { transform: perspective(1800px) rotateX(12deg) rotateY(-9deg) rotateZ(4deg); }
+
+@keyframes bam-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes bam-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.bam-float { animation: bam-float 6s ease-in-out infinite; }
+.bam-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+  animation: bam-shimmer 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bam-float, .bam-shimmer { animation: none; }
+  .bam-tilt, .bam-tilt:hover { transition: none; }
+  .bam-glow-card, .bam-pill { transition: none; }
 }
