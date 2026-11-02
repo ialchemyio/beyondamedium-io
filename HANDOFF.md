@@ -1,5 +1,28 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Post-migration prod test: credit migration never ran; PUBLIC-execute hole fixed (commit 44135a5, not pushed)
+
+**Goal:** Test prod after the owner ran the two 2026-11-02 migrations.
+
+### FACTS (prod probes via anon key from the public JS bundle, browser pane)
+- Supabase healthy from outside: auth 200 in 422ms, PostgREST 188–659ms.
+- Ran OK: `custom_domains` exists; `my_project_quota()` works; `plan_project_limit('builder')` = 5.
+- **Never ran:** `20260527_credit_functions.sql` (`deduct_credits`, `add_purchased_credits`, `provision_plan` → PGRST202) → AI generation + billing provisioning broken on prod. `20260720_storage_assets.sql` (`project-assets` → "Bucket not found") → builder image uploads broken. `20260527_tighten_experiment_rls.sql`: unknown (not probed; idempotent).
+- 524 on `/dashboard` (owner hit it; 120s+ hangs, `/p/` 17s) coincided with the redeploy triggered by docs-only commit `c473061` (build ID changed 5Xx0… → 5XYG…). Recovered on its own (all routes ~0.15s). Cause = rolling restart (strong evidence, not log-confirmed).
+
+### WHAT changed
+- `20260527_credit_functions.sql` + `20261102_project_limits.sql`: revoke EXECUTE from `public` (not just anon/authenticated) and grant to `service_role` (credit fns) / `authenticated, service_role` (quota). Without this, anyone could have called `provision_plan` / `add_purchased_credits` once the migration ran.
+
+### VERIFIED
+Throwaway Postgres 16: revoke-from-anon-only → anon still called the definer fn; fixed files → anon/authenticated denied credit fns, service_role allowed, quota anon-denied/authenticated-allowed, project-limit trigger still enforces. 46/46 tests.
+
+### NEXT (owner)
+1. Run in IO Supabase SQL editor, in this order: `20260527_credit_functions.sql` (fixed), `20260720_storage_assets.sql`, `20260527_tighten_experiment_rls.sql`, then re-run `20261102_project_limits.sql`.
+2. Coolify → app → Git → **Watch Paths**: limit auto-deploys to app files (e.g. `src/**`, `public/**`, `package*.json`, `Dockerfile`, `next.config.ts`) so docs/SQL commits stop redeploying prod.
+3. Agent: re-probe prod (credit fns must return a permission error, not PGRST202; bucket must exist).
+
+---
+
 ## 2026-11-02 — Custom domains made real; published sites served to the public (commit a0b4b78, pushed + deployed as build 5Xx0MCCEbqByKj_H43pOu)
 
 **Goal:** Fix the Domains page (stale Vercel DNS + fake "connected" ✓). Root cause: nothing ever served custom domains.
