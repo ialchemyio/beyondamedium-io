@@ -1,5 +1,31 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Custom domains made real; published sites served to the public (commit a0b4b78, not pushed)
+
+**Goal:** Fix the Domains page (stale Vercel DNS + fake "connected" ✓). Root cause: nothing ever served custom domains.
+
+### WHAT changed
+- `supabase/migrations/20261102_custom_domains.sql` (NEW): `custom_domains` (domain PK, one per project, status requested/active/rejected); users insert/select/delete own rows only, no update policy (team activates); backfills `projects.custom_domain` as requests.
+- `src/lib/custom-domains.ts` (+6 tests), `src/lib/domain-routing.ts` (service-role resolver, 60s/30s cache), `src/middleware.ts` (host → `/p/<slug>` rewrite, all paths on a customer domain serve the site).
+- `src/app/(published)/p/[slug]/page.tsx`: reads via service role filtered to `is_published = true`; custom-domain nav links + canonical; trusts `x-bam-custom-domain` only with a matching non-BAM Host.
+- `src/app/api/domains/route.ts` (POST request / DELETE remove), `dashboard/domains/page.tsx` rebuilt, project settings domain box replaced by a link.
+
+### WHY
+The page faked success; and no migration grants anon read on projects/pages, so `/p/[slug]` (queried as the visitor) most likely 404s for everyone but the owner. **UNVERIFIED on prod**: owner should open a published site in a private window to confirm whether it was broken.
+
+### VERIFIED
+Throwaway Postgres 16: migration idempotent, backfill correct, 11-case RLS attack suite correct. Dev server: platform/unknown hosts render (no 500), spoofed header ignored, `/api/domains` 400/401. Domains page via stubbed harness (deleted). 46/46 tests, tsc clean, build exit 0.
+
+### STATE
+- Needs `20261102_custom_domains.sql` run on the IO DB (LAUNCH_CHECKLIST §1) before the Domains page can load rows. The `/p/` public-read fix works on deploy without any migration.
+- Optional env: `BAM_TEAM_EMAIL`, `NEXT_PUBLIC_CUSTOM_DOMAIN_TARGET` (LAUNCH_CHECKLIST §4b, which also has the activation runbook). `.env.example` is gitignored by `.env*`, so it only exists locally.
+- UNVERIFIED live: serving a real customer domain end-to-end.
+
+### NEXT
+Push; run the migration; open a published `/p/<slug>` in a private window (should now load); then activate one real domain per the §4b runbook and `curl -sI` it.
+
+---
+
 ## 2026-11-02 — Plan project limits enforced (commit 0b1107d, pushed + deployed as build 90AfivT9MNvju_CDjd8JA)
 
 **Goal:** Close the revenue leak where `PLANS.maxProjects` (Starter 1 / Builder 5 / Pro+BAM unlimited) was advertised but never enforced.
