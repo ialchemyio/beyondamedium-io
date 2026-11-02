@@ -1,5 +1,15 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Live Save round-trip verified on prod
+
+Owner asked for a live save test. On the throwaway "Yeee" project (`20dd3fc0…`), Home page (was empty), in the owner's logged-in Chrome:
+- Code view → `<h2 id="bam-save-test">BAM save test</h2>` → Apply: unsaved dot appears.
+- Save: `PATCH /rest/v1/pages` → 204, button shows "Saved", dot clears.
+- Reload: the heading persisted, no dot.
+- Reverted to `<body></body>` → Save "Saved" → reload: the page is empty again (original state restored).
+- Note: a synthetic drag of a block into the canvas didn't register via automation (HTML5 DnD), so the Code view was used instead. Real mouse drag is UNVERIFIED by automation only.
+- Earlier, one post-deploy load sat on the spinner with no Supabase requests; a reload fixed it. Likely the deploy switchover; UNVERIFIED.
+
 ## 2026-11-02 — Editor top bar: Publish no longer clips on narrow windows
 
 **WHAT:** `src/app/(app)/dashboard/[projectId]/editor/page.tsx`. Below `xl` (1280px) the top bar hides the project name text (the B mark keeps it as `title`). The left cluster is `min-w-0` so the page switcher truncates, and the right cluster is `shrink-0`, so Save/Publish never clip.
