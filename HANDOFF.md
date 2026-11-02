@@ -1,6 +1,6 @@
 # HANDOFF — beyondamedium.io
 
-## 2026-11-02 — Custom domains made real; published sites served to the public (commit a0b4b78, not pushed)
+## 2026-11-02 — Custom domains made real; published sites served to the public (commit a0b4b78, pushed + deployed as build 5Xx0MCCEbqByKj_H43pOu)
 
 **Goal:** Fix the Domains page (stale Vercel DNS + fake "connected" ✓). Root cause: nothing ever served custom domains.
 
@@ -21,8 +21,11 @@ Throwaway Postgres 16: migration idempotent, backfill correct, 11-case RLS attac
 - Optional env: `BAM_TEAM_EMAIL`, `NEXT_PUBLIC_CUSTOM_DOMAIN_TARGET` (LAUNCH_CHECKLIST §4b, which also has the activation runbook). `.env.example` is gitignored by `.env*`, so it only exists locally.
 - UNVERIFIED live: serving a real customer domain end-to-end.
 
+### DEPLOYED
+Pushed `9b0b807..1befffb`; live ~60s later, settled 5/5. Prod: public pages 200, `/dashboard*` 307, bad `/p/` slug 404 (service-role read path runs), `/api/domains` 400/401, spoofed header ignored.
+
 ### NEXT
-Push; run the migration; open a published `/p/<slug>` in a private window (should now load); then activate one real domain per the §4b runbook and `curl -sI` it.
+Run the migration; open a published `/p/<slug>` in a private window (should now load); then activate one real domain per the §4b runbook and `curl -sI` it.
 
 ---
 
