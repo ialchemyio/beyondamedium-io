@@ -1,5 +1,9 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Test plan reverted; limit enforced again
+
+Owner set `user_credits.plan` back to `starter` (the first revert attempt had left it unlimited). Verified live: the dashboard shows "5 of 1 project used" with the limit banner, and the wizard shows its at-limit banner. The test project "Wizard Test Cafe" (`dac2f652…`) still exists; delete or keep at the owner's call. Credits: 15 left after the 35-credit test build.
+
 ## 2026-11-02 — App header no longer causes sideways scroll
 
 **WHY:** At 1085px every dashboard page (the wizard included) was 1204px wide. The header's left side (logo+nav, 758px) plus the right side (credits, Build with AI, email, Sign out, 406px) didn't fit, and the "Build with AI" pill wrapped onto 3 lines.
