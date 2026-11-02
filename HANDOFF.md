@@ -1,6 +1,6 @@
 # HANDOFF — beyondamedium.io
 
-## 2026-11-02 — Plan project limits enforced (commit 0b1107d, not pushed)
+## 2026-11-02 — Plan project limits enforced (commit 0b1107d, pushed + deployed as build 90AfivT9MNvju_CDjd8JA)
 
 **Goal:** Close the revenue leak where `PLANS.maxProjects` (Starter 1 / Builder 5 / Pro+BAM unlimited) was advertised but never enforced.
 
@@ -19,8 +19,11 @@
 - **REQUIRED to activate:** run `20261102_project_limits.sql` in the IO Supabase SQL editor (added to LAUNCH_CHECKLIST §1). Until then the code is inert (quota RPC missing → never blocks), so deploying first is safe.
 - UNVERIFIED on real Supabase (DNS-blocked here): `auth.role()` returning `authenticated` for browser/SSR clients is standard Supabase behavior but untested live.
 
+### DEPLOYED
+Pushed `0a00a26..b1dde8f`; new build live ~60s later, settled after a brief old/new mix. Prod `/`, `/login`, `/signup`, `/privacy`, `/terms`, `/refund` → 200; `/dashboard*` → 307; agent + seo with no session → 401.
+
 ### NEXT
-Push, run the migration, then on prod as a Starter account with 1 project: click Blank project (expect upgrade modal) and open the wizard (expect the limit banner).
+Run the migration, then on prod as a Starter account with 1 project: click Blank project (expect upgrade modal) and open the wizard (expect the limit banner).
 
 ---
 
