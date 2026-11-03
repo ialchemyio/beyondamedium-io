@@ -1,5 +1,12 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-03 — BAM logo on the site (e1ef7e2, deployed)
+- WHAT: transparent cutouts from the owner's brand sheet → `public/brand/bam-lockup.png` (landing nav, lg+), `bam-mark.png` (landing nav <lg, app header), `bam-logo.png` (login/signup). New `src/app/icon.png`, `apple-icon.png`, `favicon.ico` replace the Next default.
+- VERIFIED: tsc clean, `npm run build` exit 0; local screenshots at 375/780/1440 + login; live: new build ID after 45s, `/brand/bam-lockup.png`, `/icon.png`, `/apple-icon.png`, `/favicon.ico` all 200, live nav shows lockup.
+- UNVERIFIED: dashboard header render (needs a signed-in session).
+- NEXT: get the original vector/large logo file and swap it in (cutouts come from a 2000px sheet); update `src/app/opengraph-image.tsx` to use the logo.
+- Known: `react-hooks/set-state-in-effect` lint error in login page `?error=auth` effect (from the earlier signup-hardening commit).
+
 ## 2026-11-02 — Auth callback + sign-out redirected to the container address
 
 **WHY:** Live `/auth/callback` and `POST /api/auth/signout` answered `307/302 → https://0.0.0.0:3000/...`. Both built the redirect from `new URL(request.url).origin`, which behind Coolify's proxy is the container bind address. Every email-confirmation click (and every sign-out) landed on a dead URL. Pre-existing, found while verifying the signup fix.
