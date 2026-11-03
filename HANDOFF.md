@@ -1,3 +1,18 @@
+## 2026-11-02 — Signup → first dashboard load hardened
+
+**WHY:** Supabase IO has email confirmation ON (`/auth/v1/settings` → `mailer_autoconfirm: false`). The signup page ignored that: it pushed every new user to /dashboard with no session, middleware bounced them to /login, and nothing said "check your email". `signUp` also sent no `emailRedirectTo`, so the confirm link landed on the Site URL instead of `/auth/callback`.
+
+**WHAT:**
+- `signup/page.tsx`: `emailRedirectTo: <origin>/auth/callback`; "Check your email" screen with Resend when there's no session; an already-registered email (Supabase returns a user with `identities: []`) now says so instead of faking a sent link. Purple → BAM blue.
+- `login/page.tsx`: `?error=auth` explains an expired/other-browser link; `email_not_confirmed` offers "Resend confirmation email"; after sign-in, returns to the middleware's `?redirect=` path. Purple → BAM blue.
+- `auth/callback/route.ts`: `next` goes through `safeNextPath` — `?next=@evil.com` used to redirect to `https://beyondamedium.io@evil.com` (open redirect).
+- `credits.ts` `getOrInitCredits`: insert is `upsert … ignoreDuplicates` then re-select, so concurrent first-load requests can't return null ("no credits") for a new account; unknown plan names reset as starter instead of throwing.
+- New `src/lib/safe-redirect.ts` + test.
+
+**VERIFIED:** `npx tsc --noEmit` clean; `npm test` 54/54; `npm run build` exit 0. Local dev: `/login?error=auth` shows the message; signup with Supabase's response stubbed in-page shows "Check your email" and the request carried `redirect_to=<origin>/auth/callback`.
+**UNVERIFIED:** a real end-to-end signup (would create a real auth user) — owner should do one with a spare address after deploy. Supabase Auth → URL Configuration must allow `https://beyondamedium.io/auth/callback` in Redirect URLs, otherwise Supabase falls back to the Site URL (not checkable with our keys).
+**NEXT:** owner test signup on prod; confirm the email arrives, the link lands on /dashboard, and credits show 15.
+
 ## 2026-11-02 (b) — Security sweep: tenant isolation
 - WHAT: `7833a03`.
   - `supabase/migrations/20261105_tenant_isolation.sql`: `owns_funnel()` scopes experiment/variant writes; drops the public directory UPDATE and the anon INSERT on transactions/restaurant_orders; adds the atomic `refund_credits` RPC.

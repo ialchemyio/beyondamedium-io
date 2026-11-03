@@ -49,9 +49,12 @@ export async function getOrInitCredits(userId: string) {
     periodEnd.setMonth(periodEnd.getMonth() + 1)
 
     const plan = PLANS.starter
-    const { data: newCredits } = await supabase
+    // A new user's first page load fires several credit reads at once; insert
+    // only if missing so the losers of that race read the winner's row instead
+    // of getting null (which showed "no credits" to brand-new accounts).
+    await supabase
       .from('user_credits')
-      .insert({
+      .upsert({
         user_id: userId,
         plan: 'starter',
         credits_remaining: plan.monthlyCredits,
@@ -59,17 +62,16 @@ export async function getOrInitCredits(userId: string) {
         credits_purchased: 0,
         current_period_start: now.toISOString(),
         current_period_end: periodEnd.toISOString(),
-      })
-      .select()
-      .single()
+      }, { onConflict: 'user_id', ignoreDuplicates: true })
 
-    credits = newCredits
+    const { data: row } = await supabase.from('user_credits').select('*').eq('user_id', userId).maybeSingle()
+    credits = row
   }
 
   // Handle monthly reset
   if (credits && credits.current_period_end && new Date(credits.current_period_end) < new Date()) {
-    const planKey = (credits.plan as PlanKey) ?? 'starter'
-    const plan = PLANS[planKey]
+    // Unknown plan names (set by hand in SQL) reset as starter instead of crashing.
+    const plan = PLANS[credits.plan as PlanKey] ?? PLANS.starter
     const now = new Date()
     const newPeriodEnd = new Date(now)
     newPeriodEnd.setMonth(newPeriodEnd.getMonth() + 1)
