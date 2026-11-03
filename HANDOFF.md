@@ -1,3 +1,9 @@
+## 2026-11-02 — Security sweep: lock credit writes
+- WHAT: `f9994d5` adds supabase/migrations/20261104_lock_credit_writes.sql (drops user INSERT/UPDATE policies on user_credits + credit_transactions, REVOKEs writes from anon/authenticated).
+- WHY: any signed-in user could PATCH their own credits_remaining/plan through PostgREST.
+- VERIFIED: code-read only. All writes use getServiceClient()/definer RPCs. UNVERIFIED in prod until the owner runs the migration.
+- NEXT: owner runs the migration plus its footer query. Then fix experiments IDOR (api/experiments PATCH/DELETE), directory public UPDATE, webhook claim-first, atomic refund RPC. See PROJECT_AUDIT/SECURITY_SWEEP_2026-11-02.md for the full findings table.
+
 # HANDOFF — beyondamedium.io
 
 ## 2026-11-02 — Polish batch deployed; ai_usage migration applied
