@@ -5,7 +5,7 @@
 - VERIFIED: tsc 0, eslint clean on touched files, tests 55/55, build 0; live after 75s: all icon/brand URLs 200 with byte sizes equal to repo files; live og image byte-identical to build output.
 - OWNER ACTION: paste the new confirm-signup.html into Supabase → Auth → Email Templates → Confirm signup.
 - UNVERIFIED: real inbox rendering (Gmail/Outlook) of the new emails; dashboard header render.
-- NEXT: vendor a bold display font TTF (e.g. Inter Tight 800) under assets/ for a bold share-card headline (needs owner OK to add the file).
+- DONE (372cd0b, deployed): Inter Tight 800/500 woff vendored in `assets/fonts/` (OFL.txt alongside, from @fontsource/inter-tight 5.3.0); share card headline bold. Live og image byte-identical to build.
 - Note: one `npm run build` failed intermittently on next/font/google fetch ("queries have exactly one entry"); rerun passed with no code change.
 
 ## 2026-11-03 — BAM logo on the site (e1ef7e2, deployed)
