@@ -1,3 +1,5 @@
+# HANDOFF — beyondamedium.io
+
 ## 2026-11-02 — Signup → first dashboard load hardened
 
 **WHY:** Supabase IO has email confirmation ON (`/auth/v1/settings` → `mailer_autoconfirm: false`). The signup page ignored that: it pushed every new user to /dashboard with no session, middleware bounced them to /login, and nothing said "check your email". `signUp` also sent no `emailRedirectTo`, so the confirm link landed on the Site URL instead of `/auth/callback`.
@@ -35,8 +37,6 @@
 - WHY: any signed-in user could PATCH their own credits_remaining/plan through PostgREST.
 - VERIFIED: code-read only. All writes use getServiceClient()/definer RPCs. UNVERIFIED in prod until the owner runs the migration.
 - NEXT: owner runs the migration plus its footer query. Then fix experiments IDOR (api/experiments PATCH/DELETE), directory public UPDATE, webhook claim-first, atomic refund RPC. See PROJECT_AUDIT/SECURITY_SWEEP_2026-11-02.md for the full findings table.
-
-# HANDOFF — beyondamedium.io
 
 ## 2026-11-02 — Polish batch deployed; ai_usage migration applied
 
