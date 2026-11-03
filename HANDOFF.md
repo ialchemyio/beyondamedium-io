@@ -1,3 +1,20 @@
+## 2026-11-02 (b) — Security sweep: tenant isolation
+- WHAT: `7833a03`.
+  - `supabase/migrations/20261105_tenant_isolation.sql`: `owns_funnel()` scopes experiment/variant writes; drops the public directory UPDATE and the anon INSERT on transactions/restaurant_orders; adds the atomic `refund_credits` RPC.
+  - `api/experiments` checks funnel ownership on every verb and page ownership for variants.
+  - `api/directory/claim` claims atomically with the service role and releases the claim on failure.
+  - Checkout writes orders with the service role (new `src/lib/supabase/service.ts`).
+  - The webhook claims credit-pack events before granting.
+  - `refundCredits` uses the RPC (falls back to the old path with a warning until the migration runs); the monthly reset is conditional.
+- WHY: any signed-in user could edit or delete any tenant's experiments; anyone could rewrite directory listings; anon could insert ledger rows and orders; a credit pack could be granted twice; refunds raced deductions.
+- VERIFIED:
+  - tsc exit 0; eslint on changed files exit 0; `npm test` 52/52 pass.
+  - Dev :3021 (local env = PROD Supabase, so logged-out requests only): GET/PATCH/DELETE `/api/experiments` and POST `/api/directory/claim` → 401 (GET used to return any funnel's experiments).
+  - UNVERIFIED: the cross-tenant 403 path (needs two prod accounts), a real checkout, a webhook replay, and the migration in prod.
+- FINDING: under the current RLS, anonymous checkout could not have worked (`insert().select()` needs SELECT, and the session-id update was silently blocked). The service-role change fixes this; confirm with a real test order after deploy.
+- OPEN: directory claims still have no proof the claimant owns the business (product decision); raw error.message is still returned in automations/premium-templates routes.
+- NEXT: deploy `7833a03` + `f9994d5`, then run `20261104_lock_credit_writes.sql` and `20261105_tenant_isolation.sql` plus the verify queries, then place one test restaurant order.
+
 ## 2026-11-02 — Security sweep: lock credit writes
 - WHAT: `f9994d5` adds supabase/migrations/20261104_lock_credit_writes.sql (drops user INSERT/UPDATE policies on user_credits + credit_transactions, REVOKEs writes from anon/authenticated).
 - WHY: any signed-in user could PATCH their own credits_remaining/plan through PostgREST.
