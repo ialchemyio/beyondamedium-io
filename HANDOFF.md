@@ -1,5 +1,13 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Auth callback + sign-out redirected to the container address
+
+**WHY:** Live `/auth/callback` and `POST /api/auth/signout` answered `307/302 → https://0.0.0.0:3000/...`. Both built the redirect from `new URL(request.url).origin`, which behind Coolify's proxy is the container bind address. Every email-confirmation click (and every sign-out) landed on a dead URL. Pre-existing, found while verifying the signup fix.
+**WHAT:** `publicOrigin(request)` in `src/lib/safe-redirect.ts` (x-forwarded-host/Host, allowlisted to beyondamedium.io + www + localhost, else apex); used by the callback and signout routes. Middleware (nextUrl clone) and Stripe checkout (Origin allowlist) were already correct.
+**VERIFIED:** tsc clean; `npm test` 55/55 (new publicOrigin cases); `npm run build` exit 0; local `next start`: callback with Host www → `https://www.beyondamedium.io/login?error=auth`, Host evil.com + `next=@evil.com` → `https://beyondamedium.io/login?error=auth`, signout → `https://beyondamedium.io/login`. Deployed signup chunk contains `emailRedirectTo: ${window.location.origin}/auth/callback` and the Check-your-email screen.
+**Supabase redirect allowlist (owner):** has `https://beyondamedium.io/auth/callback` and `https://www.beyondamedium.io/auth/callback`.
+**UNVERIFIED:** real signup end-to-end — needs the owner with a spare email after deploy.
+
 ## 2026-11-02 — Signup → first dashboard load hardened
 
 **WHY:** Supabase IO has email confirmation ON (`/auth/v1/settings` → `mailer_autoconfirm: false`). The signup page ignored that: it pushed every new user to /dashboard with no session, middleware bounced them to /login, and nothing said "check your email". `signUp` also sent no `emailRedirectTo`, so the confirm link landed on the Site URL instead of `/auth/callback`.

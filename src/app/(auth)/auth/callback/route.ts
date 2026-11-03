@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail, welcomeEmail } from '@/lib/email'
-import { safeNextPath } from '@/lib/safe-redirect'
+import { safeNextPath, publicOrigin } from '@/lib/safe-redirect'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  const origin = publicOrigin(request)
   const code = searchParams.get('code')
   // Joined to origin below, so it must be a same-site path (`@evil.com` would leave the site).
   const next = safeNextPath(searchParams.get('next'))
