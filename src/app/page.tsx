@@ -101,10 +101,10 @@ const jsonLd = {
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2.5" aria-label="Beyond A Medium home">
-      <span className="relative w-8 h-8 rounded-[10px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center shadow-[0_6px_20px_-6px_rgba(31,143,255,0.8)]">
-        <span className="font-display text-[13px] font-extrabold text-white">B</span>
-      </span>
-      <span className="font-display text-[17px] font-bold tracking-tight">bam<span className="text-[#4aa8ff]">.</span></span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/bam-lockup.png" alt="BAM | Beyond A Medium" width={566} height={131} className="hidden lg:block h-9 w-auto" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/bam-mark.png" alt="BAM" width={216} height={132} className="lg:hidden h-8 w-auto" />
     </Link>
   )
 }

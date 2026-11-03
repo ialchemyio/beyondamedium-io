@@ -42,10 +42,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {/* min-w-0 lets the nav scroll inside its box instead of widening the page */}
         <div className="flex items-center gap-6 min-w-0">
           <Link href={BAM_LITE ? '/dashboard/restaurants' : '/dashboard'} className="flex items-center gap-2 shrink-0">
-            <span className="w-7 h-7 rounded-[9px] bg-gradient-to-br from-[#4aa8ff] via-[#1f8fff] to-[#7c5cff] flex items-center justify-center">
-              <span className="font-display text-[12px] font-extrabold text-white">B</span>
-            </span>
-            <span className="font-display text-[15px] font-bold text-white">bam<span className="text-[#4aa8ff]">.</span>{BAM_LITE && <span className="text-[11px] text-[#8ec5ff] ml-1.5 font-mono">LITE</span>}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/bam-mark.png" alt="BAM" width={216} height={132} className="h-7 w-auto" />
+            {BAM_LITE && <span className="text-[11px] text-[#8ec5ff] font-mono">LITE</span>}
           </Link>
           <nav className="flex items-center gap-0.5 overflow-x-auto min-w-0">
             {navItems.map(item => (
