@@ -1,5 +1,12 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-02 — Polish batch deployed; ai_usage migration applied
+
+- `dcac3ed` pushed; Coolify build `MlfRvxx1rTcgpVOXoQO9X` live (old container briefly served stale /privacy during drain, then cleared).
+- VERIFIED: `curl -sI https://beyondamedium.io` → 200; live /privacy title "Privacy Policy — Beyond A Medium" (single suffix), 0 `cyan-*` classes over 6 samples.
+- Owner ran `supabase/migrations/20261103_ai_usage.sql` in IO. VERIFIED via REST: service role `GET /rest/v1/ai_usage` → 200; anon → 42501 permission denied.
+- NEXT: after a few real builds, run the margin query at the bottom of the migration file to see $ cost per credit.
+
 ## 2026-11-02 — Polish batch: honest blocks, AI cost log, new default theme, rebrand sweep
 
 **WHAT / WHY:**
