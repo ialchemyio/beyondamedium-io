@@ -44,7 +44,11 @@ export async function sendEmail({ to, subject, html }: SendArgs): Promise<{ ok: 
 const FONT = `-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif`
 const LOGO = `${SITE}/brand/bam-lockup.png`
 
-function wrap(title: string, body: string, preheader = ''): string {
+const CUSTOMER_FOOTER = `You're receiving this because you have an account with us.
+          Manage billing in your <a href="${SITE}/dashboard/billing" style="color:#1268da;text-decoration:none">dashboard</a>.`
+const TEAM_FOOTER = 'Internal notice for the BAM team.'
+
+function wrap(title: string, body: string, preheader = '', footer = CUSTOMER_FOOTER): string {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${title}</title></head>
 <body style="margin:0;padding:0;background:#eef1f6;font-family:${FONT};color:#0b1220">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0">${preheader}</div>
@@ -61,8 +65,7 @@ function wrap(title: string, body: string, preheader = ''): string {
         </td></tr>
         <tr><td align="center" style="padding:24px 16px 0;font-size:12px;line-height:1.7;color:#8a94a6">
           Beyond A Medium · <a href="${SITE}" style="color:#1268da;text-decoration:none">beyondamedium.io</a><br>
-          You're receiving this because you have an account with us.
-          Manage billing in your <a href="${SITE}/dashboard/billing" style="color:#1268da;text-decoration:none">dashboard</a>.
+          ${footer}
         </td></tr>
       </table>
     </td></tr>
@@ -84,6 +87,9 @@ function rows(items: [string, string][]): string {
     ${items.map(([k, v]) => `<tr><td style="padding:12px 0;border-bottom:1px solid #e3e8ef;color:#64748b">${k}</td><td align="right" style="padding:12px 0;border-bottom:1px solid #e3e8ef;font-weight:600;color:#0b1220">${v}</td></tr>`).join('')}
   </table>`
 }
+
+const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+const CODE = 'display:block;margin-top:10px;padding:12px 14px;background:#f4f6fa;border:1px solid #e3e8ef;border-radius:8px;font-family:Menlo,Consolas,monospace;font-size:12px;line-height:1.6;color:#0b1220;word-break:break-all'
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`
 
@@ -139,5 +145,32 @@ export function paymentFailedEmail(): { subject: string; html: string } {
       </p>
       ${button(`${SITE}/dashboard/billing`, 'Update payment method', '#0b1220')}`,
       'Update your payment method to keep your plan active.'),
+  }
+}
+
+// ── Team notices (BAM_TEAM_EMAIL) ───────────────────────────────
+export function domainRequestedEmail(a: { domain: string; projectName: string; slug: string; requester: string }): { subject: string; html: string } {
+  const d = escape(a.domain)
+  return {
+    subject: `Custom domain requested: ${a.domain}`,
+    html: wrap('Custom domain requested', `
+      <p style="${P}"><strong>${d}</strong> was requested for a project and needs activating.</p>
+      ${rows([['Domain', d], ['Project', escape(a.projectName)], ['Page', `/p/${escape(a.slug)}`], ['Requested by', escape(a.requester)]])}
+      <p style="${P};margin-top:22px">
+        Add https://${d} and https://www.${d} to the app's domains in Coolify and redeploy,
+        confirm the customer's DNS points at the server, then run:
+      </p>
+      <code style="${CODE}">update public.custom_domains set status = 'active', activated_at = now() where domain = '${d}';</code>`,
+      `${d} needs activating in Coolify.`, TEAM_FOOTER),
+  }
+}
+
+export function domainRemovedEmail(domain: string): { subject: string; html: string } {
+  const d = escape(domain)
+  return {
+    subject: `Custom domain removed: ${domain}`,
+    html: wrap('Custom domain removed', `
+      <p style="${P}"><strong>${d}</strong> was removed by its owner. Remove it from the app's domains in Coolify.</p>`,
+      `Remove ${d} from Coolify.`, TEAM_FOOTER),
   }
 }

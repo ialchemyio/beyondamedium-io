@@ -3,9 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireUser, userOwnsProject } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { normalizeDomain } from '@/lib/custom-domains'
-import { sendEmail } from '@/lib/email'
-
-const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+import { sendEmail, domainRequestedEmail, domainRemovedEmail } from '@/lib/email'
 
 // POST { projectId, domain } — request a custom domain for a project you own.
 // Saved as 'requested'; the BAM team activates it (RLS forbids users doing so).
@@ -53,12 +51,7 @@ export async function POST(request: Request) {
     const { data: project } = await supabase.from('projects').select('name, slug').eq('id', projectId).single()
     await sendEmail({
       to: team,
-      subject: `Custom domain requested: ${domain}`,
-      html: `<p><strong>${escape(domain)}</strong> was requested for <strong>${escape(project?.name ?? projectId)}</strong>
-        (/p/${escape(project?.slug ?? '')}) by ${escape(user.email ?? user.id)}.</p>
-        <p>Activation: add https://${escape(domain)} and https://www.${escape(domain)} to the app's domains in Coolify and redeploy,
-        confirm the customer's DNS points at the server, then run:<br/>
-        <code>update public.custom_domains set status = 'active', activated_at = now() where domain = '${escape(domain)}';</code></p>`,
+      ...domainRequestedEmail({ domain, projectName: project?.name ?? projectId, slug: project?.slug ?? '', requester: user.email ?? user.id }),
     })
   }
 
@@ -84,11 +77,7 @@ export async function DELETE(request: Request) {
 
   const removed = data[0]
   if (removed.status === 'active' && process.env.BAM_TEAM_EMAIL) {
-    await sendEmail({
-      to: process.env.BAM_TEAM_EMAIL,
-      subject: `Custom domain removed: ${removed.domain}`,
-      html: `<p><strong>${escape(removed.domain)}</strong> was removed by its owner. Remove it from the app's domains in Coolify.</p>`,
-    })
+    await sendEmail({ to: process.env.BAM_TEAM_EMAIL, ...domainRemovedEmail(removed.domain) })
   }
   return NextResponse.json({ removed: removed.domain })
 }
