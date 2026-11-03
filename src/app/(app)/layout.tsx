@@ -43,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex items-center gap-6 min-w-0">
           <Link href={BAM_LITE ? '/dashboard/restaurants' : '/dashboard'} className="flex items-center gap-2 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/bam-mark.png" alt="BAM" width={216} height={132} className="h-7 w-auto" />
+            <img src="/brand/bam-mark.png" alt="BAM" width={397} height={168} className="h-7 w-auto" />
             {BAM_LITE && <span className="text-[11px] text-[#8ec5ff] font-mono">LITE</span>}
           </Link>
           <nav className="flex items-center gap-0.5 overflow-x-auto min-w-0">

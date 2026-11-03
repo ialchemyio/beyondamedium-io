@@ -102,9 +102,9 @@ function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2.5" aria-label="Beyond A Medium home">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/bam-lockup.png" alt="BAM | Beyond A Medium" width={566} height={131} className="hidden lg:block h-9 w-auto" />
+      <img src="/brand/bam-lockup.png" alt="BAM | Beyond A Medium" width={564} height={129} className="hidden lg:block h-9 w-auto" />
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/bam-mark.png" alt="BAM" width={216} height={132} className="lg:hidden h-8 w-auto" />
+      <img src="/brand/bam-mark.png" alt="BAM" width={397} height={168} className="lg:hidden h-8 w-auto" />
     </Link>
   )
 }

@@ -92,7 +92,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block" aria-label="Beyond A Medium home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/bam-logo.png" alt="BAM | Beyond A Medium" width={1092} height={460} className="h-20 w-auto mx-auto" />
+            <img src="/brand/bam-logo.png" alt="BAM | Beyond A Medium" width={1081} height={457} className="h-20 w-auto mx-auto" />
           </Link>
           <h1 className="text-xl font-semibold mt-4 text-white">Create your account</h1>
           <p className="text-sm text-white/40 mt-1">Start building websites with AI</p>
