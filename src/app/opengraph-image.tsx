@@ -1,11 +1,15 @@
 import { ImageResponse } from 'next/og'
+import { join } from 'node:path'
+import { readFile } from 'node:fs/promises'
 
 export const runtime = 'nodejs'
 export const alt = 'Beyond A Medium — AI Website Builder'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const logo = await readFile(join(process.cwd(), 'public/brand/bam-lockup.png'), 'base64')
+
   return new ImageResponse(
     (
       <div
@@ -18,22 +22,10 @@ export default function OpenGraphImage() {
           padding: '80px',
           background: '#06080d',
           backgroundImage:
-            'radial-gradient(1000px 500px at 50% -10%, rgba(34,211,238,0.18), transparent), radial-gradient(600px 300px at 20% 100%, rgba(59,130,246,0.14), transparent)',
+            'radial-gradient(1000px 500px at 50% -10%, rgba(31,143,255,0.22), transparent), radial-gradient(600px 300px at 20% 100%, rgba(21,112,224,0.16), transparent)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40 }}>
-          <div
-            style={{
-              width: 64, height: 64, borderRadius: 16, display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(135deg, #4aa8ff, #7c5cff)',
-              color: 'white', fontSize: 34, fontWeight: 800,
-            }}
-          >
-            B
-          </div>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 30, fontWeight: 600 }}>Beyond A Medium</div>
-        </div>
+        <img src={`data:image/png;base64,${logo}`} alt="BAM | Beyond A Medium" width={389} height={90} style={{ marginBottom: 48 }} />
         <div
           style={{
             display: 'flex', flexDirection: 'column',
@@ -43,7 +35,7 @@ export default function OpenGraphImage() {
           <span>Describe it. Build it.</span>
           <span
             style={{
-              background: 'linear-gradient(90deg, #67e8f9, #60a5fa, #a78bfa)',
+              background: 'linear-gradient(90deg, #8ec5ff, #4aa8ff, #1f8fff)',
               backgroundClip: 'text', color: 'transparent',
             }}
           >
