@@ -1,5 +1,10 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-03 (later) — Team domain emails branded (bf20ffa, deployed)
+- WHAT: `src/lib/email.ts` gains `domainRequestedEmail` / `domainRemovedEmail` (same logo shell, `TEAM_FOOTER`, HTML-escaped inputs); `src/app/api/domains/route.ts` uses them in place of inline HTML. `wrap()` takes an optional footer.
+- VERIFIED: tsc 0, eslint clean, tests 55/55, build exit 0; both rendered in headless Chrome with the logo (escaping checked with `Joe's <Pizza>`). Live build ID changed after push. A real send is UNVERIFIED (it only fires on a domain request with BAM_TEAM_EMAIL set).
+- ALSO (other project): the mobile fix for beyondamedium.com went to bam-site (8f06c3c, see its HANDOFF.md).
+
 ## 2026-11-03 — Brand polish: favicon, share card, emails (123594e, deployed)
 - WHAT: icons rebuilt from the large logo (`src/app/icon.png`, `apple-icon.png` full-bleed, `favicon.ico` letters-only 16/32/48); cutouts in `public/brand/` cleaned (glow removed, swoosh tip kept). `src/app/opengraph-image.tsx` redesigned (stacked logo + 3-line headline, Geist Regular only). `src/lib/email.ts` wrap(): dark header with hosted `/brand/bam-lockup.png`, accent line, bulletproof `button()`, `rows()`, preheaders; `supabase/email-templates/confirm-signup.html` matches.
 - VERIFIED: tsc 0, eslint clean on touched files, tests 55/55, build 0; live after 75s: all icon/brand URLs 200 with byte sizes equal to repo files; live og image byte-identical to build output.
