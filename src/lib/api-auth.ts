@@ -61,3 +61,22 @@ export async function userOwnsFunnel(
     .maybeSingle()
   return !!data
 }
+
+/**
+ * True if the user owns the page (pages → projects.user_id). Variants store
+ * page_id as text; anything that is not an owned page returns false.
+ */
+export async function userOwnsPage(
+  supabase: SupabaseClient,
+  pageId: string,
+  userId: string,
+): Promise<boolean> {
+  if (!pageId || !/^[0-9a-f-]{36}$/i.test(pageId)) return false
+  const { data } = await supabase
+    .from('pages')
+    .select('id, projects!inner(user_id)')
+    .eq('id', pageId)
+    .eq('projects.user_id', userId)
+    .maybeSingle()
+  return !!data
+}

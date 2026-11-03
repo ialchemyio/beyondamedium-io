@@ -150,8 +150,28 @@ export async function POST(request: Request) {
         if (userId && type === 'credits') {
           const credits = parseInt(session.metadata?.credits ?? '0', 10)
           if (credits > 0) {
-            await addPurchasedCredits(userId, credits, 'credit_pack')
-            await recordEvent(supabase, event.id, session.amount_total ?? 0, 'credit_pack', { userId, credits })
+            // Claim the event BEFORE granting: the unique stripe_event_id makes a
+            // concurrent/retried delivery fail here instead of granting twice.
+            const { error: claimErr } = await supabase.from('transactions').insert({
+              stripe_event_id: event.id,
+              amount_total: (session.amount_total ?? 0) / 100,
+              bam_cut: (session.amount_total ?? 0) / 100,
+              client_cut: 0,
+              currency: 'usd',
+              status: 'completed',
+              metadata: { source: 'credit_pack', userId, credits },
+            })
+            if (claimErr) {
+              if (claimErr.code === '23505') return NextResponse.json({ received: true, idempotent: true })
+              throw new Error(`credit_pack claim failed: ${claimErr.message}`)
+            }
+            try {
+              await addPurchasedCredits(userId, credits, 'credit_pack')
+            } catch (grantErr) {
+              // Release the claim so Stripe's retry can grant the credits.
+              await supabase.from('transactions').delete().eq('stripe_event_id', event.id)
+              throw grantErr
+            }
             const email = await userEmail(supabase, userId)
             if (email) { const t = creditPackReceiptEmail(credits, session.amount_total ?? 0); await sendEmail({ to: email, ...t }) }
           }

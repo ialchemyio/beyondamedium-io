@@ -84,9 +84,17 @@ export async function getOrInitCredits(userId: string) {
         updated_at: now.toISOString(),
       })
       .eq('user_id', userId)
+      // Only the first concurrent caller resets; a later one must not wipe
+      // deductions made since the reset.
+      .lt('current_period_end', now.toISOString())
       .select()
-      .single()
-    credits = refreshed ?? credits
+      .maybeSingle()
+    if (refreshed) {
+      credits = refreshed
+    } else {
+      const { data: current } = await supabase.from('user_credits').select('*').eq('user_id', userId).maybeSingle()
+      credits = current ?? credits
+    }
   }
 
   return credits
@@ -186,6 +194,15 @@ export async function deductCredits(userId: string, amount: number, action: stri
 export async function refundCredits(userId: string, amount: number, action: string): Promise<void> {
   if (amount <= 0) return
   const supabase = getServiceClient()
+  // Atomic increment (20261105_tenant_isolation.sql). Until that migration runs
+  // the function is missing (PGRST202) and we fall back to the old path.
+  const { error: rpcErr } = await supabase.rpc('refund_credits', { p_user_id: userId, p_amount: amount, p_action: action })
+  if (!rpcErr) return
+  if (rpcErr.code !== 'PGRST202') {
+    console.error('[credits] refund_credits failed:', rpcErr.message)
+    return
+  }
+  console.warn('[credits] refund_credits RPC missing — run 20261105_tenant_isolation.sql; using non-atomic fallback')
   const credits = await getOrInitCredits(userId)
   if (!credits) return
   await supabase.from('user_credits').update({

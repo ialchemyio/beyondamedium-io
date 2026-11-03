@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getStripe, calculateApplicationFee } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 interface CartItem {
   id: string
@@ -77,8 +78,10 @@ export async function POST(request: Request) {
 
     const applicationFeeCents = calculateApplicationFee(totalCents)
 
-    // Create order record (pending) with server-priced items.
-    const { data: order, error: orderError } = await supabase
+    // Create order record (pending) with server-priced items. Service role:
+    // customers are anonymous and have no INSERT/SELECT grant on orders.
+    const service = createServiceClient()
+    const { data: order, error: orderError } = await service
       .from('restaurant_orders')
       .insert({
         restaurant_id: restaurant.id,
@@ -94,7 +97,10 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (orderError) return NextResponse.json({ error: orderError.message }, { status: 500 })
+    if (orderError || !order) {
+      console.error('Restaurant checkout order insert failed:', orderError?.message)
+      return NextResponse.json({ error: 'Could not create your order. Please try again.' }, { status: 500 })
+    }
 
     // Create Stripe Checkout session with Connect
     const stripe = getStripe()
@@ -137,7 +143,7 @@ export async function POST(request: Request) {
     })
 
     // Save session id on order
-    await supabase
+    await service
       .from('restaurant_orders')
       .update({ stripe_session_id: session.id })
       .eq('id', order.id)
