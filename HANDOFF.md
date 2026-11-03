@@ -1,5 +1,13 @@
 # HANDOFF — beyondamedium.io
 
+## 2026-11-03 — Brand polish: favicon, share card, emails (123594e, deployed)
+- WHAT: icons rebuilt from the large logo (`src/app/icon.png`, `apple-icon.png` full-bleed, `favicon.ico` letters-only 16/32/48); cutouts in `public/brand/` cleaned (glow removed, swoosh tip kept). `src/app/opengraph-image.tsx` redesigned (stacked logo + 3-line headline, Geist Regular only). `src/lib/email.ts` wrap(): dark header with hosted `/brand/bam-lockup.png`, accent line, bulletproof `button()`, `rows()`, preheaders; `supabase/email-templates/confirm-signup.html` matches.
+- VERIFIED: tsc 0, eslint clean on touched files, tests 55/55, build 0; live after 75s: all icon/brand URLs 200 with byte sizes equal to repo files; live og image byte-identical to build output.
+- OWNER ACTION: paste the new confirm-signup.html into Supabase → Auth → Email Templates → Confirm signup.
+- UNVERIFIED: real inbox rendering (Gmail/Outlook) of the new emails; dashboard header render.
+- NEXT: vendor a bold display font TTF (e.g. Inter Tight 800) under assets/ for a bold share-card headline (needs owner OK to add the file).
+- Note: one `npm run build` failed intermittently on next/font/google fetch ("queries have exactly one entry"); rerun passed with no code change.
+
 ## 2026-11-03 — BAM logo on the site (e1ef7e2, deployed)
 - WHAT: transparent cutouts from the owner's brand sheet → `public/brand/bam-lockup.png` (landing nav, lg+), `bam-mark.png` (landing nav <lg, app header), `bam-logo.png` (login/signup). New `src/app/icon.png`, `apple-icon.png`, `favicon.ico` replace the Next default.
 - VERIFIED: tsc clean, `npm run build` exit 0; local screenshots at 375/780/1440 + login; live: new build ID after 45s, `/brand/bam-lockup.png`, `/icon.png`, `/apple-icon.png`, `/favicon.ico` all 200, live nav shows lockup.
